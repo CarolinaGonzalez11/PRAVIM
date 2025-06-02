@@ -1,0 +1,548 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load widget_tweaks %}
+
+{% block content %}
+
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f6f8;
+    margin: 0;
+    padding: 0;
+}
+.form-container {
+    max-width: 100%;
+    margin: 0 auto;
+    background-color: white;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    overflow-x: auto;
+}
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+th {
+    background-color: #252c54 ;
+    color: white;
+    font-size: 14px;
+    padding: 8px;
+    text-align: left;
+}
+td.label-cell {
+    background-color: #252c54 ;
+    color: white;
+    width: 25%;
+    font-weight: bold;
+    padding: 8px;
+    vertical-align: top;
+}
+td.input-cell {
+    width: 75%;
+    padding: 8px;
+    vertical-align: top;
+}
+input[type="text"],
+input[type="date"],
+select, textarea {
+    width: 100%;
+    padding: 6px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+.btn-institucional {
+    background-color: #252c54;
+    color: #fff;
+    border: none;
+    padding: 12px 32px;
+    border-radius: 6px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    box-shadow: 0 2px 8px rgba(37, 44, 84, 0.15);
+    margin-top: 12px;
+}
+.btn-institucional:hover, .btn-institucional:focus {
+    background-color: #1a2040;
+    color: #fff;
+}
+.btn-descartar {
+    background-color: #ddd;
+    color: #252c54;
+    border: none;
+    padding: 10px 28px;
+    border-radius: 6px;
+    font-weight: bold;
+}
+.btn-descartar:hover, .btn-descartar:focus {
+    background-color: #bbb;
+    color: #252c54;
+}
+@media (max-width: 768px) {
+    table, thead, tbody, th, td, tr {
+        display: block;
+        width: 100%;
+    }
+    th, td {
+        border: 1px solid white;
+    }
+}
+textarea {
+    min-height: 40px;
+    max-height: 500px;
+    overflow-y: hidden;
+    resize: vertical;
+    padding: 6px;
+    font-size: 14px;
+    width: 100%;
+    box-sizing: border-box;
+}
+.form-footer {
+    margin-bottom: 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+</style>
+
+<div class="container mt-4">
+    <h2 class="mb-4" style="color:#252c54;">
+        Editar Ficha de Acogida N° {{ ficha.id }}
+        {% if persona and persona.nombre %}
+            <span class="ms-2" style="font-size:1.2rem; color:#252c54;">
+                | Nombre persona atendida: {{ persona.nombre }}
+            </span>
+        {% endif %}
+    </h2>
+    <form method="post" id="formFicha" autocomplete="off">
+        {% csrf_token %}
+
+        <!-- PREINGRESO -->
+        <h4 class="mb-3">📝 Módulo 1: Preingreso</h4>
+        <table>
+            <tbody>
+                <tr>
+                    <td class="label-cell">Fecha recepción</td>
+                    <td class="input-cell">
+                        {{ form_ficha.fecha_recepcion|add_class:"editable-field" }}
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label-cell">Vía de ingreso</td>
+                    <td class="input-cell">
+                        {{ form_ficha.via_ingreso|add_class:"editable-field" }}
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label-cell">Fecha contacto 1</td>
+                    <td class="input-cell">
+                        {{ form_ficha.fecha_contacto_1|add_class:"editable-field" }}
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label-cell">Fecha contacto 2</td>
+                    <td class="input-cell">
+                        {{ form_ficha.fecha_contacto_2|add_class:"editable-field" }}
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label-cell">Fecha contacto 3</td>
+                    <td class="input-cell">
+                        {{ form_ficha.fecha_contacto_3|add_class:"editable-field" }}
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label-cell">Tipo de contacto</td>
+                    <td class="input-cell">
+                        {{ form_ficha.tipo_contacto|add_class:"editable-field" }}
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- PERSONA ATENDIDA -->
+        <h4 class="mt-5 mb-3">👤 Módulo 1B: Datos de la Persona Atendida</h4>
+        <table>
+            <tbody>
+                <tr><td class="label-cell">Nombre</td><td class="input-cell">{{ form_persona.nombre|add_class:"editable-field" }}</td></tr>
+                <tr><td class="label-cell">RUT / Nº Pasaporte</td><td class="input-cell">{{ form_persona.rut_pasaporte|add_class:"editable-field" }}</td></tr>
+                <tr><td class="label-cell">Género</td><td class="input-cell">{{ form_persona.genero|add_class:"editable-field" }}</td></tr>
+                <tr><td class="label-cell">Teléfono</td><td class="input-cell">{{ form_persona.telefono|add_class:"editable-field" }}</td></tr>
+                <tr><td class="label-cell">Fecha de Nacimiento</td><td class="input-cell">{{ form_persona.fecha_nacimiento|add_class:"editable-field" }}</td></tr>
+                <tr><td class="label-cell">País de Nacionalidad</td><td class="input-cell">{{ form_persona.nacionalidad|add_class:"editable-field" }}</td></tr>
+                <tr><td class="label-cell">Estado Civil</td><td class="input-cell">{{ form_persona.estado_civil|add_class:"editable-field" }}</td></tr>
+                <tr><td class="label-cell">Previsión</td><td class="input-cell">{{ form_persona.prevision|add_class:"editable-field" }}</td></tr>
+                <tr><td class="label-cell">CESFAM Vinculante</td><td class="input-cell">{{ form_persona.cesfam|add_class:"editable-field" }}</td></tr>
+                <tr><td class="label-cell">Ocupación</td><td class="input-cell">{{ form_persona.ocupacion|add_class:"editable-field" }}</td></tr>
+                <tr><td class="label-cell">Dirección</td><td class="input-cell">{{ form_persona.direccion|add_class:"editable-field" }}</td></tr>
+                <tr><td class="label-cell">Villa</td><td class="input-cell">{{ form_persona.villa|add_class:"editable-field" }}</td></tr>
+                <tr><td class="label-cell">Barrio</td><td class="input-cell">{{ form_persona.barrio|add_class:"editable-field" }}</td></tr>
+                <tr><td class="label-cell">Cuadrante</td><td class="input-cell">{{ form_persona.cuadrante|add_class:"editable-field" }}</td></tr>
+                <tr>
+                    <td class="label-cell">¿Discapacidad?</td>
+                    <td class="input-cell">{{ form_persona.discapacidad|add_class:"editable-field" }}</td>
+                </tr>
+                <tr>
+                    <td class="label-cell">¿Pertenencia a pueblo originario / etnia?</td>
+                    <td class="input-cell">{{ form_persona.etnia|add_class:"editable-field" }}</td>
+                </tr>
+                <tr>
+                    <td class="label-cell">¿Diversidad?</td>
+                    <td class="input-cell">{{ form_persona.diversidad|add_class:"editable-field" }}</td>
+                </tr>
+                <tr><td class="label-cell">Persona significativa</td><td class="input-cell">{{ form_persona.persona_significativa|add_class:"editable-field" }}</td></tr>
+                <tr><td class="label-cell">Vínculo</td><td class="input-cell">{{ form_persona.vinculo|add_class:"editable-field" }}</td></tr>
+                <tr><td class="label-cell">Teléfono significativo</td><td class="input-cell">{{ form_persona.telefono_significativo|add_class:"editable-field" }}</td></tr>
+                <tr><td class="label-cell">N° adultos hogar</td><td class="input-cell">{{ form_persona.n_adultos|add_class:"editable-field" }}</td></tr>
+                <tr><td class="label-cell">N° NNA hogar</td><td class="input-cell">{{ form_persona.n_nna|add_class:"editable-field" }}</td></tr>
+            </tbody>
+        </table>
+
+
+        <!-- DENUNCIA -->
+        <h4 class="mt-5 mb-3">⚖️ Módulo 1C: Denuncia</h4>
+        <table>
+            <tbody>
+                <tr>
+                    <td class="label-cell">¿Tiene denuncia?</td>
+                    <td class="input-cell">{{ form_denuncia.tiene_denuncia|add_class:"editable-field" }}</td>
+                </tr>
+            </tbody>
+        </table>
+        <div id="denuncia-campos" {% if not form_denuncia.tiene_denuncia.value %}style="display: none;"{% endif %}>
+            <table>
+                <tbody>
+                    <tr><td class="label-cell">Año de Denuncia</td><td class="input-cell">{{ form_denuncia.anio_denuncia|add_class:"editable-field" }}</td></tr>
+                    <tr><td class="label-cell">Lugar</td><td class="input-cell">{{ form_denuncia.lugar_denuncia|add_class:"editable-field" }}</td></tr>
+                    <tr><td class="label-cell">Número de Causa</td><td class="input-cell">{{ form_denuncia.numero_causa|add_class:"editable-field" }}</td></tr>
+                    <tr><td class="label-cell">¿Existe Medida Cautelar?</td><td class="input-cell">{{ form_denuncia.medida_cautelar|add_class:"editable-field" }}</td></tr>
+                    <tr><td class="label-cell">Descripción de Dificultades</td><td class="input-cell">{{ form_denuncia.descripcion_dificultad|add_class:"editable-field" }}</td></tr>
+                    <tr><td class="label-cell">Motivo de la Denuncia</td><td class="input-cell">{{ form_denuncia.motivo_denuncia|add_class:"editable-field" }}</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- MOTIVO DE INGRESO -->
+        <h4 class="mt-5 mb-3">📑 Motivo de Ingreso</h4>
+        <table>
+            <tbody>
+                <tr>
+                    <td class="label-cell">Motivo principal</td>
+                    <td class="input-cell">{{ form_motivo.motivo_ingreso|add_class:"editable-field" }}</td>
+                </tr>
+                <tr>
+                    <td class="label-cell">Descripción del caso</td>
+                    <td class="input-cell">
+                        {{ form_motivo.descripcion_motivo|add_class:"editable-field" }} 
+                        <small class="form-text text-muted">Describe brevemente los hechos relatados por la persona atendida al momento del ingreso.</small>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- ASPECTOS PSICOLÓGICOS -->
+        <h4 class="mt-5 mb-3">🧠 Aspectos Psicológicos</h4>
+        <table>
+            <tbody>
+                <tr>
+                    <td class="label-cell">Diagnóstico salud mental</td>
+                    <td class="input-cell">{{ form_psicologico.diagnostico_salud_mental|add_class:"editable-field" }}</td>
+                </tr>
+                <tr>
+                    <td class="label-cell">Atenciones anteriores</td>
+                    <td class="input-cell">{{ form_psicologico.atenciones_anteriores|add_class:"editable-field" }}</td>
+                </tr>
+                <tr>
+                    <td class="label-cell">Internaciones</td>
+                    <td class="input-cell">{{ form_psicologico.internaciones|add_class:"editable-field" }}</td>
+                </tr>
+                <tr>
+                    <td class="label-cell">Antecedentes de suicidio</td>
+                    <td class="input-cell">{{ form_psicologico.suicidio_antecedentes|add_class:"editable-field" }}</td>
+                </tr>
+                <tr>
+                    <td class="label-cell">Estado de conciencia</td>
+                    <td class="input-cell">{{ form_psicologico.estado_conciencia|add_class:"editable-field" }}</td>
+                </tr>
+                <tr>
+                    <td class="label-cell">Orientación</td>
+                    <td class="input-cell">{{ form_psicologico.orientacion|add_class:"editable-field" }}</td>
+                </tr>
+                <tr>
+                    <td class="label-cell">Estado cognitivo</td>
+                    <td class="input-cell">{{ form_psicologico.estado_cognitivo|add_class:"editable-field" }}</td>
+                </tr>
+                <tr>
+                    <td class="label-cell">Actitud</td>
+                    <td class="input-cell">{{ form_psicologico.actitud|add_class:"editable-field" }}</td>
+                </tr>
+                <tr>
+                    <td class="label-cell">Lenguaje</td>
+                    <td class="input-cell">{{ form_psicologico.lenguaje|add_class:"editable-field" }}</td>
+                </tr>
+                <tr>
+                    <td class="label-cell">Afectividad</td>
+                    <td class="input-cell">{{ form_psicologico.afectividad|add_class:"editable-field" }}</td>
+                </tr>
+                <tr>
+                    <td class="label-cell">Sueño</td>
+                    <td class="input-cell">{{ form_psicologico.sueno|add_class:"editable-field" }}</td>
+                </tr>
+                <tr>
+                    <td class="label-cell">Alimentación</td>
+                    <td class="input-cell">{{ form_psicologico.alimentacion|add_class:"editable-field" }}</td>
+                </tr>
+                <tr>
+                    <td class="label-cell">Limitación vida cotidiana</td>
+                    <td class="input-cell">{{ form_psicologico.limitacion_vida_cotidiana|add_class:"editable-field" }}</td>
+                </tr>
+                <tr>
+                    <td class="label-cell">¿Quiebre en historia de vida?</td>
+                    <td class="input-cell">{{ form_psicologico.quiebre_historia_vida|add_class:"editable-field" }}</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- REDES DE APOYO -->
+        <h4 class="mt-5 mb-3">🌐 Redes de Apoyo</h4>
+        <table>
+            <tbody>
+                <tr><td class="label-cell">Red familiares</td><td class="input-cell">{{ form_redes.red_familiares|add_class:"editable-field" }}</td></tr>
+                <tr><td class="label-cell">Red amistades</td><td class="input-cell">{{ form_redes.red_amistades|add_class:"editable-field" }}</td></tr>
+                <tr><td class="label-cell">Red cónyuge</td><td class="input-cell">{{ form_redes.red_conyuge|add_class:"editable-field" }}</td></tr>
+                <tr><td class="label-cell">Red laborales</td><td class="input-cell">{{ form_redes.red_laborales|add_class:"editable-field" }}</td></tr>
+                <tr><td class="label-cell">Red otros personales</td><td class="input-cell">{{ form_redes.red_otros_personales|add_class:"editable-field" }}</td></tr>
+                <tr><td class="label-cell">Red junta de vecinos</td><td class="input-cell">{{ form_redes.red_junta_vecinos|add_class:"editable-field" }}</td></tr>
+                <tr><td class="label-cell">Red centro de madres</td><td class="input-cell">{{ form_redes.red_centro_madres|add_class:"editable-field" }}</td></tr>
+                <tr><td class="label-cell">Red club de adultos mayores</td><td class="input-cell">{{ form_redes.red_club_adultos|add_class:"editable-field" }}</td></tr>
+                <tr><td class="label-cell">Red club deportivo</td><td class="input-cell">{{ form_redes.red_club_deportivo|add_class:"editable-field" }}</td></tr>
+                <tr><td class="label-cell">Red otros comunitarios</td><td class="input-cell">{{ form_redes.red_otros_comunitarios|add_class:"editable-field" }}</td></tr>
+                <tr><td class="label-cell">Red Municipalidad</td><td class="input-cell">{{ form_redes.red_municipalidad|add_class:"editable-field" }}</td></tr>
+                <tr><td class="label-cell">Red CESFAM</td><td class="input-cell">{{ form_redes.red_cesfam|add_class:"editable-field" }}</td></tr>
+                <tr><td class="label-cell">Red COSAM</td><td class="input-cell">{{ form_redes.red_cosam|add_class:"editable-field" }}</td></tr>
+                <tr><td class="label-cell">Red otro salud</td><td class="input-cell">{{ form_redes.red_otro_salud|add_class:"editable-field" }}</td></tr>
+                <tr><td class="label-cell">Red establecimiento educativo</td><td class="input-cell">{{ form_redes.red_establecimiento|add_class:"editable-field" }}</td></tr>
+                <tr><td class="label-cell">Red ONG</td><td class="input-cell">{{ form_redes.red_ong|add_class:"editable-field" }}</td></tr>
+            </tbody>
+        </table>
+
+        <!-- PLAN DE ACCIÓN -->
+        <h4 class="mt-5 mb-3">🗂️ Plan de Acción</h4>
+        <table>
+            <tbody>
+                <tr>
+                    <td class="label-cell" rowspan="2"><strong>Derivación CAVD</strong></td>
+                    <td class="input-cell">
+                        {{ form_plan.derivacion_cavd_psicologica|add_class:"editable-field" }} Atención Psicológica
+                    </td>
+                </tr>
+                <tr>
+                    <td class="input-cell">
+                        {{ form_plan.derivacion_cavd_juridica|add_class:"editable-field" }} Atención Jurídica
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label-cell" rowspan="2"><strong>DERIVACIÓN CESFAM</strong></td>
+                    <td class="input-cell">
+                        {{ form_plan.derivacion_cesfam_salud_general|add_class:"editable-field" }} Atención Salud General
+                    </td>
+                </tr>
+                <tr>
+                    <td class="input-cell">
+                        {{ form_plan.derivacion_cesfam_salud_mental|add_class:"editable-field" }} Atención Salud Mental
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label-cell" rowspan="3"><strong>UAV Atención psicológica</strong></td>
+                    <td class="input-cell">
+                        <div class="checkbox-textarea-row">
+                            {{ form_plan.uav_psicologica_1|add_class:"editable-field" }}
+                            {{ form_plan.uav_psicologica_1_detalle|add_class:"editable-field" }}
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="input-cell">
+                        <div class="checkbox-textarea-row">
+                            {{ form_plan.uav_psicologica_2|add_class:"editable-field" }}
+                            {{ form_plan.uav_psicologica_2_detalle|add_class:"editable-field" }}
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="input-cell">
+                        <div class="checkbox-textarea-row">
+                            {{ form_plan.uav_psicologica_3|add_class:"editable-field" }}
+                            {{ form_plan.uav_psicologica_3_detalle|add_class:"editable-field" }}
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label-cell" rowspan="3"><strong>UAV Atención Social</strong></td>
+                    <td class="input-cell">
+                        <div class="checkbox-textarea-row">
+                            {{ form_plan.uav_social_1|add_class:"editable-field" }}
+                            {{ form_plan.uav_social_1_detalle|add_class:"editable-field" }}
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="input-cell">
+                        <div class="checkbox-textarea-row">
+                            {{ form_plan.uav_social_2|add_class:"editable-field" }}
+                            {{ form_plan.uav_social_2_detalle|add_class:"editable-field" }}
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="input-cell">
+                        <div class="checkbox-textarea-row">
+                            {{ form_plan.uav_social_3|add_class:"editable-field" }}
+                            {{ form_plan.uav_social_3_detalle|add_class:"editable-field" }}
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label-cell" rowspan="4"><strong>Patrullaje preventivo</strong></td>
+                    <td class="input-cell">
+                        {{ form_plan.patrullaje_activo|add_class:"editable-field" }} Activar patrullaje preventivo
+                    </td>
+                </tr>
+                <tr>
+                    <td class="input-cell">
+                        {{ form_plan.patrullaje_turno_1|add_class:"editable-field" }} 1° Turno (07:00 a 15:00 hrs) /
+                        {{ form_plan.patrullaje_entrevista_1|add_class:"editable-field" }} Entrevista
+                    </td>
+                </tr>
+                <tr>
+                    <td class="input-cell">
+                        {{ form_plan.patrullaje_turno_2|add_class:"editable-field" }} 2° Turno (15:00 a 23:00 hrs) /
+                        {{ form_plan.patrullaje_entrevista_2|add_class:"editable-field" }} Entrevista
+                    </td>
+                </tr>
+                <tr>
+                    <td class="input-cell">
+                        {{ form_plan.patrullaje_turno_3|add_class:"editable-field" }} 3° Turno (23:00 a 07:00 hrs) /
+                        {{ form_plan.patrullaje_entrevista_3|add_class:"editable-field" }} Entrevista
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label-cell" rowspan="2"><strong>Profesional a cargo</strong></td>
+                    <td class="input-cell">
+                        {{ form_plan.profesional_nathaly|add_class:"editable-field" }} Nathaly Reyes<br>
+                        {{ form_plan.profesional_paloma|add_class:"editable-field" }} Paloma Quinteros<br>
+                        {{ form_plan.cordinadora_gloria|add_class:"editable-field" }} Gloria Rivera<br>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="form-footer mt-4">
+            <button type="button" class="btn-descartar" onclick="window.location.href='{% url 'fichas:ver_ficha_completa' ficha.id %}'">
+                Descartar cambios
+            </button>
+            <button type="submit" class="btn-institucional btn-lg">
+                Guardar Ficha
+            </button>
+        </div>
+
+    </form>
+</div>
+
+<!-- Modal de advertencia de cambios en campos ya llenos -->
+<div class="modal fade" id="confirmarCambiosCamposModal" tabindex="-1" aria-labelledby="confirmarCambiosCamposLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content" style="border-radius: 18px; border: 2px solid #252c54;">
+      <div class="modal-header" style="background-color: #252c54; color: white; border-radius: 18px 18px 0 0;">
+        <h5 class="modal-title" id="confirmarCambiosCamposLabel" style="font-weight:bold; letter-spacing:0.5px;">Advertencia</h5>
+      </div>
+      <div class="modal-body" style="padding: 26px;">
+        Estás modificando datos que ya estaban registrados previamente.<br><br>
+        ¿Estás segura/o de que deseas cambiar estos datos?
+      </div>
+      <div class="modal-footer d-flex justify-content-center" style="border-radius: 0 0 18px 18px; background-color:#f4f6f8;">
+        <button type="button" class="btn-descartar" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" id="confirmarCambiosCamposBtn" class="btn-institucional">Sí, modificar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// Añade data-original a todos los campos editables con valor original
+document.addEventListener("DOMContentLoaded", function() {
+    // Lo ideal es poner esto en el backend, pero lo simulamos aquí
+    document.querySelectorAll('.editable-field').forEach(function(input){
+        if(input.value && input.value !== "") {
+            input.setAttribute('data-original', input.value);
+        }
+    });
+
+    // Autosize para textareas
+    document.querySelectorAll('textarea').forEach(function(textarea){
+        const baseHeight = textarea.scrollHeight;
+        textarea.style.height = baseHeight + 'px';
+        textarea.addEventListener('input', function(){
+            if(textarea.scrollHeight > textarea.offsetHeight){
+                textarea.style.height = 'auto';
+                textarea.style.height = textarea.scrollHeight + 'px';
+            }
+        });
+    });
+
+    // Control de advertencia de cambios sobre campos llenos
+    let fieldsWithOriginalChange = [];
+
+    document.querySelectorAll('.editable-field').forEach(function(input){
+        input.addEventListener('change', function(){
+            let original = input.getAttribute('data-original');
+            // Solo si tenía dato original y ahora es diferente
+            if(original !== null && original !== "" && input.value !== original){
+                if(!fieldsWithOriginalChange.includes(input)){
+                    fieldsWithOriginalChange.push(input);
+                }
+            } else {
+                // Si vuelve al original, lo quita de la lista
+                let idx = fieldsWithOriginalChange.indexOf(input);
+                if(idx !== -1) fieldsWithOriginalChange.splice(idx,1);
+            }
+        });
+    });
+
+    // Formulario: intercepta submit si hay cambios en campos previos
+    document.getElementById("formFicha").addEventListener("submit", function(e){
+        if(fieldsWithOriginalChange.length > 0){
+            e.preventDefault();
+            var modal = new bootstrap.Modal(document.getElementById('confirmarCambiosCamposModal'));
+            modal.show();
+
+            // Botón confirma del modal
+            document.getElementById("confirmarCambiosCamposBtn").onclick = function(){
+                modal.hide();
+                fieldsWithOriginalChange = [];
+                document.getElementById("formFicha").submit();
+            };
+        }
+    });
+
+    // Advertencia de salir sin guardar
+    let isFormDirty = false;
+    document.getElementById("formFicha").addEventListener("input", function () {
+        isFormDirty = true;
+    });
+    window.addEventListener("beforeunload", function (e) {
+        if (isFormDirty) {
+            e.preventDefault();
+            e.returnValue = '';
+        }
+    });
+    document.getElementById("formFicha").addEventListener("submit", function () {
+        isFormDirty = false;
+    });
+});
+</script>
+
+{% endblock %}

@@ -1,0 +1,233 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+    .busqueda-form {
+        background: #f6f8fb;
+        padding: 25px 30px 15px 30px;
+        border-radius: 14px;
+        margin-bottom: 32px;
+        border: 2px solid #252c54;
+        max-width: 1400px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    .busqueda-form label {
+        font-weight: 600;
+        color: #252c54;
+    }
+    .busqueda-form input, .busqueda-form select {
+        border: 1.5px solid #b8bbd8;
+        border-radius: 6px;
+        font-size: 1rem;
+        padding: 7px;
+        margin-right: 15px;
+        margin-bottom: 12px;
+        width: auto;
+        min-width: 120px;
+    }
+    .busqueda-form .btn-institucional {
+        background: #252c54;
+        color: #fff;
+        border: none;
+        font-weight: bold;
+        padding: 10px 36px;
+        border-radius: 8px;
+    }
+    .busqueda-form .btn-institucional:hover { background: #1a2040; }
+    .busqueda-form .btn-reset {
+        background: #e0e3f2;
+        color: #252c54;
+        font-weight: 600;
+        border: 1.5px solid #c9cbe0;
+        padding: 10px 24px;
+        border-radius: 8px;
+        margin-left: 10px;
+    }
+    .table-responsive {
+        overflow-x: auto;
+    }
+    table {
+        border-collapse: collapse;
+        width: 100%;
+        min-width: 1100px;
+        background: #fff;
+    }
+    th, td {
+        border: 1px solid #e5e8f4;
+        padding: 7px 10px;
+        text-align: left;
+    }
+    th {
+        background: #252c54;
+        color: white;
+        cursor: pointer;
+        position: relative;
+        font-size: 1rem;
+    }
+    th a { color: white; text-decoration: none;}
+    th .orden-icono { font-size: 0.9rem; margin-left: 4px; }
+    tr:nth-child(even) { background: #f6f7fb; }
+    .btn-ver {
+        background: #252c54;
+        color: #fff;
+        border: none;
+        border-radius: 7px;
+        padding: 7px 17px;
+        font-weight: 500;
+        font-size: 1rem;
+    }
+    .btn-ver:hover { background: #3842a6; }
+    .paginacion {
+        margin: 28px 0 10px 0;
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 8px;
+    }
+    .paginacion a, .paginacion span {
+        display: inline-block;
+        padding: 7px 14px;
+        border-radius: 6px;
+        background: #f4f6f8;
+        color: #252c54;
+        font-weight: bold;
+        border: 1px solid #d1d5ed;
+        margin: 0 2px;
+        text-decoration: none;
+    }
+    .paginacion .current { background: #252c54; color: white; border: 1px solid #252c54;}
+    .btn-egreso {
+        background: #252c54;
+        color: #fff;
+        border: none;
+        border-radius: 7px;
+        padding: 7px 17px;
+        font-weight: 500;
+        font-size: 1rem;
+        margin-left: 6px;
+    }
+    .btn-egreso:hover { background: #31ccec; color: #252c54; }
+
+</style>
+<h2 class="mb-4" style="color:#252c54;font-weight:700;">Buscar persona atendida</h2>
+
+<div class="busqueda-form">
+    <form method="get" class="d-flex flex-wrap align-items-end justify-content-between">
+        <div>
+            <label for="fecha_inicio">Fecha recepción desde:</label>
+            <input type="date" id="fecha_inicio" name="fecha_inicio" value="{{ fecha_inicio|default:'' }}">
+            <label for="fecha_fin">hasta:</label>
+            <input type="date" id="fecha_fin" name="fecha_fin" value="{{ fecha_fin|default:'' }}">
+        </div>
+        <div>
+            <label for="numero_ficha">N° Ficha:</label>
+            <input type="number" id="numero_ficha" name="numero_ficha" value="{{ numero_ficha|default:'' }}" min="1" style="width:100px;">
+        </div>
+        <div>
+            <label for="nombre">Nombre:</label>
+            <input type="text" id="nombre" name="nombre" value="{{ nombre|default:'' }}" autocomplete="off" style="width:180px;">
+        </div>
+        <div>
+            <label for="delito">Motivo/Delito:</label>
+            <select id="delito" name="delito" style="width:190px;">
+                <option value="">Todos</option>
+                {% for op, label in OPCIONES_MOTIVO %}
+                    <option value="{{ op }}" {% if delito == op %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div>
+            <button type="submit" class="btn btn-institucional">Buscar</button>
+            <a href="{% url 'fichas:buscar_persona' %}" class="btn btn-reset">Restablecer filtros</a>
+        </div>
+        {% if ordenar_por %}
+            <input type="hidden" name="ordenar_por" value="{{ ordenar_por }}">
+        {% endif %}
+        {% if sentido %}
+            <input type="hidden" name="sentido" value="{{ sentido }}">
+        {% endif %}
+    </form>
+</div>
+
+
+<div class="table-responsive">
+    <h4 style="color:#252c54; font-weight:550;">Resultados de Búsqueda ({{ page_obj.paginator.count }})</h4>
+
+<table>
+    <thead>
+        <tr>
+            {% for columna, label in columnas %}
+                <th>
+                    {% with ordenar_icono="" %}
+                        {% if ordenar_por == columna %}
+                            {% if sentido == "asc" %}
+                                {% with ordenar_icono="▲" %}{% endwith %}
+                            {% else %}
+                                {% with ordenar_icono="▼" %}{% endwith %}
+                            {% endif %}
+                        {% endif %}
+                    {% endwith %}
+                    {% with nueva_sentido="asc" %}
+                        {% if ordenar_por == columna and sentido == "asc" %}
+                            {% with nueva_sentido="desc" %}{% endwith %}
+                        {% endif %}
+                    {% endwith %}
+                    <a href="?{% for key, value in request.GET.items %}
+                        {% if key != 'ordenar_por' and key != 'sentido' %}
+                            {{ key }}={{ value|urlencode }}&
+                        {% endif %}
+                    {% endfor %}
+                    ordenar_por={{ columna }}&sentido={{ nueva_sentido }}">
+                        {{ label }}
+                        {% if ordenar_por == columna %}
+                            <span class="orden-icono">{{ ordenar_icono }}</span>
+                        {% endif %}
+                    </a>
+                </th>
+            {% endfor %}
+            <th>Acción</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for ficha in page_obj %}
+        <tr>
+            <td>{{ ficha.id }}</td>
+            <td>{{ ficha.fecha_recepcion|date:"d/m/Y" }}</td>
+            <td>{{ ficha.personaatendida.nombre|default:"-" }}</td>
+            <td>
+                {% if ficha.motivoingreso and ficha.motivoingreso.motivo_ingreso %}
+                    {{ ficha.motivoingreso.get_motivo_ingreso_display }}
+                {% else %}-{% endif %}
+            </td>
+            <td>
+                <a href="{% url 'fichas:ver_ficha_completa' ficha.id %}" class="btn-ver">Ver ficha</a>
+                <a href="{% url 'fichas:ingresar_intervencion' %}?ficha_id={{ ficha.id }}" class="btn-ver" style="background:#252c54; margin-left:8px;">Ingresar intervención</a>
+                <a href="{% url 'fichas:gestionar_egreso' ficha.id %}" class="btn-egreso" >Egreso</a>
+
+
+            </td>
+            
+        </tr>
+        {% empty %}
+        <tr><td colspan="{{ columnas|length|add:1 }}">No se encontraron resultados con los filtros actuales.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+</div>
+
+<div class="paginacion">
+    {% if page_obj.has_previous %}
+        <a href="?{% for key, value in request.GET.items %}
+            {% if key != 'page' %}{{ key }}={{ value|urlencode }}&{% endif %}
+        {% endfor %}page={{ page_obj.previous_page_number }}">Anterior</a>
+    {% endif %}
+    <span class="current">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+    {% if page_obj.has_next %}
+        <a href="?{% for key, value in request.GET.items %}
+            {% if key != 'page' %}{{ key }}={{ value|urlencode }}&{% endif %}
+        {% endfor %}page={{ page_obj.next_page_number }}">Siguiente</a>
+    {% endif %}
+</div>
+{% endblock %}

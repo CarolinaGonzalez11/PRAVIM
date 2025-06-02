@@ -1,0 +1,93 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Ingreso a PRAVIM</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background-color: #f5f5f5;
+      text-align: center;
+      padding-top: 50px;
+    }
+
+    .login-container {
+      width: 350px;
+      margin: auto;
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.2);
+    }
+
+    .logo-container {
+      background-color: #252c54;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+
+    .logo-container img {
+      width: 200px;
+      background-color: #252c54;
+    }
+
+    h2 {
+      margin-bottom: 20px;
+      color: #252c54;
+    }
+
+    form {
+      text-align: left;
+    }
+
+    button {
+      width: 100%;
+      padding: 10px;
+      background-color: #252c54;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      margin-top: 10px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #1c2243;
+    }
+
+    .error {
+      color: red;
+      margin-bottom: 10px;
+    }
+
+    input {
+      width: 100%;
+      padding: 8px;
+      margin-bottom: 12px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-container">
+    <div class="logo-container">
+      <img src="{% static 'usuarios/logo.png' %}" alt="Logo Maipú">
+    </div>
+    <h2>Ingreso a PRAVIM</h2>
+
+    {% if form.errors %}
+      <p class="error">{{ form.non_field_errors.0 }}</p>
+    {% endif %}
+
+    <form method="post">
+      {% csrf_token %}
+      {{ form.as_p }}
+      <button type="submit">Ingresar</button>
+    </form>
+  </div>
+</body>
+</html>

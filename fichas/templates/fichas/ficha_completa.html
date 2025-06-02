@@ -1,0 +1,638 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f6f8;
+    margin: 0;
+    padding: 0;
+}
+
+.form-container {
+    max-width: 100%;
+    margin: 0 auto;
+    background-color: white;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    overflow-x: auto;
+}
+
+/* Tablas */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+th {
+    background-color: #252c54 ;
+    color: white;
+    font-size: 14px;
+    padding: 8px;
+    text-align: left;
+}
+
+td.label-cell {
+    background-color: #252c54 ;
+    color: white;
+    width: 25%;
+    font-weight: bold;
+    padding: 8px;
+    vertical-align: top;
+}
+
+td.input-cell {
+    width: 75%;
+    padding: 8px;
+    vertical-align: top;
+}
+
+
+/* Inputs */
+input[type="text"],
+input[type="date"],
+select {
+    width: 100%;
+    padding: 6px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+/* Botones */
+.btn-primary {
+    background-color: #252c54 ;
+    color: white;
+    border: none;
+}
+
+.btn-secondary {
+    background-color: #ccc;
+    color: #000;
+    text-decoration: none;
+}
+
+/* Bordes blancos para tablas */
+table, th, td {
+    border: 1px solid white;
+}
+
+/* Acordeón */
+.accordion-button {
+    background-color: #252c54 ;
+    color: white;
+}
+
+.accordion-button:not(.collapsed) {
+    background-color: #252c54 ;
+    color: white;
+}
+
+.accordion-button:focus {
+    box-shadow: none;
+    outline: none;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    table, thead, tbody, th, td, tr {
+        display: block;
+        width: 100%;
+    }
+    th, td {
+        border: 1px solid white;
+    }
+}
+@media (max-width: 768px) {
+    td.input-cell,
+    td.label-cell {
+        display: block;
+        width: 100%;
+    }
+}
+
+
+
+textarea {
+    min-height: 40px;
+    max-height: 500px;
+    overflow-y: hidden;
+    resize: vertical;
+    padding: 6px;
+    font-size: 14px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+
+
+.table-responsive-preingreso {
+    overflow-x: auto;
+    width: 100%;
+}
+
+.table-responsive-preingreso table {
+    min-width: 900px; /* o el ancho que necesites */
+}
+
+.checkbox-textarea-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.checkbox-textarea-row input[type="checkbox"] {
+    margin-right: 8px;
+    margin-left: 2px;
+    /* Si necesitas que sea más grande: */
+    /* transform: scale(1.4); */
+}
+
+.checkbox-textarea-row textarea {
+    flex: 1 1 auto;
+    min-height: 45px;
+    margin-left: 0;
+}
+
+.btn-institucional {
+    background-color: #252c54;
+    color: #fff;
+    border: none;
+    padding: 12px 32px;
+    border-radius: 6px;
+    font-size: 1.2rem;
+    font-weight: bold;
+    box-shadow: 0 2px 8px rgba(37, 44, 84, 0.15);
+    transition: background 0.2s, box-shadow 0.2s;
+    margin-top: 12px;
+}
+
+.btn-institucional:hover, .btn-institucional:focus {
+    background-color: #1a2040;
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(37, 44, 84, 0.20);
+    outline: none;
+}
+
+.form-footer {
+    margin-bottom: 30px;
+}
+
+</style>
+
+
+ 
+<div class="container mt-4">
+    <h2 class="mb-4 text-primary">Nueva Ficha de Acogida</h2>
+
+    <form method="post" id="formFicha">
+        {% csrf_token %}
+
+        <div class="accordion" id="formAccordion">
+
+            <!-- Acordeón 1: Preingreso + Individualización + Denuncia -->
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="headingPreingreso">
+                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapsePreingreso">
+                        Preingreso e Individualización
+                    </button>
+                </h2>
+                <div id="collapsePreingreso" class="accordion-collapse collapse show" data-bs-parent="#formAccordion">
+                    <div class="accordion-body">
+
+                        <!-- PREINGRESO -->
+                        <h4 class="mb-3">📝 Módulo 1: Preingreso</h4>
+                        <div class="table-responsive-preingreso">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Fecha recepción</th>
+                                        <th>Vía de ingreso</th>
+                                        <th>Fecha contacto 1</th>
+                                        <th>Fecha contacto 2</th>
+                                        <th>Fecha contacto 3</th>
+                                        <th>Tipo de contacto</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>{{ form_ficha.fecha_recepcion }}</td>
+                                        <td>{{ form_ficha.via_ingreso }}</td>
+                                        <td>{{ form_ficha.fecha_contacto_1 }}</td>
+                                        <td>{{ form_ficha.fecha_contacto_2 }}</td>
+                                        <td>{{ form_ficha.fecha_contacto_3 }}</td>
+                                        <td>{{ form_ficha.tipo_contacto }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+
+                        <!-- PERSONA ATENDIDA -->
+                        <h4 class="mt-5 mb-3">👤 Módulo 1B: Datos de la Persona Atendida</h4>
+                        <table>
+                            <tbody>
+                                <tr><td class="label-cell">Nombre</td><td class="input-cell">{{ form_persona.nombre }}</td></tr>
+                                <tr><td class="label-cell">RUT / Nº Pasaporte</td><td class="input-cell">{{ form_persona.rut_pasaporte }}</td></tr>
+                                <tr><td class="label-cell">Género</td><td class="input-cell">{{ form_persona.genero }}</td></tr>
+                                <tr><td class="label-cell">Teléfono</td><td class="input-cell">{{ form_persona.telefono }}</td></tr>
+                                <tr><td class="label-cell">Fecha de Nacimiento</td><td class="input-cell">{{ form_persona.fecha_nacimiento }}</td></tr>
+                                <tr><td class="label-cell">País de Nacionalidad</td><td class="input-cell">{{ form_persona.nacionalidad }}</td></tr>
+                                <tr><td class="label-cell">Estado Civil</td><td class="input-cell">{{ form_persona.estado_civil }}</td></tr>
+                                <tr><td class="label-cell">Previsión</td><td class="input-cell">{{ form_persona.prevision }}</td></tr>
+                                <tr><td class="label-cell">CESFAM Vinculante</td><td class="input-cell">{{ form_persona.cesfam }}</td></tr>
+                                <tr><td class="label-cell">Ocupación</td><td class="input-cell">{{ form_persona.ocupacion }}</td></tr>
+                                <tr><td class="label-cell">Dirección</td><td class="input-cell">{{ form_persona.direccion }}</td></tr>
+                                <tr><td class="label-cell">Villa</td><td class="input-cell">{{ form_persona.villa }}</td></tr>
+                                <tr><td class="label-cell">Barrio</td><td class="input-cell">{{ form_persona.barrio }}</td></tr>
+                                <tr><td class="label-cell">Cuadrante</td><td class="input-cell">{{ form_persona.cuadrante }}</td></tr>
+                                <tr><td class="label-cell">¿Discapacidad?</td><td class="input-cell">{{ form_persona.discapacidad }}</td></tr>
+                                <tr><td class="label-cell">¿Pertenencia a pueblo originario / etnia?</td><td class="input-cell">{{ form_persona.etnia }}</td></tr>
+                                <tr><td class="label-cell">¿Diversidad (sexo/género/orientación)?</td><td class="input-cell">{{ form_persona.diversidad }}</td></tr>
+                                <tr><td class="label-cell">Persona significativa</td><td class="input-cell">{{ form_persona.persona_significativa }}</td></tr>
+                                <tr><td class="label-cell">Vínculo</td><td class="input-cell">{{ form_persona.vinculo }}</td></tr>
+                                <tr><td class="label-cell">Teléfono significativo</td><td class="input-cell">{{ form_persona.telefono_significativo }}</td></tr>
+                                <tr><td class="label-cell">N° adultos hogar</td><td class="input-cell">{{ form_persona.n_adultos }}</td></tr>
+                                <tr><td class="label-cell">N° NNA hogar</td><td class="input-cell">{{ form_persona.n_nna }}</td></tr>
+                            </tbody>
+                        </table>
+
+
+
+                        <!-- DENUNCIA -->
+                        <h4 class="mt-5 mb-3">⚖️ Módulo 1C: Denuncia</h4>
+
+                        <table>
+                            <tbody>
+                                <tr>
+                                    <td class="label-cell">¿Tiene denuncia?</td>
+                                    <td class="input-cell">{{ form_denuncia.tiene_denuncia }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <div id="denuncia-campos" {% if not form_denuncia.tiene_denuncia.value %}style="display: none;"{% endif %}>
+                            <table>
+                                <tbody>
+                                    <tr><td class="label-cell">Año de Denuncia</td><td class="input-cell">{{ form_denuncia.anio_denuncia }}</td></tr>
+                                    <tr><td class="label-cell">Lugar</td><td class="input-cell">{{ form_denuncia.lugar_denuncia }}</td></tr>
+                                    <tr><td class="label-cell">Número de Causa</td><td class="input-cell">{{ form_denuncia.numero_causa }}</td></tr>
+                                    <tr><td class="label-cell">¿Existe Medida Cautelar?</td><td class="input-cell">{{ form_denuncia.medida_cautelar }}</td></tr>
+                                    <tr><td class="label-cell">Descripción de Dificultades</td><td class="input-cell">{{ form_denuncia.descripcion_dificultad }}</td></tr>
+                                    <tr><td class="label-cell">Motivo de la Denuncia</td><td class="input-cell">{{ form_denuncia.motivo_denuncia }}</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+
+                        <script>
+                            document.addEventListener('DOMContentLoaded', () => {
+                                const checkbox = document.getElementById('id_tiene_denuncia');
+                                const campos = document.getElementById('denuncia-campos');
+                                if (checkbox && campos) {
+                                    checkbox.addEventListener('change', () => {
+                                        campos.style.display = checkbox.checked ? 'block' : 'none';
+                                    });
+                                }
+                            });
+                        </script>
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- Acordeón 2: Motivo -->
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="headingMotivo">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseMotivo">
+                        Motivo de Ingreso
+                    </button>
+                </h2>
+                <div id="collapseMotivo" class="accordion-collapse collapse" data-bs-parent="#formAccordion">
+                    <div class="accordion-body">
+
+                        <table>
+                            <tbody>
+                                <tr>
+                                    <td class="label-cell">Motivo principal</td>
+                                    <td class="input-cell">{{ form_motivo.motivo_ingreso }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="label-cell">Descripción del caso</td>
+                                    <td class="input-cell">{{ form_motivo.descripcion_motivo }}</td> 
+                                    <small class="form-text text-muted">Describe brevemente los hechos relatados por la persona atendida al momento del ingreso.</small>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- Acordeón 3: Psicológico -->
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="headingPsico">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapsePsico">
+                        Aspectos Psicológicos
+                    </button>
+                </h2>
+                <div id="collapsePsico" class="accordion-collapse collapse" data-bs-parent="#formAccordion">
+                    <div class="accordion-body">
+
+                        <table>
+                            <tbody>
+                                <tr>
+                                    <td class="label-cell">Diagnóstico salud mental</td>
+                                    <td class="input-cell">{{ form_psicologico.diagnostico_salud_mental }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="label-cell">Atenciones anteriores</td>
+                                    <td class="input-cell">{{ form_psicologico.atenciones_anteriores }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="label-cell">Internaciones</td>
+                                    <td class="input-cell">{{ form_psicologico.internaciones }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="label-cell">Antecedentes de suicidio</td>
+                                    <td class="input-cell">{{ form_psicologico.suicidio_antecedentes }}</td>
+                                </tr>
+
+                                <tr>
+                                    <td class="label-cell">Estado de conciencia</td>
+                                    <td class="input-cell">{{ form_psicologico.estado_conciencia }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="label-cell">Orientación</td>
+                                    <td class="input-cell">{{ form_psicologico.orientacion }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="label-cell">Estado cognitivo</td>
+                                    <td class="input-cell">{{ form_psicologico.estado_cognitivo }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="label-cell">Actitud</td>
+                                    <td class="input-cell">{{ form_psicologico.actitud }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="label-cell">Lenguaje</td>
+                                    <td class="input-cell">{{ form_psicologico.lenguaje }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="label-cell">Afectividad</td>
+                                    <td class="input-cell">{{ form_psicologico.afectividad }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="label-cell">Sueño</td>
+                                    <td class="input-cell">{{ form_psicologico.sueno }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="label-cell">Alimentación</td>
+                                    <td class="input-cell">{{ form_psicologico.alimentacion }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="label-cell">Limitación vida cotidiana</td>
+                                    <td class="input-cell">{{ form_psicologico.limitacion_vida_cotidiana }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="label-cell">¿Quiebre en historia de vida?</td>
+                                    <td class="input-cell">{{ form_psicologico.quiebre_historia_vida }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- Acordeón 4: Redes de Apoyo -->
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="headingRedes">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseRedes">
+                        Redes de Apoyo
+                    </button>
+                </h2>
+                <div id="collapseRedes" class="accordion-collapse collapse" data-bs-parent="#formAccordion">
+                    <div class="accordion-body">
+
+                        <table>
+                            <tbody>
+                                <tr><td class="label-cell">Red familiares</td><td class="input-cell">{{ form_redes.red_familiares }}</td></tr>
+                                <tr><td class="label-cell">Red amistades</td><td class="input-cell">{{ form_redes.red_amistades }}</td></tr>
+                                <tr><td class="label-cell">Red cónyuge</td><td class="input-cell">{{ form_redes.red_conyuge }}</td></tr>
+                                <tr><td class="label-cell">Red laborales</td><td class="input-cell">{{ form_redes.red_laborales }}</td></tr>
+                                <tr><td class="label-cell">Red otros personales</td><td class="input-cell">{{ form_redes.red_otros_personales }}</td></tr>
+
+                                <tr><td class="label-cell">Red junta de vecinos</td><td class="input-cell">{{ form_redes.red_junta_vecinos }}</td></tr>
+                                <tr><td class="label-cell">Red centro de madres</td><td class="input-cell">{{ form_redes.red_centro_madres }}</td></tr>
+                                <tr><td class="label-cell">Red club de adultos mayores</td><td class="input-cell">{{ form_redes.red_club_adultos }}</td></tr>
+                                <tr><td class="label-cell">Red club deportivo</td><td class="input-cell">{{ form_redes.red_club_deportivo }}</td></tr>
+                                <tr><td class="label-cell">Red otros comunitarios</td><td class="input-cell">{{ form_redes.red_otros_comunitarios }}</td></tr>
+
+                                <tr><td class="label-cell">Red Municipalidad</td><td class="input-cell">{{ form_redes.red_municipalidad }}</td></tr>
+                                <tr><td class="label-cell">Red CESFAM</td><td class="input-cell">{{ form_redes.red_cesfam }}</td></tr>
+                                <tr><td class="label-cell">Red COSAM</td><td class="input-cell">{{ form_redes.red_cosam }}</td></tr>
+                                <tr><td class="label-cell">Red otro salud</td><td class="input-cell">{{ form_redes.red_otro_salud }}</td></tr>
+                                <tr><td class="label-cell">Red establecimiento educativo</td><td class="input-cell">{{ form_redes.red_establecimiento }}</td></tr>
+                                <tr><td class="label-cell">Red ONG</td><td class="input-cell">{{ form_redes.red_ong }}</td></tr>
+                            </tbody>
+                        </table>
+
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- Acordeón 5: Plan de Acción -->
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="headingPlan">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapsePlan">
+                        Plan de Acción
+                    </button>
+                </h2>
+                <div id="collapsePlan" class="accordion-collapse collapse" data-bs-parent="#formAccordion">
+                    <div class="accordion-body">
+                        
+                        <table>
+                            <tbody>
+                                <!-- Derivación CAVD -->
+                                <tr>
+                                    <td class="label-cell" rowspan="2"><strong>Derivación CAVD</strong></td>
+                                    <td class="input-cell">
+                                        {{ form_plan.derivacion_cavd_psicologica }} Atención Psicológica
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="input-cell">
+                                        {{ form_plan.derivacion_cavd_juridica }} Atención Jurídica
+                                    </td>
+                                </tr>
+                                <!-- Derivación CESFAM -->
+                                <tr>
+                                    <td class="label-cell" rowspan="2"><strong>DERIVACIÓN CESFAM</strong></td>
+                                    <td class="input-cell">
+                                        {{ form_plan.derivacion_cesfam_salud_general }} Atención Salud General
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="input-cell">
+                                        {{ form_plan.derivacion_cesfam_salud_mental }} Atención Salud Mental
+                                    </td>
+                                </tr>
+                                
+                                <!-- UAV Atención psicológica -->
+                                <tr>
+                                    <td class="label-cell" rowspan="3"><strong>UAV Atención psicológica</strong></td>
+                                    <td class="input-cell">
+                                        <div class="checkbox-textarea-row">
+                                            {{ form_plan.uav_psicologica_1 }}
+                                            {{ form_plan.uav_psicologica_1_detalle }}
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="input-cell">
+                                        <div class="checkbox-textarea-row">
+                                            {{ form_plan.uav_psicologica_2 }}
+                                            {{ form_plan.uav_psicologica_2_detalle }}
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="input-cell">
+                                        <div class="checkbox-textarea-row">
+                                            {{ form_plan.uav_psicologica_3 }}
+                                            {{ form_plan.uav_psicologica_3_detalle }}
+                                        </div>
+                                    </td>
+                                </tr>
+
+                                <!-- UAV Atención Social -->
+                                <tr>
+                                    <td class="label-cell" rowspan="3"><strong>UAV Atención Social</strong></td>
+                                    <td class="input-cell">
+                                        <div class="checkbox-textarea-row">
+                                            {{ form_plan.uav_social_1 }}
+                                            {{ form_plan.uav_social_1_detalle }}
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="input-cell">
+                                        <div class="checkbox-textarea-row">
+                                            {{ form_plan.uav_social_2 }}
+                                            {{ form_plan.uav_social_2_detalle }}
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="input-cell">
+                                        <div class="checkbox-textarea-row">
+                                            {{ form_plan.uav_social_3 }}
+                                            {{ form_plan.uav_social_3_detalle }}
+                                        </div>
+                                    </td>
+                                </tr>
+                            
+                                <!-- Patrullaje preventivo -->
+                                <tr>
+                                    <td class="label-cell" rowspan="4"><strong>Patrullaje preventivo</strong></td>
+                                    <td class="input-cell">
+                                        {{ form_plan.patrullaje_activo }} Activar patrullaje preventivo
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="input-cell">
+                                        {{ form_plan.patrullaje_turno_1 }} 1° Turno (07:00 a 15:00 hrs) / 
+                                        {{ form_plan.patrullaje_entrevista_1 }} Entrevista
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="input-cell">
+                                        {{ form_plan.patrullaje_turno_2 }} 2° Turno (15:00 a 23:00 hrs) / 
+                                        {{ form_plan.patrullaje_entrevista_2 }} Entrevista
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="input-cell">
+                                        {{ form_plan.patrullaje_turno_3 }} 3° Turno (23:00 a 07:00 hrs) / 
+                                        {{ form_plan.patrullaje_entrevista_3 }} Entrevista
+                                    </td>
+                                </tr>
+                                <!-- Profesional a cargo -->
+                                <tr>
+                                    <td class="label-cell" rowspan="2"><strong>Profesional a cargo</strong></td>
+                                    <td class="input-cell">
+                                        {{ form_plan.profesional_nathaly }} Nathaly Reyes<br>
+                                        {{ form_plan.profesional_paloma }} Paloma Quinteros<br>
+                                        {{ form_plan.cordinadora_gloria }} Gloria Rivera<br>
+                                        <!-- Si agregas más profesionales, ponlos igual -->
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        
+                    </div>
+                </div>
+            </div>
+
+
+
+
+        </div>
+
+        <div class="form-footer text-center mt-4">
+            <button type="submit" class="btn btn-institucional btn-lg">
+                Guardar Ficha
+            </button>
+        </div>
+
+    </form>
+</div>
+
+<script>
+    let isFormDirty = false;
+    document.getElementById("formFicha").addEventListener("input", function () {
+        isFormDirty = true;
+    });
+    window.addEventListener("beforeunload", function (e) {
+        if (isFormDirty) {
+            e.preventDefault();
+            e.returnValue = '';
+        }
+    });
+    document.getElementById("formFicha").addEventListener("submit", function () {
+        isFormDirty = false;
+    });
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const textareas = document.querySelectorAll('textarea');
+
+    textareas.forEach(textarea => {
+        // Setea altura mínima solo 1 línea (basado en scrollHeight inicial)
+        const baseHeight = textarea.scrollHeight;
+        textarea.style.height = baseHeight + 'px';
+
+        textarea.addEventListener('input', () => {
+            // Expande solo si se supera la altura inicial
+            if (textarea.scrollHeight > textarea.offsetHeight) {
+                textarea.style.height = 'auto';
+                textarea.style.height = textarea.scrollHeight + 'px';
+            }
+        });
+    });
+});
+</script>
+
+
+
+{% endblock %}

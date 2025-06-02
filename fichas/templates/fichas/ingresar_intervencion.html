@@ -1,0 +1,329 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+    .table-container {
+        overflow-x: auto;
+        max-width: 100%;
+        margin-bottom: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 12px rgba(37,44,84,0.09);
+        background: white;
+    }
+    table {
+        border-collapse: collapse;
+        width: 100%;
+        min-width: 1200px;
+        background: white;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 1px 5px rgba(37,44,84,0.07);
+    }
+    th, td {
+        border: 1px solid #e5e8f4;
+        padding: 9px 12px;
+        text-align: left;
+        vertical-align: middle;
+    }
+    th {
+        background-color: #252c54;
+        color: white;
+        font-size: 15px;
+        font-weight: 700;
+        letter-spacing: 0.2px;
+        border-bottom: 2px solid #204d9b;
+        position: sticky;
+        top: 0;
+        z-index: 2;
+    }
+    tr:nth-child(even) { background: #f6f7fb; }
+    tr:hover td { background: #e8efff; }
+    .btn-primary, .btn-edit, .btn-save, .btn-cancel, .btn-add {
+        padding: 7px 13px;
+        border-radius: 5px;
+        border: none;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        margin-right: 4px;
+    }
+    .btn-primary, .btn-add {
+        background-color: #252c54;
+        color: white;
+        box-shadow: 0 1px 4px rgba(37,44,84,0.11);
+        transition: background 0.15s;
+    }
+    .btn-primary:hover, .btn-add:hover { background-color: #31ccec; color: #252c54; }
+    .btn-edit {
+        background: #ffd966;
+        color: #252c54;
+        border: 1.2px solid #ffe597;
+    }
+    .btn-edit:hover { background: #fff2b2; }
+    .btn-save {
+        background: #4bd78b;
+        color: #fff;
+        border: 1.2px solid #5df39d;
+    }
+    .btn-save:hover { background: #28a745; }
+    .btn-cancel {
+        background: #e0e3f2;
+        color: #252c54;
+        border: 1.2px solid #c9cbe0;
+    }
+    .btn-cancel:hover { background: #bbb; }
+    input[type="text"], input[type="date"], select {
+        width: 100%;
+        padding: 6px 7px;
+        font-size: 14px;
+        border: 1px solid #b7bad8;
+        border-radius: 5px;
+        background: #f8fafd;
+        transition: border-color 0.18s;
+    }
+    input[type="text"]:focus, input[type="date"]:focus, select:focus {
+        border-color: #252c54;
+        outline: 1.3px solid #204d9b;
+        background: #f4f6fb;
+    }
+</style>
+
+{% if ficha %}
+    <div class="alert alert-info" style="margin-bottom:16px;">
+        <b>Ficha asociada:</b> N° {{ ficha.id }}
+        {% if ficha.personaatendida %}- {{ ficha.personaatendida.nombre }}{% endif %}
+    </div>
+{% endif %}
+
+<div class="table-container">
+    <table id="tabla-intervenciones">
+        <thead>
+            <tr>
+                <th>Fecha</th>
+                <th>Etapa</th>
+                <th>Tipo de Atención</th>
+                <th>Responsables/es</th>
+                <th>Participantes</th>
+                <th>Lugar o Vía de Intervención</th>
+                <th>Objetivo/s</th>
+                <th>Descripción</th>
+                <th>Resultados/Sugerencias</th>
+                <th>Acción</th>
+            </tr>
+        </thead>
+        <tbody id="body-intervenciones">
+            {% for i in intervenciones %}
+            <tr data-id="{{ i.id }}">
+                <td>{{ i.fecha|date:"Y-m-d" }}</td>
+                <td>{{ i.get_etapa_display }}</td>
+                <td>{{ i.get_tipo_intervencion_display }}</td>
+                <td>{{ i.responsables }}</td>
+                <td>{{ i.participantes }}</td>
+                <td>{{ i.get_lugar_via_display }}</td>
+                <td>{{ i.objetivos }}</td>
+                <td>{{ i.descripcion }}</td>
+                <td>{{ i.resultados }}</td>
+                <td>
+                    <button type="button" class="btn-edit" onclick="editarFila(this)">Editar</button>
+                </td>
+            </tr>
+            {% endfor %}
+            <!-- Fila para nueva intervención -->
+            <tr id="nueva-intervencion">
+                <td><input name="fecha" type="date"></td>
+                <td>
+                    <select name="etapa">
+                        <option value="">---</option>
+                        <option value="Diagnóstico">Diagnóstico</option>
+                        <option value="Intervención">Intervención</option>
+                        <option value="Preparación Egreso/Egreso">Preparación Egreso/Egreso</option>
+                    </select>
+                </td>
+                <td>
+                    <select name="tipo_intervencion">
+                        <option value="">---</option>
+                        <option value="Psicológica">Psicológica</option>
+                        <option value="Social">Social</option>
+                        <option value="Psicosocial">Psicosocial</option>
+                        <option value="Vinculación con red">Vinculación con red</option>
+                        <option value="Otra">Otra</option>
+                    </select>
+                </td>
+                <td><input name="responsables" type="text"></td>
+                <td><input name="participantes" type="text"></td>
+                <td>
+                    <select name="lugar_via">
+                        <option value="">---</option>
+                        <option value="Domicilio">Domicilio</option>
+                        <option value="Otro sitio en terreno">Otro sitio en terreno</option>
+                        <option value="Contacto telefónico">Contacto telefónico</option>
+                        <option value="Video llamada">Video llamada</option>
+                        <option value="Dependencias UAV">Dependencias UAV</option>
+                        <option value="Correo, e-mail">Correo, e-mail</option>
+                        <option value="Otro">Otro</option>
+                    </select>
+                </td>
+                <td><input name="objetivos" type="text"></td>
+                <td><input name="descripcion" type="text"></td>
+                <td><input name="resultados" type="text"></td>
+                <td>
+                    <button class="btn-add" onclick="agregarIntervencion(event)">Agregar</button>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<script>
+function obtenerDatosDeFila(tr) {
+    let datos = {};
+    tr.querySelectorAll('input, select').forEach(el => {
+        datos[el.name] = el.value;
+    });
+    return datos;
+}
+
+function agregarIntervencion(event) {
+    event.preventDefault();
+    let fila = document.getElementById('nueva-intervencion');
+    let datos = obtenerDatosDeFila(fila);
+
+    // Validación simple (ejemplo: obligatorio fecha, etapa, tipo_intervencion)
+    if (!datos.fecha || !datos.etapa || !datos.tipo_intervencion) {
+        alert("Debe ingresar al menos Fecha, Etapa y Tipo de Atención");
+        return;
+    }
+
+    fetch("{% url 'fichas:api_intervencion_guardar' ficha.id %}", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": "{{ csrf_token }}",
+        },
+        body: JSON.stringify(datos)
+    }).then(resp => resp.json())
+    .then(data => {
+        if (data.success) {
+            let nueva = document.createElement('tr');
+            nueva.setAttribute('data-id', data.id);
+            nueva.innerHTML = `
+                <td>${data.fecha}</td>
+                <td>${data.etapa}</td>
+                <td>${data.tipo_intervencion}</td>
+                <td>${data.responsables || ""}</td>
+                <td>${data.participantes || ""}</td>
+                <td>${data.lugar_via || ""}</td>
+                <td>${data.objetivos || ""}</td>
+                <td>${data.descripcion || ""}</td>
+                <td>${data.resultados || ""}</td>
+                <td><button type="button" class="btn-edit" onclick="editarFila(this)">Editar</button></td>
+            `;
+            document.getElementById('body-intervenciones').insertBefore(nueva, fila);
+            fila.querySelectorAll('input, select').forEach(el => el.value = "");
+        } else {
+            alert("Error al guardar intervención: " + (data.error || ""));
+        }
+    });
+}
+
+function editarFila(btn) {
+    let tr = btn.closest('tr');
+    let valores = [];
+    tr.querySelectorAll('td').forEach((td, idx) => {
+        if (idx < 9) valores.push(td.textContent);
+    });
+
+    tr.innerHTML = `
+        <td><input name="fecha" type="date" value="${valores[0].trim()}"></td>
+        <td>
+            <select name="etapa">
+                <option value="Diagnóstico" ${valores[1].includes("Diagnóstico") ? "selected" : ""}>Diagnóstico</option>
+                <option value="Intervención" ${valores[1].includes("Intervención") ? "selected" : ""}>Intervención</option>
+                <option value="Preparación Egreso/Egreso" ${valores[1].includes("Egreso") ? "selected" : ""}>Preparación Egreso/Egreso</option>
+            </select>
+        </td>
+        <td>
+            <select name="tipo_intervencion">
+                <option value="Psicológica" ${valores[2].includes("Psicológica") ? "selected" : ""}>Psicológica</option>
+                <option value="Social" ${valores[2].includes("Social") ? "selected" : ""}>Social</option>
+                <option value="Psicosocial" ${valores[2].includes("Psicosocial") ? "selected" : ""}>Psicosocial</option>
+                <option value="Vinculación con red" ${valores[2].includes("Vinculación") ? "selected" : ""}>Vinculación con red</option>
+                <option value="Otra" ${valores[2].includes("Otra") ? "selected" : ""}>Otra</option>
+            </select>
+        </td>
+        <td><input name="responsables" type="text" value="${valores[3].trim()}"></td>
+        <td><input name="participantes" type="text" value="${valores[4].trim()}"></td>
+        <td>
+            <select name="lugar_via">
+                <option value="Domicilio" ${valores[5].includes("Domicilio") ? "selected" : ""}>Domicilio</option>
+                <option value="Otro sitio en terreno" ${valores[5].includes("terreno") ? "selected" : ""}>Otro sitio en terreno</option>
+                <option value="Contacto telefónico" ${valores[5].includes("teléfono") ? "selected" : ""}>Contacto telefónico</option>
+                <option value="Video llamada" ${valores[5].includes("Video") ? "selected" : ""}>Video llamada</option>
+                <option value="Dependencias UAV" ${valores[5].includes("Dependencias") ? "selected" : ""}>Dependencias UAV</option>
+                <option value="Correo, e-mail" ${valores[5].includes("Correo") ? "selected" : ""}>Correo, e-mail</option>
+                <option value="Otro" ${valores[5].includes("Otro") ? "selected" : ""}>Otro</option>
+            </select>
+        </td>
+        <td><input name="objetivos" type="text" value="${valores[6].trim()}"></td>
+        <td><input name="descripcion" type="text" value="${valores[7].trim()}"></td>
+        <td><input name="resultados" type="text" value="${valores[8].trim()}"></td>
+        <td>
+            <button class="btn-save" onclick="guardarEdicion(event, this)">Guardar</button>
+            <button class="btn-cancel" onclick="cancelarEdicion(event, this, valores)">Descartar</button>
+        </td>
+    `;
+}
+
+function guardarEdicion(event, btn) {
+    event.preventDefault();
+    let tr = btn.closest('tr');
+    let id = tr.getAttribute('data-id');
+    let datos = obtenerDatosDeFila(tr);
+
+    fetch(`/fichas/api/intervencion/editar/${id}/`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": "{{ csrf_token }}",
+        },
+        body: JSON.stringify(datos)
+    }).then(resp => resp.json())
+    .then(data => {
+        if (data.success) {
+            tr.innerHTML = `
+                <td>${data.fecha}</td>
+                <td>${data.etapa}</td>
+                <td>${data.tipo_intervencion}</td>
+                <td>${data.responsables || ""}</td>
+                <td>${data.participantes || ""}</td>
+                <td>${data.lugar_via || ""}</td>
+                <td>${data.objetivos || ""}</td>
+                <td>${data.descripcion || ""}</td>
+                <td>${data.resultados || ""}</td>
+                <td><button type="button" class="btn-edit" onclick="editarFila(this)">Editar</button></td>
+            `;
+        } else {
+            alert("Error al actualizar intervención: " + (data.error || ""));
+        }
+    });
+}
+
+function cancelarEdicion(event, btn, valores) {
+    event.preventDefault();
+    let tr = btn.closest('tr');
+    tr.innerHTML = `
+        <td>${valores[0]}</td>
+        <td>${valores[1]}</td>
+        <td>${valores[2]}</td>
+        <td>${valores[3]}</td>
+        <td>${valores[4]}</td>
+        <td>${valores[5]}</td>
+        <td>${valores[6]}</td>
+        <td>${valores[7]}</td>
+        <td>${valores[8]}</td>
+        <td><button type="button" class="btn-edit" onclick="editarFila(this)">Editar</button></td>
+    `;
+}
+</script>
+{% endblock %}

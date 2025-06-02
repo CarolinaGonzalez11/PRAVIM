@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<style>
+    .egreso-form-container {
+        background: #f6f8fb;
+        padding: 35px 35px 25px 35px;
+        border-radius: 14px;
+        margin: 0 auto 32px auto;
+        border: 2px solid #252c54;
+        max-width: 700px;
+        box-shadow: 0 0 12px rgba(37,44,84,0.13);
+    }
+    .egreso-form-container label {
+        font-weight: 600;
+        color: #252c54;
+        margin-top: 7px;
+    }
+    .egreso-form-container input, .egreso-form-container select, .egreso-form-container textarea {
+        width: 100%;
+        padding: 7px;
+        border: 1.5px solid #b8bbd8;
+        border-radius: 6px;
+        font-size: 1rem;
+        margin-bottom: 18px;
+        margin-top: 2px;
+    }
+    .egreso-form-container .btn-egreso-guardar {
+        background: #252c54;
+        color: #fff;
+        border: none;
+        font-weight: bold;
+        padding: 10px 36px;
+        border-radius: 8px;
+        font-size: 1.1rem;
+        margin-top: 8px;
+    }
+    .egreso-form-container .btn-egreso-guardar:hover { background: #31ccec; color: #252c54; }
+    .egreso-form-container .alert-info {
+        background: #e9f4fd;
+        border: 1.5px solid #c5e1fa;
+        border-radius: 7px;
+        padding: 10px 14px;
+        color: #252c54;
+        margin-bottom: 14px;
+    }
+</style>
+<div class="egreso-form-container">
+    <div class="alert alert-info">
+        <b>Ficha asociada:</b> N° {{ ficha.id }}
+        {% if ficha.personaatendida %}- {{ ficha.personaatendida.nombre }}{% endif %}
+    </div>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn-egreso-guardar">{% if creado %}Guardar egreso{% else %}Actualizar egreso{% endif %}</button>
+        <a href="{% url 'fichas:ver_ficha_completa' ficha.id %}" class="btn btn-secondary" style="margin-left:12px;">Volver</a>
+    </form>
+</div>
+{% endblock %}

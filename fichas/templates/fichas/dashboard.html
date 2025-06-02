@@ -1,0 +1,165 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div style="max-width:1600px;margin:0 auto;">
+    <h2 style="color:#252c54;margin-top:20px;">Dashboard Estadístico</h2>
+
+    <!-- Filtros -->
+    <form method="get" class="mb-4" style="background:#f4f6fb;padding:18px 20px;border-radius:10px;border:1.5px solid #252c54;display:flex;gap:16px;flex-wrap:wrap;align-items:center;">
+      <label><b>Barrio</b>:</label>
+      <select name="barrio" style="min-width:160px;">
+          <option value="">Todos</option>
+          {% for barrio in barrios %}
+              <option value="{{ barrio.id }}" {% if filtros.barrio == barrio.id|stringformat:"s" %}selected{% endif %}>{{ barrio.nombre }}</option>
+          {% endfor %}
+      </select>
+      <label><b>Cuadrante</b>:</label>
+      <select name="cuadrante" style="min-width:120px;">
+          <option value="">Todos</option>
+          {% for cuad in cuadrantes %}
+              <option value="{{ cuad.id }}" {% if filtros.cuadrante == cuad.id|stringformat:"s" %}selected{% endif %}>{{ cuad.nombre }}</option>
+          {% endfor %}
+      </select>
+      <label><b>Género</b>:</label>
+      <select name="genero" style="min-width:120px;">
+          <option value="">Todos</option>
+          {% for v, l in generos %}
+              <option value="{{ v }}" {% if filtros.genero == v %}selected{% endif %}>{{ l }}</option>
+          {% endfor %}
+      </select>
+      <label><b>Motivo</b>:</label>
+      <select name="motivo_ingreso" style="min-width:170px;">
+          <option value="">Todos</option>
+          {% for v, l in motivos %}
+              <option value="{{ v }}" {% if filtros.motivo == v %}selected{% endif %}>{{ l }}</option>
+          {% endfor %}
+      </select>
+      <label><b>Desde</b>:</label>
+      <input type="date" name="fecha_inicio" value="{{ filtros.fecha_inicio }}" style="min-width:130px;">
+      <label><b>Hasta</b>:</label>
+      <input type="date" name="fecha_fin" value="{{ filtros.fecha_fin }}" style="min-width:130px;">
+      <button type="submit" class="btn btn-institucional">Filtrar</button>
+    </form>
+
+    <!-- Indicadores resumen -->
+    <div style="display: flex; gap: 22px; margin-bottom: 28px; flex-wrap:wrap;">
+        <div style="background:#252c54;color:white;padding:22px 28px;border-radius:10px;box-shadow:0 2px 8px #252c5444;min-width:220px;">
+            <b>Total Fichas</b><br>
+            <span style="font-size:2.2rem;">{{ total_fichas|default:"0" }}</span>
+        </div>
+        <div style="background:#204d9b;color:white;padding:22px 28px;border-radius:10px;box-shadow:0 2px 8px #204d9b44;min-width:220px;">
+            <b>Total Intervenciones</b><br>
+            <span style="font-size:2.2rem;">{{ total_intervenciones|default:"0" }}</span>
+        </div>
+        <div style="background:#31ccec;color:#252c54;padding:22px 28px;border-radius:10px;box-shadow:0 2px 8px #31ccec44;min-width:220px;">
+            <b>Total Egresos</b><br>
+            <span style="font-size:2.2rem;">{{ total_egresos|default:"0" }}</span>
+        </div>
+    </div>
+
+    <!-- Gráficos -->
+    <div style="display:flex;flex-wrap:wrap;gap:40px;">
+        <div style="flex:1;min-width:350px;">
+            <h4 style="color:#252c54;">Motivo de Ingreso</h4>
+            {% if motivo_data %}
+            <canvas id="motivoChart"></canvas>
+            {% else %}
+            <div style="color:#252c54;padding:10px 0;">No hay datos para mostrar.</div>
+            {% endif %}
+        </div>
+        <div style="flex:1;min-width:350px;">
+            <h4 style="color:#252c54;">Género de Personas Atendidas</h4>
+            {% if genero_data %}
+            <canvas id="generoChart"></canvas>
+            {% else %}
+            <div style="color:#252c54;padding:10px 0;">No hay datos para mostrar.</div>
+            {% endif %}
+        </div>
+        <div style="flex:1;min-width:350px;">
+            <h4 style="color:#252c54;">Distribución por Barrio</h4>
+            {% if barrio_data %}
+            <canvas id="barrioChart"></canvas>
+            {% else %}
+            <div style="color:#252c54;padding:10px 0;">No hay datos para mostrar.</div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{{ motivo_labels|json_script:"motivo-labels" }}
+{{ motivo_data|json_script:"motivo-data" }}
+{{ genero_labels|json_script:"genero-labels" }}
+{{ genero_data|json_script:"genero-data" }}
+{{ barrio_labels|json_script:"barrio-labels" }}
+{{ barrio_data|json_script:"barrio-data" }}
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function(){
+    // Motivo de ingreso
+    var motivoLabels = JSON.parse(document.getElementById('motivo-labels').textContent || "[]");
+    var motivoData = JSON.parse(document.getElementById('motivo-data').textContent || "[]");
+    if (motivoLabels.length && motivoData.length) {
+        new Chart(document.getElementById('motivoChart').getContext('2d'), {
+            type: 'bar',
+            data: {
+                labels: motivoLabels,
+                datasets: [{
+                    label: 'Cantidad',
+                    data: motivoData,
+                    borderWidth: 1,
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                plugins: { legend: { display: false }},
+                scales: { x: { beginAtZero: true } }
+            }
+        });
+    }
+
+    // Género
+    var generoLabels = JSON.parse(document.getElementById('genero-labels').textContent || "[]");
+    var generoData = JSON.parse(document.getElementById('genero-data').textContent || "[]");
+    if (generoLabels.length && generoData.length) {
+        new Chart(document.getElementById('generoChart').getContext('2d'), {
+            type: 'pie',
+            data: {
+                labels: generoLabels,
+                datasets: [{
+                    label: 'Personas',
+                    data: generoData,
+                }]
+            },
+            options: { responsive: true }
+        });
+    }
+
+    // Barrio
+    var barrioLabels = JSON.parse(document.getElementById('barrio-labels').textContent || "[]");
+    var barrioData = JSON.parse(document.getElementById('barrio-data').textContent || "[]");
+    if (barrioLabels.length && barrioData.length) {
+        new Chart(document.getElementById('barrioChart').getContext('2d'), {
+            type: 'bar',
+            data: {
+                labels: barrioLabels,
+                datasets: [{
+                    label: 'Casos',
+                    data: barrioData,
+                    borderWidth: 1,
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                plugins: { legend: { display: false }},
+                scales: { x: { beginAtZero: true } }
+            }
+        });
+    }
+});
+</script>
+{% endblock %}
