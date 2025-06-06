@@ -11,7 +11,34 @@ def validar_fecha_2025(value):
         raise forms.ValidationError("La fecha debe ser posterior al año 2025.")
     return value
 
+PROFESIONALES_UAV = [
+    ('NATHALY REYES', 'Nathaly Reyes'),
+    ('PALOMA QUINTEROS', 'Paloma Quinteros'),
+    ('GLORIA RIVERA', 'Gloria Rivera'),
+]
+
 class FichaAcogidaForm(forms.ModelForm):
+    profesionales_contacto_1 = forms.MultipleChoiceField(
+        choices=PROFESIONALES_UAV,
+        widget=forms.CheckboxSelectMultiple,
+        required=False,
+        label="Profesionales en primer contacto"
+    )
+    ingreso_efectivo = forms.TypedChoiceField(
+        label="¿Ingreso efectivo?",
+        choices=[(True, "Sí"), (False, "No")],
+        coerce=lambda x: x == 'True',
+        widget=forms.RadioSelect,
+        required=False,
+    )
+    contencion_inicial = forms.TypedChoiceField(
+        label="¿Recibió contención inicial?",
+        choices=[(True, "Sí"), (False, "No")],
+        coerce=lambda x: x == 'True',
+        widget=forms.RadioSelect,
+        required=False,
+    )    
+    
     class Meta:
         model = FichaAcogida
         exclude = ['profesional']
@@ -21,6 +48,7 @@ class FichaAcogidaForm(forms.ModelForm):
             'fecha_contacto_1': forms.DateInput(attrs={'type': 'date'}),
             'fecha_contacto_2': forms.DateInput(attrs={'type': 'date'}),
             'fecha_contacto_3': forms.DateInput(attrs={'type': 'date'}),
+            'fecha_ingreso': forms.DateInput(attrs={'type': 'date'}),
 
         }
     
@@ -60,100 +88,204 @@ class PersonaAtendidaForm(forms.ModelForm):
 
 
 class DenunciaForm(forms.ModelForm):
+    DIFICULTADES_CHOICES = [
+        ('mal_trato', 'Mal trato/trato inadecuado'),
+        ('tiempo_espera', 'Tiempo de espera'),
+        ('no_llegaron', 'No llegaron a llamado'),
+        ('otra', 'Otra'),
+    ]
+    dificultades = forms.ChoiceField(
+        choices=DIFICULTADES_CHOICES,
+        widget=forms.RadioSelect,   # O Select
+        required=False,
+        label='Dificultades'
+    )
+
     class Meta:
         model = Denuncia
-        fields = [  # define TODO excepto 'ficha'
-            'tiene_denuncia', 'anio_denuncia', 'lugar_denuncia', 'numero_causa',
-            'medida_cautelar', 'dificultades_denuncia',
-            'descripcion_dificultad', 'motivo_denuncia'
+        fields = [
+            'tiene_denuncia', 'anio_denuncia', 'lugar_denuncia', 'lugar_denuncia_otro',
+            'numero_causa', 'motivo_denuncia',
+            'dificultades', 'dificultades_otra',
+            'medida_cautelar', 'medida_cautelar_detalle'
         ]
+        widgets = {
+            'anio_denuncia': forms.TextInput(attrs={'placeholder': 'Ej: 2025'}),
+            'motivo_denuncia': forms.Textarea(attrs={'rows': 2}),
+            'dificultades_otra': forms.Textarea(attrs={'rows': 2}),
+            'medida_cautelar_detalle': forms.TextInput(attrs={'placeholder': 'Ej: Prohibición de acercamiento'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field in self.fields.values():
+            field.required = False  # todos opcionales
 
 
 class MotivoIngresoForm(forms.ModelForm):
     class Meta:
         model = MotivoIngreso
         fields = '__all__'
-        exclude = ['ficha']  # ✅ esto es clave
+        exclude = ['ficha']
+        help_texts = {
+            'motivo_otro': 'Por favor, especifica el motivo si seleccionaste "Otro".'
+        }
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field in self.fields.values():
+            field.required = False  # Todos los campos opcionales por defecto
+
+    def clean(self):
+        cleaned_data = super().clean()
+        motivo = cleaned_data.get('motivo_ingreso')
+        motivo_otro = cleaned_data.get('motivo_otro', '').strip()
+        if motivo == 'OTROS' and not motivo_otro:
+            self.add_error('motivo_otro', "Debes especificar el motivo si seleccionas 'Otro'.")
+        return cleaned_data
 
 from django import forms
-from fichas.models import AspectosPsicologicos
+from .models import AspectosPsicologicos
 
+# Choices auxiliares (puedes importarlos desde tu models.py si los tienes ahí)
 ACTITUD_CHOICES = [
-    ('colaboradora', 'Colaboradora'),
-    ('reticente', 'Reticente'),
-    ('querellante', 'Querellante'),
-    ('agresiva', 'Agresiva'),
-    ('inhibida', 'Inhibida'),
+    ('Colaboradora', 'Colaboradora'),
+    ('Reticente', 'Reticente'),
+    ('Querellante', 'Querellante'),
+    ('Agresiva', 'Agresiva'),
+    ('Inhibida', 'Inhibida'),
 ]
 
 LENGUAJE_CHOICES = [
-    ('verborreico', 'Verborreico'),
-    ('mutismo', 'Mutismo'),
-    ('neologismos', 'Neologismos'),
+    ('Verborreico', 'Verborreico'),
+    ('Mutismo', 'Mutismo'),
+    ('Neologismos', 'Neologismos'),
 ]
 
 AFECTIVIDAD_CHOICES = [
-    ('humor_expansivo', 'Humor expansivo'),
-    ('humor_deprimido', 'Humor deprimido'),
-    ('indiferencia_afectiva', 'Indiferencia afectiva'),
-    ('labilidad', 'Labilidad'),
+    ('Humor expansivo', 'Humor expansivo'),
+    ('Humor deprimido', 'Humor deprimido'),
+    ('Indiferencia_afectiva', 'Indiferencia afectiva'),
+    ('Labilidad', 'Labilidad'),
 ]
 
 SUENO_CHOICES = [
-    ('insomnio', 'Insomnio'),
-    ('hipersomnia', 'Hipersomnia'),
+    ('Insomnio', 'Insomnio'),
+    ('Hipersomnia', 'Hipersomnia'),
 ]
 
 ALIMENTACION_CHOICES = [
-    ('anorexia', 'Anorexia'),
-    ('negativa_a_comer', 'Negativa a comer'),
-    ('hiporexia', 'Hiporexia'),
+    ('Anorexia', 'Anorexia'),
+    ('Negativa a comer', 'Negativa a comer'),
+    ('Hiporexia', 'Hiporexia'),
 ]
 
 LIMITACION_CHOICES = [
-    ('no_puede_salir', 'No puede salir'),
-    ('no_puede_realizar_actividades', 'No puede realizar actividades habituales'),
+    ('No puede salir', 'No puede salir'),
+    ('No puede realizar actividades', 'No puede realizar actividades habituales'),
 ]
 
 ESTADO_CONCIENCIA_CHOICES = [
-    ('lucido', 'Lúcido'),
-    ('obnubilado', 'Obnubilado'),
+    ('Lúcido', 'Lúcido'),
+    ('Obnubilado', 'Obnubilado'),
 ]
 
 ORIENTACION_CHOICES = [
-    ('desorientacion_temporal', 'Desorientación temporal'),
-    ('desorientacion_espacial', 'Desorientación espacial'),
+    ('Desorientacion temporal', 'Desorientación temporal'),
+    ('Desorientacion espacial', 'Desorientación espacial'),
 ]
 
 ESTADO_COGNITIVO_CHOICES = [
-    ('atencion', 'Problemas de atención'),
-    ('concentracion', 'Problemas de concentración'),
-    ('memoria', 'Problemas de memoria'),
+    ('Problemas de atención', 'Problemas de atención'),
+    ('Problemas de concentración', 'Problemas de concentración'),
+    ('Problemas de memoria', 'Problemas de memoria'),
 ]
 
-
-
-
+DIAGNOSTICO_CHOICES = [
+    ('estado_animo', 'Trastornos del estado de ánimo (depresión, bipolaridad, distimia)'),
+    ('ansiedad', 'Trastornos de ansiedad (ansiedad generalizada, crisis de pánico, fobias)'),
+    ('psicoticos', 'Trastornos psicóticos (esquizofrenia, delirante, psicosis no especificada)'),
+    ('personalidad', 'Trastornos de la personalidad (límite, antisocial, evitativa)'),
+    ('consumo', 'Trastornos por consumo de sustancias (alcohol, drogas, psicotrópicos)'),
+    ('neurodesarrollo', 'Trastornos del neurodesarrollo (autismo, TDAH, discapacidad intelectual leve)'),
+    ('conducta_alimentaria', 'Trastornos de la conducta alimentaria (anorexia, bulimia, atracón)'),
+    ('adaptativos', 'Trastornos adaptativos y reacción al estrés (estrés agudo, adaptativo, TEPT)'),
+    ('somatomorfos', 'Trastornos somatomorfos y psicosomáticos (somatización, dolor crónico sin causa médica)'),
+    ('disociativos', 'Trastornos disociativos (amnesia disociativa, despersonalización)'),
+    ('no_especificado', 'Problemas de salud mental no especificados (malestar emocional, síntomas inespecíficos)'),
+    ('otro', 'Otro (especifique)')
+]
 
 class AspectosPsicologicosForm(forms.ModelForm):
+    # Campos principales
+    antecedentes = forms.CharField(
+        required=False,
+        label="Antecedentes (campo de texto libre)",
+        widget=forms.Textarea(attrs={'rows': 2})
+    )
+    diagnostico = forms.ChoiceField(
+        choices=[('', '---------')] + DIAGNOSTICO_CHOICES,
+        required=False,
+        label="Diagnóstico"
+    )
+
+    diagnostico_otro = forms.CharField(
+        required=False,
+        label="Otro diagnóstico (especifique)",
+        widget=forms.TextInput(attrs={'placeholder': 'Especifique si seleccionó Otro'})
+    )
+
+    atencion_salud_mental = forms.BooleanField(
+        required=False,
+        label="¿Ha tenido atención en salud mental?"
+    )
+    atencion_anio = forms.CharField(
+        required=False,
+        label="Año de atención",
+        widget=forms.TextInput(attrs={'placeholder': 'Ej: 2024'})
+    )
+    atencion_lugar = forms.CharField(
+        required=False,
+        label="Lugar de atención",
+        widget=forms.TextInput(attrs={'placeholder': 'Ej: CESFAM, COSAM, etc.'})
+    )
+
+    internacion = forms.BooleanField(
+        required=False,
+        label="¿Ha tenido internaciones?"
+    )
+    internacion_anio = forms.CharField(
+        required=False,
+        label="Año de internación",
+        widget=forms.TextInput(attrs={'placeholder': 'Ej: 2024'})
+    )
+    internacion_lugar = forms.CharField(
+        required=False,
+        label="Lugar de internación",
+        widget=forms.TextInput(attrs={'placeholder': 'Ej: Hospital, COSAM, etc.'})
+    )
+
+    afectacion_psicologica = forms.CharField(
+        required=False,
+        label="Ideación y/o intentos suicidas  ( año, motivo, otros, especifique) ",
+        widget=forms.Textarea(attrs={'rows': 2})
+    )
+
+    # Campos multiselección
     estado_conciencia = forms.MultipleChoiceField(
         choices=ESTADO_CONCIENCIA_CHOICES,
         widget=forms.CheckboxSelectMultiple,
         required=False
     )
-
     orientacion = forms.MultipleChoiceField(
         choices=ORIENTACION_CHOICES,
         widget=forms.CheckboxSelectMultiple,
         required=False
     )
-
     estado_cognitivo = forms.MultipleChoiceField(
         choices=ESTADO_COGNITIVO_CHOICES,
         widget=forms.CheckboxSelectMultiple,
         required=False
     )
-
     actitud = forms.MultipleChoiceField(
         choices=ACTITUD_CHOICES,
         widget=forms.CheckboxSelectMultiple,
@@ -184,16 +316,34 @@ class AspectosPsicologicosForm(forms.ModelForm):
         widget=forms.CheckboxSelectMultiple,
         required=False
     )
-    
 
     class Meta:
         model = AspectosPsicologicos
         exclude = ['ficha']
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field in self.fields.values():
+            field.required = False  # Todos los campos opcionales
+
+    def clean(self):
+        cleaned = super().clean()
+        # Validar diagnóstico
+        if cleaned.get('diagnostico') == 'otro' and not cleaned.get('diagnostico_otro'):
+            self.add_error('diagnostico_otro', "Debes especificar el diagnóstico si seleccionas 'Otro'.")
+        # Validar atención salud mental
+        if cleaned.get('atencion_salud_mental'):
+            if not cleaned.get('atencion_anio') or not cleaned.get('atencion_lugar'):
+                self.add_error('atencion_anio', "Debe indicar año y lugar de la atención.")
+        # Validar internación
+        if cleaned.get('internacion'):
+            if not cleaned.get('internacion_anio') or not cleaned.get('internacion_lugar'):
+                self.add_error('internacion_anio', "Debe indicar año y lugar de la internación.")
+        return cleaned
+
     def save(self, commit=True):
         instance = super().save(commit=False)
-
-        # Campos multiseleccionables
+        # Guardar campos multiseleccionables como JSON
         instance.estado_conciencia = self.cleaned_data.get('estado_conciencia', [])
         instance.orientacion = self.cleaned_data.get('orientacion', [])
         instance.estado_cognitivo = self.cleaned_data.get('estado_cognitivo', [])
@@ -203,7 +353,6 @@ class AspectosPsicologicosForm(forms.ModelForm):
         instance.sueno = self.cleaned_data.get('sueno', [])
         instance.alimentacion = self.cleaned_data.get('alimentacion', [])
         instance.limitacion_vida_cotidiana = self.cleaned_data.get('limitacion_vida_cotidiana', [])
-
         if commit:
             instance.save()
         return instance
@@ -254,15 +403,30 @@ class PlanAccionForm(forms.ModelForm):
         model = PlanAccion
         exclude = ['ficha']
         widgets = {
+            # UAV Psicológica y Social (igual que tenías)
             'uav_psicologica_1_detalle': forms.Textarea(attrs={'rows': 2}),
             'uav_psicologica_2_detalle': forms.Textarea(attrs={'rows': 2}),
             'uav_psicologica_3_detalle': forms.Textarea(attrs={'rows': 2}),
             'uav_social_1_detalle': forms.Textarea(attrs={'rows': 2}),
             'uav_social_2_detalle': forms.Textarea(attrs={'rows': 2}),
             'uav_social_3_detalle': forms.Textarea(attrs={'rows': 2}),
+            # UAV Legal
+            'uav_legal_1_detalle': forms.Textarea(attrs={'rows': 2}),
+            'uav_legal_2_detalle': forms.Textarea(attrs={'rows': 2}),
+            'uav_legal_3_detalle': forms.Textarea(attrs={'rows': 2}),
+            # Patrullaje
+            'registro_patrullaje': forms.TextInput(attrs={'placeholder': 'Ej: 2025-0001'}),
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         for field in self.fields.values():
-            field.required = False
+            field.required = False  # todos opcionales
+
+    def clean(self):
+        cleaned_data = super().clean()
+        patrullaje_activo = cleaned_data.get('patrullaje_activo')
+        registro_patrullaje = cleaned_data.get('registro_patrullaje')
+        if patrullaje_activo and not registro_patrullaje:
+            self.add_error('registro_patrullaje', 'Debe ingresar el número de registro del patrullaje.')
+        return cleaned_data

@@ -102,9 +102,17 @@ def ver_ficha_completa(request, ficha_id):
         'motivo': motivo,
         'psicologico': psicologico,
         'redes': redes,
-        'plan': plan,
+        'plan': plan,        
     }
     return render(request, 'fichas/ver_ficha.html', context)
+
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib.auth.decorators import login_required
+from .models import FichaAcogida, PersonaAtendida, Denuncia, MotivoIngreso, AspectosPsicologicos, RedesApoyo, PlanAccion
+from .forms import (
+    FichaAcogidaForm, PersonaAtendidaForm, DenunciaForm, MotivoIngresoForm,
+    AspectosPsicologicosForm, RedesApoyoForm, PlanAccionForm
+)
 
 @login_required
 def editar_ficha_completa(request, ficha_id):
@@ -125,22 +133,32 @@ def editar_ficha_completa(request, ficha_id):
         form_redes = RedesApoyoForm(request.POST, instance=redes)
         form_plan = PlanAccionForm(request.POST, instance=plan)
 
-        if all([
-            form_ficha.is_valid(),
-            form_persona.is_valid(),
-            form_denuncia.is_valid(),
-            form_motivo.is_valid(),
-            form_psicologico.is_valid(),
-            form_redes.is_valid(),
-            form_plan.is_valid()
-        ]):
+        # Relacionar las instancias correctamente antes de guardar
+        if form_ficha.is_valid() and form_persona.is_valid() and form_denuncia.is_valid() \
+            and form_motivo.is_valid() and form_psicologico.is_valid() and form_redes.is_valid() and form_plan.is_valid():
+            
             ficha = form_ficha.save()
-            persona = form_persona.save()
-            denuncia = form_denuncia.save()
-            motivo = form_motivo.save()
-            psicologico = form_psicologico.save()
-            redes = form_redes.save()
-            plan = form_plan.save()
+            persona = form_persona.save(commit=False)
+            denuncia = form_denuncia.save(commit=False)
+            motivo = form_motivo.save(commit=False)
+            psicologico = form_psicologico.save(commit=False)
+            redes = form_redes.save(commit=False)
+            plan = form_plan.save(commit=False)
+            
+            # Relacionar con ficha si corresponde
+            persona.ficha = ficha
+            denuncia.ficha = ficha
+            motivo.ficha = ficha
+            psicologico.ficha = ficha
+            redes.ficha = ficha
+            plan.ficha = ficha
+            
+            persona.save()
+            denuncia.save()
+            motivo.save()
+            psicologico.save()
+            redes.save()
+            plan.save()
             return redirect('fichas:ver_ficha_completa', ficha.id)
     else:
         form_ficha = FichaAcogidaForm(instance=ficha)
@@ -161,6 +179,7 @@ def editar_ficha_completa(request, ficha_id):
         'form_plan': form_plan,
         'ficha': ficha,
     })
+
     
 from django.shortcuts import render
 from django.db.models import Q

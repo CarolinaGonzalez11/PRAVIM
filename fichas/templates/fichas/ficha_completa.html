@@ -1,6 +1,5 @@
 {% extends 'base.html' %}
 {% load static %}
-
 {% block content %}
 
 <style>
@@ -88,7 +87,7 @@ table, th, td {
 }
 
 .accordion-button:not(.collapsed) {
-    background-color: #252c54 ;
+    background-color: #e60380 ;
     color: white;
 }
 
@@ -182,12 +181,36 @@ textarea {
     margin-bottom: 30px;
 }
 
+
+.espacio-fila td {
+    padding: 0 !important;
+    border: none !important;
+    height: 12px; /* O el espacio que prefieras */
+    background: transparent !important;
+}
+
+.radio-inline {
+    display: flex;
+    gap: 14px;
+    align-items: center;
+    /* Para mantener alineado en celdas altas */
+}
+.radio-inline label {
+    margin-right: 6px;
+    margin-bottom: 0 !important;
+    font-weight: normal;
+}
+.radio-inline input[type="radio"] {
+    margin-right: 4px;
+}
+
+
 </style>
 
 
  
 <div class="container mt-4">
-    <h2 class="mb-4 text-primary">Nueva Ficha de Acogida</h2>
+    <h2 class="mb-4" style="color:#252c54;font-weight:700;">Nueva Ficha de Acogida</h2>
 
     <form method="post" id="formFicha">
         {% csrf_token %}
@@ -205,7 +228,7 @@ textarea {
                     <div class="accordion-body">
 
                         <!-- PREINGRESO -->
-                        <h4 class="mb-3">📝 Módulo 1: Preingreso</h4>
+                        <h4 class="mb-3">Módulo 1A: Preingreso</h4>
                         <div class="table-responsive-preingreso">
                             <table>
                                 <thead>
@@ -216,24 +239,37 @@ textarea {
                                         <th>Fecha contacto 2</th>
                                         <th>Fecha contacto 3</th>
                                         <th>Tipo de contacto</th>
+                                        <th>¿Ingreso efectivo?</th>
+                                        <th>Fecha de ingreso</th>
+                                        <th>Profesionales primer contacto</th>
+                                        <th>¿Recibió contención inicial?</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <tr>
-                                        <td>{{ form_ficha.fecha_recepcion }}</td>
+                                        <td>{{ form_ficha.fecha_recepcion }}
+                                                {% for error in form_ficha.fecha_recepcion.errors %}
+                                                    <div class="text-danger" style="color:#e60380;">{{ error }}</div>
+                                                {% endfor %}
+                                        </td>
                                         <td>{{ form_ficha.via_ingreso }}</td>
                                         <td>{{ form_ficha.fecha_contacto_1 }}</td>
                                         <td>{{ form_ficha.fecha_contacto_2 }}</td>
                                         <td>{{ form_ficha.fecha_contacto_3 }}</td>
                                         <td>{{ form_ficha.tipo_contacto }}</td>
+                                        <td>{{ form_ficha.ingreso_efectivo }}</td>
+                                        <td>{{ form_ficha.fecha_ingreso }}</td>
+                                        <td>{{ form_ficha.profesionales_contacto_1 }}</td>
+                                        <td>{{ form_ficha.contencion_inicial }}</td>
                                     </tr>
                                 </tbody>
                             </table>
                         </div>
 
 
+
                         <!-- PERSONA ATENDIDA -->
-                        <h4 class="mt-5 mb-3">👤 Módulo 1B: Datos de la Persona Atendida</h4>
+                        <h4 class="mt-5 mb-3">Módulo 1B: Datos de la Persona Atendida</h4>
                         <table>
                             <tbody>
                                 <tr><td class="label-cell">Nombre</td><td class="input-cell">{{ form_persona.nombre }}</td></tr>
@@ -246,64 +282,83 @@ textarea {
                                 <tr><td class="label-cell">Previsión</td><td class="input-cell">{{ form_persona.prevision }}</td></tr>
                                 <tr><td class="label-cell">CESFAM Vinculante</td><td class="input-cell">{{ form_persona.cesfam }}</td></tr>
                                 <tr><td class="label-cell">Ocupación</td><td class="input-cell">{{ form_persona.ocupacion }}</td></tr>
+                                <tr class="espacio-fila"><td colspan="2"></td></tr>
                                 <tr><td class="label-cell">Dirección</td><td class="input-cell">{{ form_persona.direccion }}</td></tr>
                                 <tr><td class="label-cell">Villa</td><td class="input-cell">{{ form_persona.villa }}</td></tr>
                                 <tr><td class="label-cell">Barrio</td><td class="input-cell">{{ form_persona.barrio }}</td></tr>
                                 <tr><td class="label-cell">Cuadrante</td><td class="input-cell">{{ form_persona.cuadrante }}</td></tr>
-                                <tr><td class="label-cell">¿Discapacidad?</td><td class="input-cell">{{ form_persona.discapacidad }}</td></tr>
+                                <tr class="espacio-fila"><td colspan="2"></td></tr>
+                                <tr><td class="label-cell">¿Situación de Discapacidad?</td><td class="input-cell">{{ form_persona.discapacidad }}</td></tr>
                                 <tr><td class="label-cell">¿Pertenencia a pueblo originario / etnia?</td><td class="input-cell">{{ form_persona.etnia }}</td></tr>
                                 <tr><td class="label-cell">¿Diversidad (sexo/género/orientación)?</td><td class="input-cell">{{ form_persona.diversidad }}</td></tr>
-                                <tr><td class="label-cell">Persona significativa</td><td class="input-cell">{{ form_persona.persona_significativa }}</td></tr>
-                                <tr><td class="label-cell">Vínculo</td><td class="input-cell">{{ form_persona.vinculo }}</td></tr>
+                                <tr><td class="label-cell">Nombre de persona significativa</td><td class="input-cell">{{ form_persona.persona_significativa }}</td></tr>
+                                <tr class="espacio-fila"><td colspan="2"></td></tr>
+                                <tr><td class="label-cell">Vínculo con persona significativa</td><td class="input-cell">{{ form_persona.vinculo }}</td></tr>
                                 <tr><td class="label-cell">Teléfono significativo</td><td class="input-cell">{{ form_persona.telefono_significativo }}</td></tr>
                                 <tr><td class="label-cell">N° adultos hogar</td><td class="input-cell">{{ form_persona.n_adultos }}</td></tr>
                                 <tr><td class="label-cell">N° NNA hogar</td><td class="input-cell">{{ form_persona.n_nna }}</td></tr>
+                                <tr><td class="label-cell"><strong>Total integrantes hogar</strong></td><td class="input-cell"><span id="total-integrantes" style="font-weight:bold;">0</span></td></tr>
                             </tbody>
                         </table>
 
 
 
                         <!-- DENUNCIA -->
-                        <h4 class="mt-5 mb-3">⚖️ Módulo 1C: Denuncia</h4>
-
+                        <h4 class="mt-5 mb-3">Módulo 1C: Denuncia</h4>
                         <table>
                             <tbody>
+                                <!-- Siempre visibles -->
                                 <tr>
                                     <td class="label-cell">¿Tiene denuncia?</td>
                                     <td class="input-cell">{{ form_denuncia.tiene_denuncia }}</td>
                                 </tr>
+                                <tr>
+                                    <td class="label-cell">Dificultades en la denuncia</td>
+                                    <td class="input-cell">
+                                        {{ form_denuncia.dificultades }}
+                                        <div id="dificultades-otra-campo" style="display:none; margin-top:6px;">
+                                            {{ form_denuncia.dificultades_otra }}
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                            <tbody id="denuncia-detalle-campos" style="display: none;">
+                                <tr>
+                                    <td class="label-cell">Año de la denuncia</td>
+                                    <td class="input-cell">{{ form_denuncia.anio_denuncia }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="label-cell">Lugar de denuncia</td>
+                                    <td class="input-cell">
+                                        {{ form_denuncia.lugar_denuncia }}
+                                        <div id="otro-lugar-campo" style="display:none; margin-top:6px;">
+                                            {{ form_denuncia.lugar_denuncia_otro }}
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="label-cell">Número de causa</td>
+                                    <td class="input-cell">{{ form_denuncia.numero_causa }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="label-cell">Motivo denuncia</td>
+                                    <td class="input-cell">{{ form_denuncia.motivo_denuncia }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="label-cell">¿Medida cautelar?</td>
+                                    <td class="input-cell">
+                                        {{ form_denuncia.medida_cautelar }}
+                                        <div id="medida-cautelar-detalle-campo" style="display:none; margin-top:6px;">
+                                            {{ form_denuncia.medida_cautelar_detalle }}
+                                        </div>
+                                    </td>
+                                </tr>
                             </tbody>
                         </table>
-
-                        <div id="denuncia-campos" {% if not form_denuncia.tiene_denuncia.value %}style="display: none;"{% endif %}>
-                            <table>
-                                <tbody>
-                                    <tr><td class="label-cell">Año de Denuncia</td><td class="input-cell">{{ form_denuncia.anio_denuncia }}</td></tr>
-                                    <tr><td class="label-cell">Lugar</td><td class="input-cell">{{ form_denuncia.lugar_denuncia }}</td></tr>
-                                    <tr><td class="label-cell">Número de Causa</td><td class="input-cell">{{ form_denuncia.numero_causa }}</td></tr>
-                                    <tr><td class="label-cell">¿Existe Medida Cautelar?</td><td class="input-cell">{{ form_denuncia.medida_cautelar }}</td></tr>
-                                    <tr><td class="label-cell">Descripción de Dificultades</td><td class="input-cell">{{ form_denuncia.descripcion_dificultad }}</td></tr>
-                                    <tr><td class="label-cell">Motivo de la Denuncia</td><td class="input-cell">{{ form_denuncia.motivo_denuncia }}</td></tr>
-                                </tbody>
-                            </table>
-                        </div>
-
-
-                        <script>
-                            document.addEventListener('DOMContentLoaded', () => {
-                                const checkbox = document.getElementById('id_tiene_denuncia');
-                                const campos = document.getElementById('denuncia-campos');
-                                if (checkbox && campos) {
-                                    checkbox.addEventListener('change', () => {
-                                        campos.style.display = checkbox.checked ? 'block' : 'none';
-                                    });
-                                }
-                            });
-                        </script>
-
-                    </div>
-                </div>
-            </div>
+                                        
+</div> <!-- .accordion-body -->
+</div> <!-- #collapsePreingreso -->
+</div> <!-- .accordion-item -->
 
             <!-- Acordeón 2: Motivo -->
             <div class="accordion-item">
@@ -318,6 +373,7 @@ textarea {
                         <table>
                             <tbody>
                                 <tr>
+        
                                     <td class="label-cell">Motivo principal</td>
                                     <td class="input-cell">{{ form_motivo.motivo_ingreso }}</td>
                                 </tr>
@@ -326,6 +382,23 @@ textarea {
                                     <td class="input-cell">{{ form_motivo.descripcion_motivo }}</td> 
                                     <small class="form-text text-muted">Describe brevemente los hechos relatados por la persona atendida al momento del ingreso.</small>
                                 </tr>
+                                <tr id="motivo-otro-row" style="display:none;">
+                                <td class="label-cell">Si seleccionó Otro, especifique</td>
+                                <td class="input-cell">
+                                    {{ form_motivo.motivo_otro }}
+                                    {% if form_motivo.motivo_otro.help_text %}
+                                    <small class="form-text text-muted">{{ form_motivo.motivo_otro.help_text }}</small>
+                                    {% endif %}
+                                    {% for error in form_motivo.motivo_otro.errors %}
+                                    <div class="text-danger" style="color:#e60380;">{{ error }}</div>
+                                    {% endfor %}
+                                </td>
+                                </tr>
+
+
+
+
+
                             </tbody>
                         </table>
 
@@ -335,10 +408,11 @@ textarea {
 
 
             <!-- Acordeón 3: Psicológico -->
+            <!-- Acordeón 3: Aspectos Psicológicos y Salud Mental -->
             <div class="accordion-item">
                 <h2 class="accordion-header" id="headingPsico">
                     <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapsePsico">
-                        Aspectos Psicológicos
+                        Aspectos Psicológicos y Salud Mental
                     </button>
                 </h2>
                 <div id="collapsePsico" class="accordion-collapse collapse" data-bs-parent="#formAccordion">
@@ -347,22 +421,78 @@ textarea {
                         <table>
                             <tbody>
                                 <tr>
-                                    <td class="label-cell">Diagnóstico salud mental</td>
-                                    <td class="input-cell">{{ form_psicologico.diagnostico_salud_mental }}</td>
+                                    <td class="label-cell">Antecedentes</td>
+                                    <td class="input-cell">
+                                        {{ form_psicologico.antecedentes }}
+                                        <small class="form-text text-muted">Ingrese antecedentes relevantes en salud mental.</small>
+                                    </td>
                                 </tr>
                                 <tr>
-                                    <td class="label-cell">Atenciones anteriores</td>
-                                    <td class="input-cell">{{ form_psicologico.atenciones_anteriores }}</td>
+                                    <td class="label-cell">Diagnóstico</td>
+                                    <td class="input-cell">
+                                        {{ form_psicologico.diagnostico }}
+                                        <small class="form-text text-muted">Seleccione un diagnóstico. Si selecciona "Otro", especifique más abajo.</small>
+                                    </td>
+                                </tr>
+                                <tr id="diagnostico-otro-row" style="display:none;">
+                                    <td class="label-cell">Otro diagnóstico (especifique)</td>
+                                    <td class="input-cell">
+                                        {{ form_psicologico.diagnostico_otro }}
+                                        {% for error in form_psicologico.diagnostico_otro.errors %}
+                                            <div class="text-danger" style="color:#e60380;">{{ error }}</div>
+                                        {% endfor %}
+                                    </td>
                                 </tr>
                                 <tr>
-                                    <td class="label-cell">Internaciones</td>
-                                    <td class="input-cell">{{ form_psicologico.internaciones }}</td>
+                                    <td class="label-cell">¿Ha tenido atención en salud mental?</td>
+                                    <td class="input-cell">
+                                        {{ form_psicologico.atencion_salud_mental }}
+                                    </td>
+                                </tr>
+                                <tr id="atencion-anio-row" style="display:none;">
+                                    <td class="label-cell">Año de atención</td>
+                                    <td class="input-cell">
+                                        {{ form_psicologico.atencion_anio }}
+                                    </td>
+                                </tr>
+                                <tr id="atencion-lugar-row" style="display:none;">
+                                    <td class="label-cell">Lugar de atención</td>
+                                    <td class="input-cell">
+                                        {{ form_psicologico.atencion_lugar }}
+                                    </td>
                                 </tr>
                                 <tr>
-                                    <td class="label-cell">Antecedentes de suicidio</td>
-                                    <td class="input-cell">{{ form_psicologico.suicidio_antecedentes }}</td>
+                                    <td class="label-cell">¿Ha tenido internaciones?</td>
+                                    <td class="input-cell">
+                                        {{ form_psicologico.internacion }}
+                                    </td>
                                 </tr>
-
+                                <tr id="internacion-anio-row" style="display:none;">
+                                    <td class="label-cell">Año de internación</td>
+                                    <td class="input-cell">
+                                        {{ form_psicologico.internacion_anio }}
+                                    </td>
+                                </tr>
+                                <tr id="internacion-lugar-row" style="display:none;">
+                                    <td class="label-cell">Lugar de internación</td>
+                                    <td class="input-cell">
+                                        {{ form_psicologico.internacion_lugar }}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="label-cell">Ideación y/o intentos suicidas  ( año, motivo, otros, especifique)</td>
+                                    <td class="input-cell">
+                                        {{ form_psicologico.afectacion_psicologica }}
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        
+                        <hr>
+                        <!-- Campos multiseleccionables (opcional agrupar en una fila de dos columnas para visual) -->
+                        <h5 class="mt-4" style="color:#252c54">Afectación ámbito psicológico</h5>
+                        <table>
+                            <tbody>
                                 <tr>
                                     <td class="label-cell">Estado de conciencia</td>
                                     <td class="input-cell">{{ form_psicologico.estado_conciencia }}</td>
@@ -405,7 +535,6 @@ textarea {
                                 </tr>
                             </tbody>
                         </table>
-
                     </div>
                 </div>
             </div>
@@ -423,24 +552,39 @@ textarea {
 
                         <table>
                             <tbody>
+                                <tr>
+                                    <td colspan="2" style="background:#eee; color:#252c54; font-weight:bold; font-size:16px;">
+                                        Redes Personales
+                                    </td>
+                                </tr>
                                 <tr><td class="label-cell">Red familiares</td><td class="input-cell">{{ form_redes.red_familiares }}</td></tr>
                                 <tr><td class="label-cell">Red amistades</td><td class="input-cell">{{ form_redes.red_amistades }}</td></tr>
                                 <tr><td class="label-cell">Red cónyuge</td><td class="input-cell">{{ form_redes.red_conyuge }}</td></tr>
                                 <tr><td class="label-cell">Red laborales</td><td class="input-cell">{{ form_redes.red_laborales }}</td></tr>
                                 <tr><td class="label-cell">Red otros personales</td><td class="input-cell">{{ form_redes.red_otros_personales }}</td></tr>
-
+                                                        
+                                <tr>
+                                    <td colspan="2" style="background:#eee; color:#252c54; font-weight:bold; font-size:16px;">
+                                        Redes Comunitarias
+                                    </td>
+                                </tr>
                                 <tr><td class="label-cell">Red junta de vecinos</td><td class="input-cell">{{ form_redes.red_junta_vecinos }}</td></tr>
                                 <tr><td class="label-cell">Red centro de madres</td><td class="input-cell">{{ form_redes.red_centro_madres }}</td></tr>
                                 <tr><td class="label-cell">Red club de adultos mayores</td><td class="input-cell">{{ form_redes.red_club_adultos }}</td></tr>
                                 <tr><td class="label-cell">Red club deportivo</td><td class="input-cell">{{ form_redes.red_club_deportivo }}</td></tr>
                                 <tr><td class="label-cell">Red otros comunitarios</td><td class="input-cell">{{ form_redes.red_otros_comunitarios }}</td></tr>
 
+                                <tr>
+                                    <td colspan="2" style="background:#eee; color:#252c54; font-weight:bold; font-size:16px;">
+                                        Redes Institucionales
+                                    </td>
+                                </tr>
                                 <tr><td class="label-cell">Red Municipalidad</td><td class="input-cell">{{ form_redes.red_municipalidad }}</td></tr>
                                 <tr><td class="label-cell">Red CESFAM</td><td class="input-cell">{{ form_redes.red_cesfam }}</td></tr>
-                                <tr><td class="label-cell">Red COSAM</td><td class="input-cell">{{ form_redes.red_cosam }}</td></tr>
-                                <tr><td class="label-cell">Red otro salud</td><td class="input-cell">{{ form_redes.red_otro_salud }}</td></tr>
                                 <tr><td class="label-cell">Red establecimiento educativo</td><td class="input-cell">{{ form_redes.red_establecimiento }}</td></tr>
-                                <tr><td class="label-cell">Red ONG</td><td class="input-cell">{{ form_redes.red_ong }}</td></tr>
+                                <tr><td class="label-cell">Red ONG</td><td class="input-cell">{{ form_redes.red_ong }}</td></tr>                               
+                                <tr><td class="label-cell">Red COSAM</td><td class="input-cell">{{ form_redes.red_cosam }}</td></tr>
+                                <tr><td class="label-cell">Otra</td><td class="input-cell">{{ form_redes.red_otro_salud }}</td></tr>        
                             </tbody>
                         </table>
 
@@ -450,6 +594,7 @@ textarea {
 
 
             <!-- Acordeón 5: Plan de Acción -->
+            <!-- Acordeón 5: Plan de Acción -->
             <div class="accordion-item">
                 <h2 class="accordion-header" id="headingPlan">
                     <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapsePlan">
@@ -458,7 +603,6 @@ textarea {
                 </h2>
                 <div id="collapsePlan" class="accordion-collapse collapse" data-bs-parent="#formAccordion">
                     <div class="accordion-body">
-                        
                         <table>
                             <tbody>
                                 <!-- Derivación CAVD -->
@@ -485,108 +629,125 @@ textarea {
                                         {{ form_plan.derivacion_cesfam_salud_mental }} Atención Salud Mental
                                     </td>
                                 </tr>
-                                
-                                <!-- UAV Atención psicológica -->
+                                <!-- UAV Atención Psicológica -->
                                 <tr>
-                                    <td class="label-cell" rowspan="3"><strong>UAV Atención psicológica</strong></td>
+                                    <td class="label-cell" rowspan="3"><strong>UAV Atención Psicológica</strong></td>
                                     <td class="input-cell">
                                         <div class="checkbox-textarea-row">
-                                            {{ form_plan.uav_psicologica_1 }}
-                                            {{ form_plan.uav_psicologica_1_detalle }}
+                                            {{ form_plan.uav_psicologica_1 }} {{ form_plan.uav_psicologica_1_detalle }}
                                         </div>
                                     </td>
                                 </tr>
                                 <tr>
                                     <td class="input-cell">
                                         <div class="checkbox-textarea-row">
-                                            {{ form_plan.uav_psicologica_2 }}
-                                            {{ form_plan.uav_psicologica_2_detalle }}
+                                            {{ form_plan.uav_psicologica_2 }} {{ form_plan.uav_psicologica_2_detalle }}
                                         </div>
                                     </td>
                                 </tr>
                                 <tr>
                                     <td class="input-cell">
                                         <div class="checkbox-textarea-row">
-                                            {{ form_plan.uav_psicologica_3 }}
-                                            {{ form_plan.uav_psicologica_3_detalle }}
+                                            {{ form_plan.uav_psicologica_3 }} {{ form_plan.uav_psicologica_3_detalle }}
                                         </div>
                                     </td>
                                 </tr>
-
                                 <!-- UAV Atención Social -->
                                 <tr>
                                     <td class="label-cell" rowspan="3"><strong>UAV Atención Social</strong></td>
                                     <td class="input-cell">
                                         <div class="checkbox-textarea-row">
-                                            {{ form_plan.uav_social_1 }}
-                                            {{ form_plan.uav_social_1_detalle }}
+                                            {{ form_plan.uav_social_1 }} {{ form_plan.uav_social_1_detalle }}
                                         </div>
                                     </td>
                                 </tr>
                                 <tr>
                                     <td class="input-cell">
                                         <div class="checkbox-textarea-row">
-                                            {{ form_plan.uav_social_2 }}
-                                            {{ form_plan.uav_social_2_detalle }}
+                                            {{ form_plan.uav_social_2 }} {{ form_plan.uav_social_2_detalle }}
                                         </div>
                                     </td>
                                 </tr>
                                 <tr>
                                     <td class="input-cell">
                                         <div class="checkbox-textarea-row">
-                                            {{ form_plan.uav_social_3 }}
-                                            {{ form_plan.uav_social_3_detalle }}
+                                            {{ form_plan.uav_social_3 }} {{ form_plan.uav_social_3_detalle }}
                                         </div>
                                     </td>
                                 </tr>
-                            
-                                <!-- Patrullaje preventivo -->
+                                <!-- UAV Atención Legal -->
                                 <tr>
-                                    <td class="label-cell" rowspan="4"><strong>Patrullaje preventivo</strong></td>
+                                    <td class="label-cell" rowspan="3"><strong>UAV Atención Legal</strong></td>
+                                    <td class="input-cell">
+                                        <div class="checkbox-textarea-row">
+                                            {{ form_plan.uav_legal_1 }} {{ form_plan.uav_legal_1_detalle }}
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="input-cell">
+                                        <div class="checkbox-textarea-row">
+                                            {{ form_plan.uav_legal_2 }} {{ form_plan.uav_legal_2_detalle }}
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="input-cell">
+                                        <div class="checkbox-textarea-row">
+                                            {{ form_plan.uav_legal_3 }} {{ form_plan.uav_legal_3_detalle }}
+                                        </div>
+                                    </td>
+                                </tr>
+                                <!-- Patrullaje Preventivo (cada parte en fila propia) -->
+                                <tr>
+                                    <td class="label-cell"><strong>Patrullaje preventivo</strong></td>
                                     <td class="input-cell">
                                         {{ form_plan.patrullaje_activo }} Activar patrullaje preventivo
                                     </td>
                                 </tr>
-                                <tr>
+                                <tr class="patrullaje-campos" style="display:none;">
+                                    <td class="label-cell"></td>
                                     <td class="input-cell">
-                                        {{ form_plan.patrullaje_turno_1 }} 1° Turno (07:00 a 15:00 hrs) / 
+                                        {{ form_plan.patrullaje_turno_1 }} 1° Turno (07:00 a 15:00 hrs) /
                                         {{ form_plan.patrullaje_entrevista_1 }} Entrevista
                                     </td>
                                 </tr>
-                                <tr>
+                                <tr class="patrullaje-campos" style="display:none;">
+                                    <td class="label-cell"></td>
                                     <td class="input-cell">
-                                        {{ form_plan.patrullaje_turno_2 }} 2° Turno (15:00 a 23:00 hrs) / 
+                                        {{ form_plan.patrullaje_turno_2 }} 2° Turno (15:00 a 23:00 hrs) /
                                         {{ form_plan.patrullaje_entrevista_2 }} Entrevista
                                     </td>
                                 </tr>
-                                <tr>
+                                <tr class="patrullaje-campos" style="display:none;">
+                                    <td class="label-cell"></td>
                                     <td class="input-cell">
-                                        {{ form_plan.patrullaje_turno_3 }} 3° Turno (23:00 a 07:00 hrs) / 
+                                        {{ form_plan.patrullaje_turno_3 }} 3° Turno (23:00 a 07:00 hrs) /
                                         {{ form_plan.patrullaje_entrevista_3 }} Entrevista
+                                    </td>
+                                </tr>
+                                <tr class="patrullaje-campos" style="display:none;">
+                                    <td class="label-cell"></td>
+                                    <td class="input-cell">
+                                        <label for="id_registro_patrullaje">N° de registro patrullaje</label>
+                                        {{ form_plan.registro_patrullaje }}
+                                        <small class="form-text text-muted">Ejemplo: 2025-0001</small>
                                     </td>
                                 </tr>
                                 <!-- Profesional a cargo -->
                                 <tr>
-                                    <td class="label-cell" rowspan="2"><strong>Profesional a cargo</strong></td>
+                                    <td class="label-cell"><strong>Profesional a cargo</strong></td>
                                     <td class="input-cell">
                                         {{ form_plan.profesional_nathaly }} Nathaly Reyes<br>
                                         {{ form_plan.profesional_paloma }} Paloma Quinteros<br>
                                         {{ form_plan.cordinadora_gloria }} Gloria Rivera<br>
-                                        <!-- Si agregas más profesionales, ponlos igual -->
                                     </td>
                                 </tr>
                             </tbody>
                         </table>
-
-                        
                     </div>
                 </div>
             </div>
-
-
-
-
-        </div>
 
         <div class="form-footer text-center mt-4">
             <button type="submit" class="btn btn-institucional btn-lg">
@@ -597,41 +758,8 @@ textarea {
     </form>
 </div>
 
-<script>
-    let isFormDirty = false;
-    document.getElementById("formFicha").addEventListener("input", function () {
-        isFormDirty = true;
-    });
-    window.addEventListener("beforeunload", function (e) {
-        if (isFormDirty) {
-            e.preventDefault();
-            e.returnValue = '';
-        }
-    });
-    document.getElementById("formFicha").addEventListener("submit", function () {
-        isFormDirty = false;
-    });
-</script>
 
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-    const textareas = document.querySelectorAll('textarea');
-
-    textareas.forEach(textarea => {
-        // Setea altura mínima solo 1 línea (basado en scrollHeight inicial)
-        const baseHeight = textarea.scrollHeight;
-        textarea.style.height = baseHeight + 'px';
-
-        textarea.addEventListener('input', () => {
-            // Expande solo si se supera la altura inicial
-            if (textarea.scrollHeight > textarea.offsetHeight) {
-                textarea.style.height = 'auto';
-                textarea.style.height = textarea.scrollHeight + 'px';
-            }
-        });
-    });
-});
-</script>
+<script src="{% static 'fichas/js/ficha_completa.js' %}"></script>
 
 
 

@@ -1,8 +1,5 @@
 {% extends 'base.html' %}
-
 {% block content %}
-
-
 <style>
     .modal-content {
         border-radius: 18px;
@@ -53,672 +50,344 @@
         background-color: #252c54 !important;
         color: white !important;
     }
-    .btn-pravim {
-        background-color: #252c54 !important;
-        border-radius: 10px;
-        color: white !important;
-        border: none;
-        font-weight: bold;
-    }
-    .btn-pravim:hover, .btn-pravim:focus {
-        background-color: #1d2240 !important;
-        color: white !important;
-    }
-
 </style>
 
 <div class="container">
     <h2 class="mb-4">Ficha N° {{ ficha.id }}</h2>
+    {% if egreso and egreso.fecha_egreso %}
+        <div class="alert alert-success"><strong>Ficha CERRADA</strong> — Egreso: {{ egreso.fecha_egreso|date:"d/m/Y" }}</div>
+    {% else %}
+        <div class="alert alert-warning"><strong>Ficha ABIERTA</strong> — En proceso</div>
+    {% endif %}
 
-    <!-- Botón Editar ficha -->
-    <a href="{% url 'fichas:editar_ficha_completa' ficha.id %}" class="btn btn-pravim mb-4">
-        Editar ficha
-    </a>
+    <a href="{% url 'fichas:editar_ficha_completa' ficha.id %}" class="btn btn-pravim mb-4">Editar ficha</a>
 
-
+    <!-- PREINGRESO -->
     <div class="card mb-4">
         <div class="card-header bg-pravim">Preingreso</div>
         <div class="card-body">
             <table class="table">
-                {% if ficha.fecha_recepcion %}
-                <tr>
-                    <th>Fecha recepción</th>
-                    <td>{{ ficha.fecha_recepcion|date:'d/m/Y' }}</td>
+                {% if ficha.fecha_recepcion %}<tr><th>Fecha recepción</th><td>{{ ficha.fecha_recepcion|date:'d/m/Y' }}</td></tr>{% endif %}
+                {% if ficha.via_ingreso %}<tr><th>Vía de ingreso</th><td>{{ ficha.get_via_ingreso_display }}{% if ficha.via_ingreso_otro %} (Otro: {{ ficha.via_ingreso_otro }}){% endif %}</td></tr>{% endif %}
+                {% if ficha.tipo_contacto %}<tr><th>Tipo de contacto</th><td>{{ ficha.get_tipo_contacto_display }}{% if ficha.tipo_contacto_otro %} (Otro: {{ ficha.tipo_contacto_otro }}){% endif %}</td></tr>{% endif %}
+                {% if ficha.fecha_contacto_1 %}<tr><th>Fecha contacto 1</th><td>{{ ficha.fecha_contacto_1|date:'d/m/Y' }}</td></tr>{% endif %}
+                {% if ficha.fecha_contacto_2 %}<tr><th>Fecha contacto 2</th><td>{{ ficha.fecha_contacto_2|date:'d/m/Y' }}</td></tr>{% endif %}
+                {% if ficha.fecha_contacto_3 %}<tr><th>Fecha contacto 3</th><td>{{ ficha.fecha_contacto_3|date:'d/m/Y' }}</td></tr>{% endif %}
+                {% if ficha.ingreso_efectivo is not None %}<tr><th>¿Ingreso efectivo?</th><td>{{ ficha.ingreso_efectivo|yesno:"Sí,No" }}</td></tr>{% endif %}
+                {% if ficha.fecha_ingreso %}<tr><th>Fecha de ingreso</th><td>{{ ficha.fecha_ingreso|date:'d/m/Y' }}</td></tr>{% endif %}
+                {% if ficha.profesionales_contacto_1 %}
+                <tr><th>Profesionales primer contacto</th>
+                    <td>
+                        {% if ficha.profesionales_contacto_1.all %}
+                            {{ ficha.profesionales_contacto_1.all|join:", " }}
+                        {% else %}
+                            {{ ficha.profesionales_contacto_1 }}
+                        {% endif %}
+                    </td>
                 </tr>
                 {% endif %}
-                {% if ficha.via_ingreso %}
-                <tr>
-                    <th>Vía de ingreso</th>
-                    <td>{{ ficha.get_via_ingreso_display }}</td>
-                </tr>
-                {% endif %}
-                {% if ficha.tipo_contacto %}
-                <tr>
-                    <th>Tipo de contacto</th>
-                    <td>{{ ficha.get_tipo_contacto_display }}</td>
-                </tr>
-                {% endif %}
-                {% if ficha.fecha_contacto_1 %}
-                <tr>
-                    <th>Fecha contacto 1</th>
-                    <td>{{ ficha.fecha_contacto_1|date:'d/m/Y' }}</td>
-                </tr>
-                {% endif %}
-                {% if ficha.fecha_contacto_2 %}
-                <tr>
-                    <th>Fecha contacto 2</th>
-                    <td>{{ ficha.fecha_contacto_2|date:'d/m/Y' }}</td>
-                </tr>
-                {% endif %}
-                {% if ficha.fecha_contacto_3 %}
-                <tr>
-                    <th>Fecha contacto 3</th>
-                    <td>{{ ficha.fecha_contacto_3|date:'d/m/Y' }}</td>
-                </tr>
-                {% endif %}
+                {% if ficha.contencion_inicial is not None %}<tr><th>¿Recibió contención inicial?</th><td>{{ ficha.contencion_inicial|yesno:"Sí,No" }}</td></tr>{% endif %}
             </table>
         </div>
     </div>
 
-
-{% if persona %}
+    <!-- DATOS DE LA PERSONA ATENDIDA -->
+    {% if persona %}
     <div class="card mb-4">
         <div class="card-header bg-pravim">Datos de la Persona Atendida</div>
         <div class="card-body">
             <table class="table">
-                {% if persona.nombre %}
+                {% if persona.nombre %}<tr><th>Nombre</th><td>{{ persona.nombre }}</td></tr>{% endif %}
+                {% if persona.rut_pasaporte %}<tr><th>RUT / Pasaporte</th><td>{{ persona.rut_pasaporte }}</td></tr>{% endif %}
+                {% if persona.genero %}<tr><th>Género</th><td>{{ persona.get_genero_display }}{% if persona.genero_otro %} (Otro: {{ persona.genero_otro }}){% endif %}</td></tr>{% endif %}
+                {% if persona.fecha_nacimiento %}<tr><th>Fecha de Nacimiento</th><td>{{ persona.fecha_nacimiento|date:"d/m/Y" }}</td></tr>{% endif %}
+                {% if persona.nacionalidad %}<tr><th>Nacionalidad</th><td>{{ persona.nacionalidad }}</td></tr>{% endif %}
+                {% if persona.estado_civil %}<tr><th>Estado Civil</th><td>{{ persona.get_estado_civil_display }}</td></tr>{% endif %}
+                {% if persona.prevision %}<tr><th>Previsión</th><td>{{ persona.get_prevision_display }}</td></tr>{% endif %}
+                {% if persona.cesfam %}<tr><th>CESFAM Vinculante</th><td>{{ persona.cesfam }}</td></tr>{% endif %}
+                {% if persona.ocupacion %}<tr><th>Ocupación</th><td>{{ persona.ocupacion }}</td></tr>{% endif %}
+                {% if persona.barrio %}<tr><th>Barrio</th><td>{{ persona.barrio }}</td></tr>{% endif %}
+                {% if persona.cuadrante %}<tr><th>Cuadrante</th><td>{{ persona.cuadrante }}</td></tr>{% endif %}
+                {% if persona.telefono %}<tr><th>Teléfono</th><td>{{ persona.telefono }}</td></tr>{% endif %}
+                {% if persona.direccion %}<tr><th>Dirección</th><td>{{ persona.direccion }}</td></tr>{% endif %}
+                {% if persona.villa %}<tr><th>Villa</th><td>{{ persona.villa }}</td></tr>{% endif %}
+                {% if persona.discapacidad %}<tr><th>Discapacidad</th><td>Sí</td></tr>{% endif %}
+                {% if persona.etnia %}<tr><th>Pertenencia a Pueblos Originarios</th><td>Sí</td></tr>{% endif %}
+                {% if persona.diversidad %}<tr><th>Pertenece a Diversidad Sexual</th><td>Sí</td></tr>{% endif %}
+                {% if persona.persona_significativa %}<tr><th>Persona significativa</th><td>{{ persona.persona_significativa }}</td></tr>{% endif %}
+                {% if persona.vinculo %}<tr><th>Vínculo</th><td>{{ persona.vinculo }}</td></tr>{% endif %}
+                {% if persona.telefono_significativo %}<tr><th>Teléfono de persona significativa</th><td>{{ persona.telefono_significativo }}</td></tr>{% endif %}
+                {% if persona.n_adultos %}<tr><th>N° adultos hogar</th><td>{{ persona.n_adultos }}</td></tr>{% endif %}
+                {% if persona.n_nna %}<tr><th>N° NNA hogar</th><td>{{ persona.n_nna }}</td></tr>{% endif %}
                 <tr>
-                    <th>Nombre</th><td>{{ persona.nombre }}</td>
+                    <th>Total integrantes hogar</th>
+                    <td>
+                        {{ persona.n_adultos|default_if_none:0|add:persona.n_nna|default_if_none:0 }}
+                        {# Si quieres un string: {{ persona.n_adultos|default:0|add:persona.n_nna|default:0 }} #}
+                    </td>
                 </tr>
-                {% endif %}
-                {% if persona.rut_pasaporte %}
-                <tr>
-                    <th>RUT / Pasaporte</th><td>{{ persona.rut_pasaporte }}</td>
-                </tr>
-                {% endif %}
-                {% if persona.genero %}
-                <tr>
-                    <th>Género</th><td>{{ persona.get_genero_display }}</td>
-                </tr>
-                {% endif %}
-                {% if persona.fecha_nacimiento %}
-                <tr>
-                    <th>Fecha de Nacimiento</th><td>{{ persona.fecha_nacimiento|date:"d/m/Y" }}</td>
-                </tr>
-                {% endif %}
-                {% if persona.nacionalidad %}
-                <tr>
-                    <th>Nacionalidad</th><td>{{ persona.nacionalidad }}</td>
-                </tr>
-                {% endif %}
-                {% if persona.estado_civil %}
-                <tr>
-                    <th>Estado Civil</th><td>{{ persona.get_estado_civil_display }}</td>
-                </tr>
-                {% endif %}
-                {% if persona.prevision %}
-                <tr>
-                    <th>Previsión</th><td>{{ persona.get_prevision_display }}</td>
-                </tr>
-                {% endif %}
-                {% if persona.cesfam %}
-                <tr>
-                    <th>CESFAM Vinculante</th><td>{{ persona.cesfam }}</td>
-                </tr>
-                {% endif %}
-                {% if persona.ocupacion %}
-                <tr>
-                    <th>Ocupación</th><td>{{ persona.ocupacion }}</td>
-                </tr>
-                {% endif %}
-                {% if persona.barrio %}
-                <tr>
-                    <th>Barrio</th><td>{{ persona.barrio }}</td>
-                </tr>
-                {% endif %}
-                {% if persona.cuadrante %}
-                <tr>
-                    <th>Cuadrante</th><td>{{ persona.cuadrante }}</td>
-                </tr>
-                {% endif %}
-                {% if persona.telefono %}
-                <tr>
-                    <th>Teléfono</th><td>{{ persona.telefono }}</td>
-                </tr>
-                {% endif %}
-                {% if persona.direccion %}
-                <tr>
-                    <th>Dirección</th><td>{{ persona.direccion }}</td>
-                </tr>
-                {% endif %}
-                {% if persona.villa %}
-                <tr>
-                    <th>Villa</th><td>{{ persona.villa }}</td>
-                </tr>
-                {% endif %}
-                {% if persona.discapacidad %}
-                <tr>
-                    <th>Discapacidad</th><td>Sí</td>
-                </tr>
-                {% endif %}
-                {% if persona.etnia %}
-                <tr>
-                    <th>Pertenencia a Pueblos Originarios</th><td>Sí</td>
-                </tr>
-                {% endif %}
-                {% if persona.diversidad %}
-                <tr>
-                    <th>Pertenece a Diversidad Sexual</th><td>Sí</td>
-                </tr>
-                {% endif %}
-                {% if persona.persona_significativa %}
-                <tr>
-                    <th>Persona significativa</th><td>{{ persona.persona_significativa }}</td>
-                </tr>
-                {% endif %}
-                {% if persona.vinculo %}
-                <tr>
-                    <th>Vínculo</th><td>{{ persona.vinculo }}</td>
-                </tr>
-                {% endif %}
-                {% if persona.telefono_significativo %}
-                <tr>
-                    <th>Teléfono de persona significativa</th><td>{{ persona.telefono_significativo }}</td>
-                </tr>
-                {% endif %}
-                {% if persona.n_adultos %}
-                <tr>
-                    <th>Número de adultos</th><td>{{ persona.n_adultos }}</td>
-                </tr>
-                {% endif %}
-                {% if persona.n_nna %}
-                <tr>
-                    <th>Número de NNA</th><td>{{ persona.n_nna }}</td>
-                </tr>
-                {% endif %}
-                {% if persona.edad %}
-                <tr>
-                    <th>Edad</th><td>{{ persona.edad }}</td>
-                </tr>
-                {% endif %}
-                {% if persona.rango_etareo %}
-                <tr>
-                    <th>Rango etáreo</th><td>{{ persona.rango_etareo }}</td>
-                </tr>
-                {% endif %}
+                {% if persona.edad %}<tr><th>Edad</th><td>{{ persona.edad }}</td></tr>{% endif %}
+                {% if persona.rango_etareo %}<tr><th>Rango etáreo</th><td>{{ persona.rango_etareo }}</td></tr>{% endif %}
             </table>
         </div>
     </div>
-{% endif %}
+    {% endif %}
 
-{% if denuncia %}
+    <!-- DENUNCIA -->
+    {% if denuncia %}
     <div class="card mb-4">
         <div class="card-header bg-pravim">Denuncia</div>
         <div class="card-body">
             <table class="table">
-                <tr>
-                    <th>¿Tiene denuncia?</th>
-                    <td>{{ denuncia.tiene_denuncia|yesno:"Sí,No" }}</td>
-                </tr>
+                <tr><th>¿Tiene denuncia?</th><td>{{ denuncia.tiene_denuncia|yesno:"Sí,No" }}</td></tr>
                 {% if denuncia.tiene_denuncia %}
-                    {% if denuncia.anio_denuncia %}
-                    <tr>
-                        <th>Año de Denuncia</th>
-                        <td>{{ denuncia.anio_denuncia }}</td>
-                    </tr>
+                    {% if denuncia.anio_denuncia %}<tr><th>Año de Denuncia</th><td>{{ denuncia.anio_denuncia }}</td></tr>{% endif %}
+                    {% if denuncia.lugar_denuncia %}<tr><th>Lugar de denuncia</th><td>{{ denuncia.get_lugar_denuncia_display }}{% if denuncia.lugar_denuncia_otro %} (Otro: {{ denuncia.lugar_denuncia_otro }}){% endif %}</td></tr>{% endif %}
+                    {% if denuncia.numero_causa %}<tr><th>Número de causa</th><td>{{ denuncia.numero_causa }}</td></tr>{% endif %}
+                    <tr><th>¿Existe medida cautelar?</th><td>{{ denuncia.medida_cautelar|yesno:"Sí,No" }}</td></tr>
+                    {% if denuncia.medida_cautelar_detalle %}<tr><th>Detalle medida cautelar</th><td>{{ denuncia.medida_cautelar_detalle }}</td></tr>{% endif %}
+                    {% if denuncia.dificultades %}
+                        <tr>
+                            <th>Dificultades en la denuncia</th>
+                            <td>{{ denuncia.get_dificultades_display }}{% if denuncia.dificultades_otra %} (Otra: {{ denuncia.dificultades_otra }}){% endif %}</td>
+                        </tr>
                     {% endif %}
-                    {% if denuncia.lugar_denuncia %}
-                    <tr>
-                        <th>Lugar de denuncia</th>
-                        <td>{{ denuncia.get_lugar_denuncia_display }}</td>
-                    </tr>
-                    {% endif %}
-                    {% if denuncia.numero_causa %}
-                    <tr>
-                        <th>Número de causa</th>
-                        <td>{{ denuncia.numero_causa }}</td>
-                    </tr>
-                    {% endif %}
-                    <tr>
-                        <th>¿Existe medida cautelar?</th>
-                        <td>{{ denuncia.medida_cautelar|yesno:"Sí,No" }}</td>
-                    </tr>
-                    <tr>
-                        <th>¿Dificultades en la denuncia?</th>
-                        <td>{{ denuncia.dificultades_denuncia|yesno:"Sí,No" }}</td>
-                    </tr>
-                    {% if denuncia.descripcion_dificultad %}
-                    <tr>
-                        <th>Descripción de dificultades</th>
-                        <td>{{ denuncia.descripcion_dificultad }}</td>
-                    </tr>
-                    {% endif %}
-                    {% if denuncia.motivo_denuncia %}
-                    <tr>
-                        <th>Motivo de la denuncia</th>
-                        <td>{{ denuncia.motivo_denuncia }}</td>
-                    </tr>
-                    {% endif %}
+                    {% if denuncia.motivo_denuncia %}<tr><th>Motivo de la denuncia</th><td>{{ denuncia.motivo_denuncia }}</td></tr>{% endif %}
                 {% endif %}
             </table>
         </div>
     </div>
-{% endif %}
+    {% endif %}
 
-{% if motivo %}
+    <!-- MOTIVO DE INGRESO -->
+    {% if motivo %}
     <div class="card mb-4">
         <div class="card-header bg-pravim">Motivo de Ingreso</div>
         <div class="card-body">
             <table class="table">
-                {% if motivo.motivo_ingreso %}
-                <tr>
-                    <th>Motivo principal</th>
-                    <td>{{ motivo.get_motivo_ingreso_display }}</td>
-                </tr>
-                {% endif %}
-                {% if motivo.descripcion_motivo %}
-                <tr>
-                    <th>Descripción del caso</th>
-                    <td>{{ motivo.descripcion_motivo }}</td>
-                </tr>
-                {% endif %}
+                {% if motivo.motivo_ingreso %}<tr><th>Motivo principal</th><td>{{ motivo.get_motivo_ingreso_display }}{% if motivo.motivo_otro %} (Otro: {{ motivo.motivo_otro }}){% endif %}</td></tr>{% endif %}
+                {% if motivo.descripcion_motivo %}<tr><th>Descripción del caso</th><td>{{ motivo.descripcion_motivo }}</td></tr>{% endif %}
             </table>
         </div>
     </div>
-{% endif %}
+    {% endif %}
 
-{% if psicologico %}
+    <!-- ASPECTOS PSICOLÓGICOS -->
+    {% if psicologico %}
     <div class="card mb-4">
         <div class="card-header bg-pravim">Aspectos Psicológicos</div>
         <div class="card-body">
             <table class="table">
-                {% if psicologico.diagnostico_salud_mental %}
-                <tr>
-                    <th>Diagnóstico salud mental</th>
-                    <td>{{ psicologico.diagnostico_salud_mental }}</td>
-                </tr>
-                {% endif %}
-                {% if psicologico.atenciones_anteriores %}
-                <tr>
-                    <th>Atenciones anteriores</th>
-                    <td>{{ psicologico.atenciones_anteriores }}</td>
-                </tr>
-                {% endif %}
-                {% if psicologico.internaciones %}
-                <tr>
-                    <th>Internaciones</th>
-                    <td>{{ psicologico.internaciones }}</td>
-                </tr>
-                {% endif %}
-                {% if psicologico.suicidio_antecedentes %}
-                <tr>
-                    <th>Antecedentes de suicidio</th>
-                    <td>{{ psicologico.suicidio_antecedentes }}</td>
-                </tr>
-                {% endif %}
+                {% if psicologico.antecedentes %}<tr><th>Antecedentes</th><td>{{ psicologico.antecedentes }}</td></tr>{% endif %}
+                {% if psicologico.diagnostico %}<tr><th>Diagnóstico</th><td>{{ psicologico.get_diagnostico_display }}{% if psicologico.diagnostico_otro %} (Otro: {{ psicologico.diagnostico_otro }}){% endif %}</td></tr>{% endif %}
+                {% if psicologico.atencion_salud_mental %}<tr><th>¿Atención salud mental?</th><td>{{ psicologico.atencion_salud_mental|yesno:"Sí,No" }}</td></tr>{% endif %}
+                {% if psicologico.atencion_anio %}<tr><th>Año de atención</th><td>{{ psicologico.atencion_anio }}</td></tr>{% endif %}
+                {% if psicologico.atencion_lugar %}<tr><th>Lugar de atención</th><td>{{ psicologico.atencion_lugar }}</td></tr>{% endif %}
+                {% if psicologico.internacion %}<tr><th>¿Internación?</th><td>{{ psicologico.internacion|yesno:"Sí,No" }}</td></tr>{% endif %}
+                {% if psicologico.internacion_anio %}<tr><th>Año de internación</th><td>{{ psicologico.internacion_anio }}</td></tr>{% endif %}
+                {% if psicologico.internacion_lugar %}<tr><th>Lugar de internación</th><td>{{ psicologico.internacion_lugar }}</td></tr>{% endif %}
+                {% if psicologico.afectacion_psicologica %}<tr><th>Ideación/Intentos suicidas</th><td>{{ psicologico.afectacion_psicologica }}</td></tr>{% endif %}
 
-                {% if psicologico.estado_conciencia %}
-                <tr>
-                    <th>Estado de conciencia</th>
-                    <td>
-                        {{ psicologico.estado_conciencia|join:", " }}
-                    </td>
-                </tr>
-                {% endif %}
-                {% if psicologico.orientacion %}
-                <tr>
-                    <th>Orientación</th>
-                    <td>
-                        {{ psicologico.orientacion|join:", " }}
-                    </td>
-                </tr>
-                {% endif %}
-                {% if psicologico.estado_cognitivo %}
-                <tr>
-                    <th>Estado cognitivo</th>
-                    <td>
-                        {{ psicologico.estado_cognitivo|join:", " }}
-                    </td>
-                </tr>
-                {% endif %}
-                {% if psicologico.actitud %}
-                <tr>
-                    <th>Actitud</th>
-                    <td>
-                        {{ psicologico.actitud|join:", " }}
-                    </td>
-                </tr>
-                {% endif %}
-                {% if psicologico.lenguaje %}
-                <tr>
-                    <th>Lenguaje</th>
-                    <td>
-                        {{ psicologico.lenguaje|join:", " }}
-                    </td>
-                </tr>
-                {% endif %}
-                {% if psicologico.afectividad %}
-                <tr>
-                    <th>Afectividad</th>
-                    <td>
-                        {{ psicologico.afectividad|join:", " }}
-                    </td>
-                </tr>
-                {% endif %}
-                {% if psicologico.sueno %}
-                <tr>
-                    <th>Sueño</th>
-                    <td>
-                        {{ psicologico.sueno|join:", " }}
-                    </td>
-                </tr>
-                {% endif %}
-                {% if psicologico.alimentacion %}
-                <tr>
-                    <th>Alimentación</th>
-                    <td>
-                        {{ psicologico.alimentacion|join:", " }}
-                    </td>
-                </tr>
-                {% endif %}
-                {% if psicologico.limitacion_vida_cotidiana %}
-                <tr>
-                    <th>Limitación vida cotidiana</th>
-                    <td>{{ psicologico.limitacion_vida_cotidiana }}</td>
-                </tr>
-                {% endif %}
-                <tr>
-                    <th>¿Quiebre en historia de vida?</th>
-                    <td>{{ psicologico.quiebre_historia_vida|yesno:"Sí,No" }}</td>
-                </tr>
+                <!-- Multiselección en lista -->
+                {% if psicologico.estado_conciencia %}<tr><th>Estado de conciencia</th><td>{{ psicologico.estado_conciencia|join:", " }}</td></tr>{% endif %}
+                {% if psicologico.orientacion %}<tr><th>Orientación</th><td>{{ psicologico.orientacion|join:", " }}</td></tr>{% endif %}
+                {% if psicologico.estado_cognitivo %}<tr><th>Estado cognitivo</th><td>{{ psicologico.estado_cognitivo|join:", " }}</td></tr>{% endif %}
+                {% if psicologico.actitud %}<tr><th>Actitud</th><td>{{ psicologico.actitud|join:", " }}</td></tr>{% endif %}
+                {% if psicologico.lenguaje %}<tr><th>Lenguaje</th><td>{{ psicologico.lenguaje|join:", " }}</td></tr>{% endif %}
+                {% if psicologico.afectividad %}<tr><th>Afectividad</th><td>{{ psicologico.afectividad|join:", " }}</td></tr>{% endif %}
+                {% if psicologico.sueno %}<tr><th>Sueño</th><td>{{ psicologico.sueno|join:", " }}</td></tr>{% endif %}
+                {% if psicologico.alimentacion %}<tr><th>Alimentación</th><td>{{ psicologico.alimentacion|join:", " }}</td></tr>{% endif %}
+                {% if psicologico.limitacion_vida_cotidiana %}<tr><th>Limitación vida cotidiana</th><td>{{ psicologico.limitacion_vida_cotidiana }}</td></tr>{% endif %}
+                <tr><th>¿Quiebre en historia de vida?</th><td>{{ psicologico.quiebre_historia_vida|yesno:"Sí,No" }}</td></tr>
             </table>
         </div>
     </div>
-{% endif %}
-{% if redes %}
+    {% endif %}
+
+
+  
+    
+    <!-- REDES DE APOYO -->
+    {% if redes %}
     <div class="card mb-4">
         <div class="card-header bg-pravim">Redes de Apoyo</div>
         <div class="card-body">
             <table class="table">
-                {% if redes.red_familiares %}
-                <tr>
-                    <th>Red familiares</th>
-                    <td>{{ redes.red_familiares }}</td>
-                </tr>
-                {% endif %}
-                {% if redes.red_amistades %}
-                <tr>
-                    <th>Red amistades</th>
-                    <td>{{ redes.red_amistades }}</td>
-                </tr>
-                {% endif %}
-                {% if redes.red_conyuge %}
-                <tr>
-                    <th>Red cónyuge</th>
-                    <td>{{ redes.red_conyuge }}</td>
-                </tr>
-                {% endif %}
-                {% if redes.red_laborales %}
-                <tr>
-                    <th>Red laborales</th>
-                    <td>{{ redes.red_laborales }}</td>
-                </tr>
-                {% endif %}
-                {% if redes.red_otros_personales %}
-                <tr>
-                    <th>Red otros personales</th>
-                    <td>{{ redes.red_otros_personales }}</td>
-                </tr>
-                {% endif %}
-                {% if redes.red_junta_vecinos %}
-                <tr>
-                    <th>Red junta de vecinos</th>
-                    <td>{{ redes.red_junta_vecinos }}</td>
-                </tr>
-                {% endif %}
-                {% if redes.red_centro_madres %}
-                <tr>
-                    <th>Red centro de madres</th>
-                    <td>{{ redes.red_centro_madres }}</td>
-                </tr>
-                {% endif %}
-                {% if redes.red_club_adultos %}
-                <tr>
-                    <th>Red club de adultos mayores</th>
-                    <td>{{ redes.red_club_adultos }}</td>
-                </tr>
-                {% endif %}
-                {% if redes.red_club_deportivo %}
-                <tr>
-                    <th>Red club deportivo</th>
-                    <td>{{ redes.red_club_deportivo }}</td>
-                </tr>
-                {% endif %}
-                {% if redes.red_otros_comunitarios %}
-                <tr>
-                    <th>Red otros comunitarios</th>
-                    <td>{{ redes.red_otros_comunitarios }}</td>
-                </tr>
-                {% endif %}
-                {% if redes.red_municipalidad %}
-                <tr>
-                    <th>Red Municipalidad</th>
-                    <td>{{ redes.red_municipalidad }}</td>
-                </tr>
-                {% endif %}
-                {% if redes.red_cesfam %}
-                <tr>
-                    <th>Red CESFAM</th>
-                    <td>{{ redes.red_cesfam }}</td>
-                </tr>
-                {% endif %}
-                {% if redes.red_cosam %}
-                <tr>
-                    <th>Red COSAM</th>
-                    <td>{{ redes.red_cosam }}</td>
-                </tr>
-                {% endif %}
-                {% if redes.red_otro_salud %}
-                <tr>
-                    <th>Red otro salud</th>
-                    <td>{{ redes.red_otro_salud }}</td>
-                </tr>
-                {% endif %}
-                {% if redes.red_establecimiento %}
-                <tr>
-                    <th>Red establecimiento educativo</th>
-                    <td>{{ redes.red_establecimiento }}</td>
-                </tr>
-                {% endif %}
-                {% if redes.red_ong %}
-                <tr>
-                    <th>Red ONG</th>
-                    <td>{{ redes.red_ong }}</td>
-                </tr>
-                {% endif %}
+                {% if redes.red_familiares %}<tr><th>Red familiares</th><td>{{ redes.red_familiares }}</td></tr>{% endif %}
+                {% if redes.red_amistades %}<tr><th>Red amistades</th><td>{{ redes.red_amistades }}</td></tr>{% endif %}
+                {% if redes.red_conyuge %}<tr><th>Red cónyuge</th><td>{{ redes.red_conyuge }}</td></tr>{% endif %}
+                {% if redes.red_laborales %}<tr><th>Red laborales</th><td>{{ redes.red_laborales }}</td></tr>{% endif %}
+                {% if redes.red_otros_personales %}<tr><th>Red otros personales</th><td>{{ redes.red_otros_personales }}</td></tr>{% endif %}
+                {% if redes.red_junta_vecinos %}<tr><th>Red junta de vecinos</th><td>{{ redes.red_junta_vecinos }}</td></tr>{% endif %}
+                {% if redes.red_centro_madres %}<tr><th>Red centro de madres</th><td>{{ redes.red_centro_madres }}</td></tr>{% endif %}
+                {% if redes.red_club_adultos %}<tr><th>Red club de adultos mayores</th><td>{{ redes.red_club_adultos }}</td></tr>{% endif %}
+                {% if redes.red_club_deportivo %}<tr><th>Red club deportivo</th><td>{{ redes.red_club_deportivo }}</td></tr>{% endif %}
+                {% if redes.red_otros_comunitarios %}<tr><th>Red otros comunitarios</th><td>{{ redes.red_otros_comunitarios }}</td></tr>{% endif %}
+                {% if redes.red_municipalidad %}<tr><th>Red Municipalidad</th><td>{{ redes.red_municipalidad }}</td></tr>{% endif %}
+                {% if redes.red_cesfam %}<tr><th>Red CESFAM</th><td>{{ redes.red_cesfam }}</td></tr>{% endif %}
+                {% if redes.red_cosam %}<tr><th>Red COSAM</th><td>{{ redes.red_cosam }}</td></tr>{% endif %}
+                {% if redes.red_otro_salud %}<tr><th>Red otro salud</th><td>{{ redes.red_otro_salud }}</td></tr>{% endif %}
+                {% if redes.red_establecimiento %}<tr><th>Red establecimiento educativo</th><td>{{ redes.red_establecimiento }}</td></tr>{% endif %}
+                {% if redes.red_ong %}<tr><th>Red ONG</th><td>{{ redes.red_ong }}</td></tr>{% endif %}
             </table>
         </div>
     </div>
-{% endif %}
+    {% endif %}
 
-{% if plan %}
+    <!-- PLAN DE ACCIÓN -->
+    {% if plan %}
     <div class="card mb-4">
         <div class="card-header bg-pravim">Plan de Acción</div>
         <div class="card-body">
             <table class="table">
-
-                {# Derivación CAVD #}
-                {% if plan.derivacion_cavd_psicologica %}
-                <tr>
-                    <th>Derivación CAVD (Psicológica)</th>
-                    <td>Sí</td>
-                </tr>
-                {% endif %}
-                {% if plan.derivacion_cavd_juridica %}
-                <tr>
-                    <th>Derivación CAVD (Jurídica)</th>
-                    <td>Sí</td>
-                </tr>
-                {% endif %}
-
-                {# Derivación CESFAM #}
-                {% if plan.derivacion_cesfam_salud_general %}
-                <tr>
-                    <th>Derivación CESFAM (Salud general)</th>
-                    <td>Sí</td>
-                </tr>
-                {% endif %}
-                {% if plan.derivacion_cesfam_salud_mental %}
-                <tr>
-                    <th>Derivación CESFAM (Salud mental)</th>
-                    <td>Sí</td>
-                </tr>
-                {% endif %}
+                {% if plan.derivacion_cavd_psicologica %}<tr><th>Derivación CAVD (Psicológica)</th><td>Sí</td></tr>{% endif %}
+                {% if plan.derivacion_cavd_juridica %}<tr><th>Derivación CAVD (Jurídica)</th><td>Sí</td></tr>{% endif %}
+                {% if plan.derivacion_cesfam_salud_general %}<tr><th>Derivación CESFAM (Salud general)</th><td>Sí</td></tr>{% endif %}
+                {% if plan.derivacion_cesfam_salud_mental %}<tr><th>Derivación CESFAM (Salud mental)</th><td>Sí</td></tr>{% endif %}
 
                 {# UAV Atención Psicológica #}
                 {% if plan.uav_psicologica_1 or plan.uav_psicologica_1_detalle %}
                 <tr>
                     <th>UAV Atención Psicológica 1</th>
-                    <td>
-                        {% if plan.uav_psicologica_1 %}✔ {% endif %}
-                        {{ plan.uav_psicologica_1_detalle }}
-                    </td>
+                    <td>{% if plan.uav_psicologica_1 %}✔{% endif %} {{ plan.uav_psicologica_1_detalle }}</td>
                 </tr>
                 {% endif %}
                 {% if plan.uav_psicologica_2 or plan.uav_psicologica_2_detalle %}
                 <tr>
                     <th>UAV Atención Psicológica 2</th>
-                    <td>
-                        {% if plan.uav_psicologica_2 %}✔ {% endif %}
-                        {{ plan.uav_psicologica_2_detalle }}
-                    </td>
+                    <td>{% if plan.uav_psicologica_2 %}✔{% endif %} {{ plan.uav_psicologica_2_detalle }}</td>
                 </tr>
                 {% endif %}
                 {% if plan.uav_psicologica_3 or plan.uav_psicologica_3_detalle %}
                 <tr>
                     <th>UAV Atención Psicológica 3</th>
-                    <td>
-                        {% if plan.uav_psicologica_3 %}✔ {% endif %}
-                        {{ plan.uav_psicologica_3_detalle }}
-                    </td>
+                    <td>{% if plan.uav_psicologica_3 %}✔{% endif %} {{ plan.uav_psicologica_3_detalle }}</td>
                 </tr>
                 {% endif %}
-
                 {# UAV Atención Social #}
                 {% if plan.uav_social_1 or plan.uav_social_1_detalle %}
                 <tr>
                     <th>UAV Atención Social 1</th>
-                    <td>
-                        {% if plan.uav_social_1 %}✔ {% endif %}
-                        {{ plan.uav_social_1_detalle }}
-                    </td>
+                    <td>{% if plan.uav_social_1 %}✔{% endif %} {{ plan.uav_social_1_detalle }}</td>
                 </tr>
                 {% endif %}
                 {% if plan.uav_social_2 or plan.uav_social_2_detalle %}
                 <tr>
                     <th>UAV Atención Social 2</th>
-                    <td>
-                        {% if plan.uav_social_2 %}✔ {% endif %}
-                        {{ plan.uav_social_2_detalle }}
-                    </td>
+                    <td>{% if plan.uav_social_2 %}✔{% endif %} {{ plan.uav_social_2_detalle }}</td>
                 </tr>
                 {% endif %}
                 {% if plan.uav_social_3 or plan.uav_social_3_detalle %}
                 <tr>
                     <th>UAV Atención Social 3</th>
-                    <td>
-                        {% if plan.uav_social_3 %}✔ {% endif %}
-                        {{ plan.uav_social_3_detalle }}
-                    </td>
+                    <td>{% if plan.uav_social_3 %}✔{% endif %} {{ plan.uav_social_3_detalle }}</td>
+                </tr>
+                {% endif %}
+
+                {# UAV Atención Legal #}
+                {% if plan.uav_legal_1 or plan.uav_legal_1_detalle %}
+                <tr>
+                    <th>UAV Atención Legal 1</th>
+                    <td>{% if plan.uav_legal_1 %}✔{% endif %} {{ plan.uav_legal_1_detalle }}</td>
+                </tr>
+                {% endif %}
+                {% if plan.uav_legal_2 or plan.uav_legal_2_detalle %}
+                <tr>
+                    <th>UAV Atención Legal 2</th>
+                    <td>{% if plan.uav_legal_2 %}✔{% endif %} {{ plan.uav_legal_2_detalle }}</td>
+                </tr>
+                {% endif %}
+                {% if plan.uav_legal_3 or plan.uav_legal_3_detalle %}
+                <tr>
+                    <th>UAV Atención Legal 3</th>
+                    <td>{% if plan.uav_legal_3 %}✔{% endif %} {{ plan.uav_legal_3_detalle }}</td>
                 </tr>
                 {% endif %}
 
                 {# Patrullaje Preventivo #}
-                {% if plan.patrullaje_activo %}
-                <tr>
-                    <th>Patrullaje preventivo activo</th>
-                    <td>Sí</td>
-                </tr>
-                {% endif %}
-                {% if plan.patrullaje_turno_1 %}
-                <tr>
-                    <th>Patrullaje Turno 1</th>
-                    <td>Sí</td>
-                </tr>
-                {% endif %}
-                {% if plan.patrullaje_entrevista_1 %}
-                <tr>
-                    <th>Patrullaje Entrevista 1</th>
-                    <td>Sí</td>
-                </tr>
-                {% endif %}
-                {% if plan.patrullaje_turno_2 %}
-                <tr>
-                    <th>Patrullaje Turno 2</th>
-                    <td>Sí</td>
-                </tr>
-                {% endif %}
-                {% if plan.patrullaje_entrevista_2 %}
-                <tr>
-                    <th>Patrullaje Entrevista 2</th>
-                    <td>Sí</td>
-                </tr>
-                {% endif %}
-                {% if plan.patrullaje_turno_3 %}
-                <tr>
-                    <th>Patrullaje Turno 3</th>
-                    <td>Sí</td>
-                </tr>
-                {% endif %}
-                {% if plan.patrullaje_entrevista_3 %}
-                <tr>
-                    <th>Patrullaje Entrevista 3</th>
-                    <td>Sí</td>
-                </tr>
-                {% endif %}
-
-                {# Profesional a cargo #}
-                {% if plan.profesional_nathaly %}
-                <tr>
-                    <th>Profesional Nathaly a cargo</th>
-                    <td>Sí</td>
-                </tr>
-                {% endif %}
-                {% if plan.profesional_paloma %}
-                <tr>
-                    <th>Profesional Paloma a cargo</th>
-                    <td>Sí</td>
-                </tr>
-                {% endif %}
+                {% if plan.patrullaje_activo %}<tr><th>Patrullaje preventivo activo</th><td>Sí</td></tr>{% endif %}
+                {% if plan.patrullaje_turno_1 %}<tr><th>Patrullaje Turno 1</th><td>Sí</td></tr>{% endif %}
+                {% if plan.patrullaje_entrevista_1 %}<tr><th>Patrullaje Entrevista 1</th><td>Sí</td></tr>{% endif %}
+                {% if plan.patrullaje_turno_2 %}<tr><th>Patrullaje Turno 2</th><td>Sí</td></tr>{% endif %}
+                {% if plan.patrullaje_entrevista_2 %}<tr><th>Patrullaje Entrevista 2</th><td>Sí</td></tr>{% endif %}
+                {% if plan.patrullaje_turno_3 %}<tr><th>Patrullaje Turno 3</th><td>Sí</td></tr>{% endif %}
+                {% if plan.patrullaje_entrevista_3 %}<tr><th>Patrullaje Entrevista 3</th><td>Sí</td></tr>{% endif %}
+                {% if plan.registro_patrullaje %}<tr><th>N° de registro patrullaje</th><td>{{ plan.registro_patrullaje }}</td></tr>{% endif %}
+                {% if plan.profesional_a_cargo %}<tr><th>Profesional a cargo</th><td>{{ plan.get_profesional_a_cargo_display }}</td></tr>{% endif %}
+                {% if plan.otro_profesional %}<tr><th>Otro profesional a cargo</th><td>{{ plan.otro_profesional }}</td></tr>{% endif %}
             </table>
         </div>
     </div>
-{% endif %}
+    {% endif %}
+
+    <!-- INTERVENCIONES -->
+    {% if intervenciones %}
+    <div class="card mb-4">
+        <div class="card-header bg-pravim">Intervenciones</div>
+        <div class="card-body">
+            <table class="table table-sm table-bordered">
+                <thead>
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Etapa</th>
+                        <th>Tipo de Atención</th>
+                        <th>Responsables</th>
+                        <th>Participantes</th>
+                        <th>Lugar/Vía</th>
+                        <th>Objetivos</th>
+                        <th>Descripción</th>
+                        <th>Resultados</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for interv in intervenciones %}
+                    <tr>
+                        <td>{{ interv.fecha|date:'d/m/Y' }}</td>
+                        <td>{{ interv.get_etapa_display }}</td>
+                        <td>{{ interv.get_tipo_atencion_display }}</td>
+                        <td>{{ interv.responsables }}</td>
+                        <td>{{ interv.participantes }}</td>
+                        <td>{{ interv.get_lugar_display }}</td>
+                        <td>{{ interv.objetivos }}</td>
+                        <td>{{ interv.descripcion }}</td>
+                        <td>{{ interv.resultados }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- EGRESO -->
+    {% if egreso %}
+    <div class="card mb-4">
+        <div class="card-header bg-pravim">Egreso</div>
+        <div class="card-body">
+            <table class="table">
+                {% if egreso.motivo_egreso %}<tr><th>Motivo de egreso</th><td>{{ egreso.get_motivo_egreso_display }}</td></tr>{% endif %}
+                {% if egreso.fecha_egreso %}<tr><th>Fecha de egreso</th><td>{{ egreso.fecha_egreso|date:"d/m/Y" }}</td></tr>{% endif %}
+                {% if egreso.cierre_total is not None %}<tr><th>¿Cierre total?</th><td>{{ egreso.cierre_total|yesno:"Sí,No" }}</td></tr>{% endif %}
+                {% if egreso.nivel_cumplimiento %}<tr><th>Nivel de cumplimiento de objetivos</th><td>{{ egreso.get_nivel_cumplimiento_display }}</td></tr>{% endif %}
+                {% if egreso.observaciones %}<tr><th>Observaciones</th><td>{{ egreso.observaciones }}</td></tr>{% endif %}
+            </table>
+        </div>
+    </div>
+    {% endif %}
+
+    
+</div>
+
+
+
+
     <!-- Botón volver al final -->
     <div class="text-center mb-4">
-        <button class="btn btn-secondary" type="button" disabled>Volver</button>
+        <a href="{% url 'fichas:buscar_persona' %}" class="btn btn-outline-pravim">Volver</a>
     </div>
-
-<!-- Modal de éxito PRAVIM institucional -->
-<div class="modal fade" id="fichaGuardadaModal" tabindex="-1" aria-labelledby="fichaGuardadaModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content" style="border-radius: 18px; border: 2px solid #252c54;">
-      <div class="modal-header" style="background-color: #252c54; color: white; border-radius: 18px 18px 0 0;">
-        <h5 class="modal-title mx-auto" id="fichaGuardadaModalLabel" style="font-weight:bold; letter-spacing:0.5px;">Ficha guardada exitosamente</h5>
-      </div>
-      <div class="modal-body" style="padding: 30px 28px 22px 28px;">
-        <div class="text-center" style="font-size: 1.15rem;">
-          <strong>La ficha de acogida se registró correctamente.</strong><br>
-          <span class="text-muted" style="font-size:0.99rem;">¿Qué deseas hacer ahora?</span>
-        </div>
-      </div>
-      <div class="modal-footer d-flex justify-content-center" style="border-radius: 0 0 18px 18px; background-color:#f4f6f8;">
-        <a href="{% url 'fichas:ficha_completa_nueva' %}" class="btn btn-primary px-4 border-0" style="background-color: #252c54; border-radius: 10px;">➕ Ingresar nueva ficha</a>
-        <a href="{% url 'fichas:ver_ficha_completa' ficha.id %}" class="btn btn-outline-secondary px-4 ms-2" style="border-radius: 10px;">👁️ Ver ficha</a>
-      </div>
-    </div>
-  </div>
 </div>
+
+
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         if (window.location.search.indexOf('success=1') !== -1) {

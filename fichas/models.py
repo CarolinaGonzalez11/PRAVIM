@@ -1,6 +1,7 @@
 from datetime import date
 from django.db import models
 from django.conf import settings
+from django.contrib.postgres.fields import ArrayField
 
 
 class Barrio(models.Model):
@@ -48,7 +49,10 @@ class Cuadrante(models.Model):
         return self.nombre
 
 
+
+
 class FichaAcogida(models.Model):
+
     VIA_INGRESO_CHOICES = [
         ('Central 1418', 'Central 1418'),
         ('Alcaldía', 'Alcaldía'),
@@ -77,7 +81,14 @@ class FichaAcogida(models.Model):
     fecha_contacto_2 = models.DateField(null=True, blank=True)
     fecha_contacto_3 = models.DateField(null=True, blank=True)
     tipo_contacto = models.CharField(max_length=50, choices=TIPO_CONTACTO_CHOICES)
-
+    
+    ingreso_efectivo = models.BooleanField(default=False)
+    fecha_ingreso = models.DateField(null=True, blank=True)
+    profesionales_contacto_1 = ArrayField(
+        models.CharField(max_length=50), blank=True, null=True
+    )
+    contencion_inicial = models.BooleanField(default=False)
+    
     def __str__(self):
         return f"Ficha {self.id} - {self.fecha_recepcion}"
 
@@ -163,25 +174,42 @@ class Denuncia(models.Model):
         ('48 COM FAMILIA', '48 COM FAMILIA'),
         ('OTRO', 'Otro'),
     ]
+    DIFICULTADES_CHOICES = [
+        ('mal_trato', 'Mal trato/trato inadecuado'),
+        ('tiempo_espera', 'Tiempo de espera'),
+        ('no_llegaron', 'No llegaron a llamado'),
+        ('otra', 'Otra'),
+    ]
     ficha = models.OneToOneField(FichaAcogida, on_delete=models.CASCADE)
     tiene_denuncia = models.BooleanField(default=False)
     anio_denuncia = models.CharField(max_length=10, blank=True)
     lugar_denuncia = models.CharField(max_length=50,choices=LUGARES_DENUNCIA, blank=True)
+    lugar_denuncia_otro = models.CharField(max_length=100, blank=True)  # campo para especificar "otro"
     numero_causa = models.CharField(max_length=50, blank=True)
-    medida_cautelar = models.BooleanField(default=False)
-    dificultades_denuncia = models.BooleanField(default=False)
-    descripcion_dificultad = models.TextField(blank=True, null=True)
     motivo_denuncia = models.TextField(blank=True)
 
+    dificultades = models.CharField(max_length=30, choices=DIFICULTADES_CHOICES, blank=True, null=True)
+    dificultades_otra = models.TextField(blank=True)  # descripción si selecciona "Otra"
+
+    medida_cautelar = models.BooleanField(default=False)
+    medida_cautelar_detalle = models.CharField(max_length=200, blank=True)  # detalle siempre que sea True
+
+    def __str__(self):
+        return f"Denuncia - Ficha {self.ficha.id}"
 
 class MotivoIngreso(models.Model):
     OPCIONES_MOTIVO = [
+        ('VIF_MUJER', 'Violencia Intrafamiliar contra la mujer'),
+        ('VIF_HOMBRE', 'Violencia Intrafamiliar contra el hombre'),
+        ('VIF_NNA', 'Violencia Intrafamiliar contra niño/niña'),
+        ('VIF_AM', 'Violencia Intrafamiliar contra adulto mayor'),
+        ('VULNERACION_NNA', 'Vulneración de derechos a NNA'),
+        # Puedes mantener otros motivos relevantes:
         ('FEMICIDIO', 'Femicidio'),
         ('PARRICIDIO', 'Parricidio'),
         ('SECUESTRO', 'Secuestro / Intento Secuestro'),
         ('DELITO_SEXUAL', 'Delito Sexual'),
         ('ROBO', 'Robo'),
-        ('VIF', 'Violencia Intrafamiliar (VIF)'),
         ('SUSTRACCION', 'Sustracción de Menores'),
         ('HOMICIDIO', 'Homicidio / Cuasidelito de Homicidio'),
         ('BALACERAS', 'Balas Locas / Balaceras'),
@@ -190,16 +218,41 @@ class MotivoIngreso(models.Model):
         ('AMENAZAS', 'Amenazas'),
         ('DAÑOS', 'Daños'),
         ('FALLECIMIENTO', 'Fallecimientos'),
-        ('OTROS', 'Otros'),
+        ('OTROS', 'Otro'),
     ]
 
     ficha = models.OneToOneField(FichaAcogida, on_delete=models.CASCADE)
     motivo_ingreso = models.CharField(max_length=50, choices=OPCIONES_MOTIVO)
+    motivo_otro = models.CharField(max_length=200, blank=True)  # Nuevo campo
     descripcion_motivo = models.TextField(blank=True)
 
 
+DIAGNOSTICO_CHOICES = [
+    ('estado_animo', 'Trastornos del estado de ánimo (depresión, bipolaridad, distimia)'),
+    ('ansiedad', 'Trastornos de ansiedad (ansiedad generalizada, crisis de pánico, fobias)'),
+    ('psicoticos', 'Trastornos psicóticos (esquizofrenia, delirante, psicosis no especificada)'),
+    ('personalidad', 'Trastornos de la personalidad (límite, antisocial, evitativa)'),
+    ('consumo', 'Trastornos por consumo de sustancias (alcohol, drogas, psicotrópicos)'),
+    ('neurodesarrollo', 'Trastornos del neurodesarrollo (autismo, TDAH, discapacidad intelectual leve)'),
+    ('conducta_alimentaria', 'Trastornos de la conducta alimentaria (anorexia, bulimia, atracón)'),
+    ('adaptativos', 'Trastornos adaptativos y reacción al estrés (estrés agudo, adaptativo, TEPT)'),
+    ('somatomorfos', 'Trastornos somatomorfos y psicosomáticos (somatización, dolor crónico sin causa médica)'),
+    ('disociativos', 'Trastornos disociativos (amnesia disociativa, despersonalización)'),
+    ('no_especificado', 'Problemas de salud mental no especificados (malestar emocional, síntomas inespecíficos)'),
+    ('otro', 'Otro (especifique)')
+]
 
 class AspectosPsicologicos(models.Model):
+    antecedentes = models.TextField(blank=True)
+    diagnostico = models.CharField(max_length=32, choices=DIAGNOSTICO_CHOICES, blank=True)
+    diagnostico_otro = models.CharField(max_length=100, blank=True)
+    atencion_salud_mental = models.BooleanField(default=False)
+    atencion_anio = models.CharField(max_length=4, blank=True)
+    atencion_lugar = models.CharField(max_length=100, blank=True)
+    internacion = models.BooleanField(default=False)
+    internacion_anio = models.CharField(max_length=4, blank=True)
+    internacion_lugar = models.CharField(max_length=100, blank=True)
+    afectacion_psicologica = models.TextField(blank=True)
     ficha = models.OneToOneField('FichaAcogida', on_delete=models.CASCADE)
 
     diagnostico_salud_mental = models.TextField(blank=True)
@@ -343,6 +396,17 @@ class PlanAccion(models.Model):
     uav_social_3 = models.BooleanField(default=False)
     uav_social_3_detalle = models.TextField(blank=True)
 
+    # UAV Atención Legal (checkbox + texto)
+
+    uav_legal_1 = models.BooleanField(default=False)
+    uav_legal_1_detalle = models.TextField(blank=True)
+
+    uav_legal_2 = models.BooleanField(default=False)
+    uav_legal_2_detalle = models.TextField(blank=True)
+
+    uav_legal_3 = models.BooleanField(default=False)
+    uav_legal_3_detalle = models.TextField(blank=True)
+    
     # Patrullaje Preventivo
     patrullaje_activo = models.BooleanField(default=False)
 
@@ -354,6 +418,8 @@ class PlanAccion(models.Model):
 
     patrullaje_turno_3 = models.BooleanField(default=False)
     patrullaje_entrevista_3 = models.BooleanField(default=False)
+
+    registro_patrullaje = models.CharField(max_length=20, blank=True)  # ej: 2025-0001
 
     # Profesional a cargo
     profesional_nathaly = models.BooleanField(default=False)
