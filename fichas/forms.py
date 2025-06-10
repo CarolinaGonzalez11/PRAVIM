@@ -5,6 +5,9 @@ from fichas.models import (
     AspectosPsicologicos, RedesApoyo, Egreso, Intervencion
 )
 
+
+
+
 # Validación para fechas posteriores a 2025
 def validar_fecha_2025(value):
     if value and value.year < 2025:
@@ -38,7 +41,11 @@ class FichaAcogidaForm(forms.ModelForm):
         widget=forms.RadioSelect,
         required=False,
     )    
-    
+    def clean(self):
+        cleaned = super().clean()
+        if not cleaned.get('fecha_recepcion'):
+            self.add_error('fecha_recepcion', "Debes ingresar la fecha de recepción.")
+        return cleaned
     class Meta:
         model = FichaAcogida
         exclude = ['profesional']
@@ -69,23 +76,135 @@ class FichaAcogidaForm(forms.ModelForm):
     def clean_fecha_contacto_3(self):
         return validar_fecha_2025(self.cleaned_data.get('fecha_contacto_3'))
 
+NACIONALIDADES_FRECUENTES = [
+    ('', '---------'),
+    ('Chile', 'Chilena'),
+    ('Venezuela', 'Venezolana'),
+    ('Perú', 'Peruana'),
+    ('Colombia', 'Colombiana'),
+    ('Haití', 'Haitiana'),
+    ('Bolivia', 'Boliviana'),
+    ('Argentina', 'Argentina'),
+    ('Ecuador', 'Ecuatoriana'),
+    ('R. Dominicana', 'Dominicana'),
+    ('Cuba', 'Cubana'),
+    ('Brasil', 'Brasileña'),
+    ('España', 'Española'),
+    ('China', 'China'),
+    ('Estados Unidos', 'Estadounidense'),
+    ('México', 'Mexicana'),
+    ('Alemania', 'Alemana'),
+    ('Francia', 'Francesa'),
+    ('Paraguay', 'Paraguaya'),
+    ('Uruguay', 'Uruguaya'),
+    ('Italia', 'Italiana'),
+    ('Otro', 'Otro'),
+]
+
+# Listado de CESFAM (igual que en tu modelo)
+CESFAM_CHOICES = [
+    ('', '---------'),
+    ('CESFAM Maipú (Pajaritos)', 'CESFAM Maipú (Pajaritos)'),
+    ('CESFAM Dra. Ana María Juricic', 'CESFAM Dra. Ana María Juricic'),
+    ('CESFAM Dr. Eduardo Ahués', 'CESFAM Dr. Eduardo Ahués'),
+    ('CESFAM Dr. Carlos Godoy', 'CESFAM Dr. Carlos Godoy'),
+    ('CESFAM Dr. Iván Insunza', 'CESFAM Dr. Iván Insunza'),
+    ('CESFAM Clotario Blest', 'CESFAM Clotario Blest'),
+    ('CESFAM Presidenta Michelle Bachelet', 'CESFAM Presidenta Michelle Bachelet'),
+    ('CESFAM Dr. Luis Ferrada', 'CESFAM Dr. Luis Ferrada'),
+    ('CESFAM Dr. Salvador Allende (El Abrazo)', 'CESFAM Dr. Salvador Allende (El Abrazo)'),
+    ('OTRO', 'Otro (especifique)'),
+]
+
+RANGO_ETAREO_CHOICES = [
+    ('', '---------'),
+    ('0-14', '0-14 años'),
+    ('15-17', '15-17 años'),
+    ('18-30', '18-30 años'),
+    ('31-40', '31-40 años'),
+    ('41-59', '41-59 años'),
+    ('60+', '60 años o más'),
+]
+
+
 class PersonaAtendidaForm(forms.ModelForm):
+    # CESFAM Dropdown + otro
+    cesfam = forms.ChoiceField(
+        choices=CESFAM_CHOICES,
+        required=False,
+        label="CESFAM Vinculante",
+        widget=forms.Select(attrs={'class': 'form-control', 'id': 'id_cesfam'})
+    )
+    cesfam_otro = forms.CharField(
+        required=False,
+        label="Otro CESFAM",
+        widget=forms.TextInput(attrs={'placeholder': 'Especifique CESFAM', 'id': 'id_cesfam_otro'})
+    )
+
+    # Nacionalidad Dropdown + otro
+    nacionalidad = forms.ChoiceField(
+        choices=NACIONALIDADES_FRECUENTES,
+        widget=forms.Select(attrs={
+            'class': 'form-control select2',
+            'data-placeholder': 'Seleccione o busque nacionalidad',
+            'id': 'id_nacionalidad',
+        }),
+        required=False,
+        label='Nacionalidad'
+    )
+    nacionalidad_otro = forms.CharField(
+        required=False,
+        widget=forms.TextInput(attrs={'placeholder': 'Especifique nacionalidad', 'id': 'id_nacionalidad_otro'}),
+        label='Otra nacionalidad'
+    )
+
+    # Género Otro
+    genero_otro = forms.CharField(
+        required=False,
+        widget=forms.TextInput(attrs={'placeholder': 'Especifique género', 'id': 'id_genero_otro'}),
+        label='Otro género'
+    )
+
+    # Rango etáreo (solo editable si no hay fecha de nacimiento)
+    rango_etareo = forms.ChoiceField(
+        choices=RANGO_ETAREO_CHOICES,
+        required=False,
+        widget=forms.Select(attrs={'class': 'form-control', 'id': 'id_rango_etareo'}),
+        label='Rango etáreo'
+    )
+
     class Meta:
         model = PersonaAtendida
-        exclude = ['ficha', 'edad', 'rango_etareo']
+        exclude = ['edad']
         widgets = {
-            'fecha_nacimiento': forms.DateInput(attrs={'type': 'date', 'max': date.today().isoformat()}),
+            'fecha_nacimiento': forms.DateInput(attrs={'type': 'date'}),
         }
-    def clean_fecha_nacimiento(self):
-        fecha = self.cleaned_data.get('fecha_nacimiento')
-        if fecha and fecha > date.today():
-            raise forms.ValidationError("La fecha de nacimiento no puede ser en el futuro.")
-        return fecha
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        # TODOS los campos opcionales por defecto
         for field in self.fields.values():
             field.required = False
 
+        # Rango etáreo: solo editable si no hay fecha_nacimiento
+        fecha = self.initial.get('fecha_nacimiento') or self.data.get('fecha_nacimiento')
+        if fecha:
+            self.fields['rango_etareo'].widget.attrs['disabled'] = 'disabled'
+        else:
+            self.fields['rango_etareo'].widget.attrs.pop('disabled', None)
+
+    def clean(self):
+        cleaned = super().clean()
+        # Género Otro
+        if cleaned.get('genero') == 'OTRO' and not cleaned.get('genero_otro', '').strip():
+            self.add_error('genero_otro', "Debes especificar el género si seleccionas 'Otro'.")
+        # Nacionalidad Otro
+        if cleaned.get('nacionalidad') == 'Otro' and not cleaned.get('nacionalidad_otro', '').strip():
+            self.add_error('nacionalidad_otro', "Debes especificar la nacionalidad si seleccionas 'Otro'.")
+        # CESFAM Otro
+        if cleaned.get('cesfam') == 'OTRO' and not cleaned.get('cesfam_otro', '').strip():
+            self.add_error('cesfam_otro', "Debes especificar el CESFAM si seleccionas 'Otro'.")
+        return cleaned
 
 class DenunciaForm(forms.ModelForm):
     DIFICULTADES_CHOICES = [
@@ -116,11 +235,11 @@ class DenunciaForm(forms.ModelForm):
             'medida_cautelar_detalle': forms.TextInput(attrs={'placeholder': 'Ej: Prohibición de acercamiento'}),
         }
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        for field in self.fields.values():
-            field.required = False  # todos opcionales
-
+    def clean(self):
+        cleaned = super().clean()
+        if cleaned.get('dificultades') == 'otra' and not cleaned.get('dificultades_otra', '').strip():
+            self.add_error('dificultades_otra', "Debes especificar la dificultad si seleccionas 'Otra'.")
+        return cleaned
 
 class MotivoIngresoForm(forms.ModelForm):
     class Meta:
@@ -136,13 +255,13 @@ class MotivoIngresoForm(forms.ModelForm):
             field.required = False  # Todos los campos opcionales por defecto
 
     def clean(self):
-        cleaned_data = super().clean()
-        motivo = cleaned_data.get('motivo_ingreso')
-        motivo_otro = cleaned_data.get('motivo_otro', '').strip()
-        if motivo == 'OTROS' and not motivo_otro:
+        cleaned = super().clean()
+        if not cleaned.get('motivo_ingreso'):
+            self.add_error('motivo_ingreso', "Debes ingresar el motivo principal de ingreso.")
+        if cleaned.get('motivo_ingreso') == 'OTROS' and not cleaned.get('motivo_otro', '').strip():
             self.add_error('motivo_otro', "Debes especificar el motivo si seleccionas 'Otro'.")
-        return cleaned_data
-
+        return cleaned
+    
 from django import forms
 from .models import AspectosPsicologicos
 
@@ -384,9 +503,13 @@ class IntervencionForm(forms.ModelForm):
         widgets = {
             'fecha': forms.DateInput(attrs={'type': 'date'}),
             'descripcion': forms.TextInput(attrs={'placeholder': 'Descripción...'}),
-            'objetivos': forms.TextInput(attrs={'placeholder': 'Objetivo/s...'}),
+            'responsables': forms.CheckboxSelectMultiple,
+            'objetivos': forms.CheckboxSelectMultiple,
+            'descripcion': forms.TextInput(attrs={'placeholder': 'Descripción...'}),
             'resultados': forms.TextInput(attrs={'placeholder': 'Resultados o sugerencias...'}),
-        }
+        }      
+      
+        
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

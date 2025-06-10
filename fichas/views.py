@@ -25,6 +25,7 @@ def crear_ficha_completa(request):
         form_psicologico = AspectosPsicologicosForm(request.POST)
         form_redes = RedesApoyoForm(request.POST)
         form_plan = PlanAccionForm(request.POST)
+        forms_list = [form_ficha, form_persona, form_denuncia, form_motivo, form_psicologico, form_redes, form_plan]
 
         if all([
             form_ficha.is_valid(),
@@ -72,6 +73,7 @@ def crear_ficha_completa(request):
         form_psicologico = AspectosPsicologicosForm()
         form_redes = RedesApoyoForm()
         form_plan = PlanAccionForm()
+        forms_list = [form_ficha, form_persona, form_denuncia, form_motivo, form_psicologico, form_redes, form_plan]
 
     return render(request, 'fichas/ficha_completa.html', {
         'form_ficha': form_ficha,
@@ -82,6 +84,8 @@ def crear_ficha_completa(request):
         'form_redes': form_redes,
         'form_plan': form_plan,
         'persona': form_persona.instance,
+        'forms_list': forms_list,   # <-- agrega esto
+
     })
 
 
@@ -353,7 +357,7 @@ def api_intervencion_guardar(request, ficha_id):
                 objetivos=data.get("objetivos", ""),
                 descripcion=data.get("descripcion", ""),
                 resultados=data.get("resultados", ""),
-                profesional=request.user
+                profesional=request.user,
             )
             return JsonResponse({
                 "success": True,
@@ -367,6 +371,7 @@ def api_intervencion_guardar(request, ficha_id):
                 "objetivos": interv.objetivos,
                 "descripcion": interv.descripcion,
                 "resultados": interv.resultados,
+
             })
         except Exception as e:
             return JsonResponse({"success": False, "error": str(e)})
@@ -409,6 +414,7 @@ def api_intervencion_editar(request, intervencion_id):
                 "objetivos": interv.objetivos,
                 "descripcion": interv.descripcion,
                 "resultados": interv.resultados,
+
             })
         except Exception as e:
             return JsonResponse({"success": False, "error": str(e)})
@@ -517,3 +523,19 @@ def dashboard(request):
         }
     }
     return render(request, "fichas/dashboard.html", context)
+
+from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse
+
+@csrf_exempt
+@login_required
+def api_intervencion_eliminar(request, intervencion_id):
+    if request.method == "POST":
+        try:
+            from .models import Intervencion
+            interv = Intervencion.objects.get(id=intervencion_id)
+            interv.delete()
+            return JsonResponse({"success": True})
+        except Exception as e:
+            return JsonResponse({"success": False, "error": str(e)})
+    return JsonResponse({"success": False, "error": "Método no permitido"})

@@ -13,5 +13,6 @@ urlpatterns = [
     path('api/intervencion/editar/<int:intervencion_id>/', views.api_intervencion_editar, name='api_intervencion_editar'),
     path('gestionar-egreso/<int:ficha_id>/', views.gestionar_egreso, name='gestionar_egreso'),
     path('dashboard/', views.dashboard, name='dashboard'),
+    path('api/intervencion/eliminar/<int:intervencion_id>/', views.api_intervencion_eliminar, name='api_intervencion_eliminar'),
 
 ]

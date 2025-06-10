@@ -92,20 +92,33 @@ class FichaAcogida(models.Model):
     def __str__(self):
         return f"Ficha {self.id} - {self.fecha_recepcion}"
 
+from django.db import models
+from datetime import date
 
-
+RANGO_ETAREO_CHOICES = [
+    ('0-14', '0-14 años'),
+    ('15-17', '15-17 años'),
+    ('18-30', '18-30 años'),
+    ('31-40', '31-40 años'),
+    ('41-59', '41-59 años'),
+    ('60+', '60 años o más'),   
+    ]
 
 class PersonaAtendida(models.Model):
     GENERO_CHOICES = [
         ('FEMENINO', 'Femenino'),
         ('MASCULINO', 'Masculino'),
+        ('TRANSMASCULINO', 'Transmasculino'),        
+        ('TRANSFEMENINA', 'Transfemenina'),
         ('NO_BINARIO', 'No Binario'),
         ('OTRO', 'Otro'),
     ]
     PREVISION_CHOICES = [
         ('FONASA', 'FONASA'),
         ('ISAPRE', 'ISAPRE'),
+        ('CAPREDENA', 'CAPREDENA'), 
         ('NINGUNA', 'Ninguna'),
+        
     ]
     ESTADO_CIVIL_CHOICES = [
         ('SOLTERO', 'Soltero'),
@@ -116,6 +129,21 @@ class PersonaAtendida(models.Model):
         ('ANULADO', 'Anulado'),
         ('CONVIVIENTE', 'Conviviente'),
     ]
+
+    CESFAM_CHOICES = [
+        ('', '---------'),
+        ('CESFAM Maipú (Pajaritos)', 'CESFAM Maipú (Pajaritos)'),
+        ('CESFAM Dra. Ana María Juricic', 'CESFAM Dra. Ana María Juricic'),
+        ('CESFAM Dr. Eduardo Ahués', 'CESFAM Dr. Eduardo Ahués'),
+        ('CESFAM Dr. Carlos Godoy', 'CESFAM Dr. Carlos Godoy'),
+        ('CESFAM Dr. Iván Insunza', 'CESFAM Dr. Iván Insunza'),
+        ('CESFAM Clotario Blest', 'CESFAM Clotario Blest'),
+        ('CESFAM Presidenta Michelle Bachelet', 'CESFAM Presidenta Michelle Bachelet'),
+        ('CESFAM Dr. Luis Ferrada', 'CESFAM Dr. Luis Ferrada'),
+        ('CESFAM Dr. Salvador Allende (El Abrazo)', 'CESFAM Dr. Salvador Allende (El Abrazo)'),
+        ('OTRO', 'Otro (especifique)'),
+    ]
+
     ficha = models.OneToOneField(FichaAcogida, on_delete=models.CASCADE)
     nombre = models.CharField(max_length=200, blank=True)
     rut_pasaporte = models.CharField(max_length=20, blank=True)
@@ -124,12 +152,15 @@ class PersonaAtendida(models.Model):
     nacionalidad = models.CharField(max_length=50, blank=True)
     estado_civil = models.CharField(max_length=20, choices=ESTADO_CIVIL_CHOICES, blank=True)
     prevision = models.CharField(max_length=20, choices=PREVISION_CHOICES, blank=True)
-    cesfam = models.CharField(max_length=100, blank=True)
+    cesfam = models.CharField(max_length=100, choices=CESFAM_CHOICES, blank=True)
+    cesfam_otro = models.CharField(max_length=100, blank=True)  # campo para especificar si seleccionan Otro
     ocupacion = models.CharField(max_length=100, blank=True)
     villa = models.CharField(max_length=100, blank=True)
     genero = models.CharField(max_length=20, choices=GENERO_CHOICES, blank=True)
+    genero_otro = models.CharField(max_length=50, blank=True)  # <--- AGREGA ESTA LÍNEA
+
     edad = models.PositiveIntegerField(null=True, blank=True)
-    rango_etareo = models.CharField(max_length=10, blank=True)
+    rango_etareo = models.CharField(max_length=10, choices=RANGO_ETAREO_CHOICES, blank=True)
     discapacidad = models.BooleanField(default=False)
     etnia = models.BooleanField(default=False)
     diversidad = models.BooleanField(default=False)
@@ -337,6 +368,7 @@ class Intervencion(models.Model):
         ('Social', 'Social'),
         ('Psicosocial', 'Psicosocial'),
         ('Vinculación con red', 'Vinculación con red'),
+        ('Taller de duelo', 'Taller de duelo'),        
         ('Otra', 'Otra'),
     ]
 
@@ -354,13 +386,15 @@ class Intervencion(models.Model):
     fecha = models.DateField()
     etapa = models.CharField(max_length=50, choices=ETAPA_CHOICES)
     tipo_intervencion = models.CharField(max_length=50, choices=TIPO_ATENCION_CHOICES)
-    responsables = models.CharField(max_length=200, blank=True)
     participantes = models.CharField(max_length=200, blank=True)
     lugar_via = models.CharField(max_length=50, choices=LUGAR_VIA_CHOICES)
     objetivos = models.TextField(blank=True)
     descripcion = models.TextField(blank=True)
     resultados = models.TextField(blank=True)
     profesional = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT)
+    
+    responsables = ArrayField(models.CharField(max_length=100), blank=True, null=True)
+    objetivos = ArrayField(models.CharField(max_length=300), blank=True, null=True)
 
     def __str__(self):
         return f"Intervención {self.fecha} - Ficha {self.ficha.id}"

@@ -14,7 +14,7 @@
     table {
         border-collapse: collapse;
         width: 100%;
-        min-width: 1200px;
+        min-width: 1400px;
         background: white;
         border-radius: 8px;
         overflow: hidden;
@@ -87,6 +87,14 @@
         outline: 1.3px solid #204d9b;
         background: #f4f6fb;
     }
+    th.col-objetivos, td.col-objetivos {
+        min-width: 500px !important;
+        max-width: 580px;
+        width: 38vw;
+        word-break: break-word;
+        white-space: pre-line;
+    }
+
 </style>
 
 {% if ficha %}
@@ -106,9 +114,9 @@
                 <th>Responsables/es</th>
                 <th>Participantes</th>
                 <th>Lugar o Vía de Intervención</th>
-                <th>Objetivo/s</th>
-                <th>Descripción</th>
-                <th>Resultados/Sugerencias</th>
+                <th class="col-objetivos">Objetivo/s de intervención</th>
+                <th>Descripción de la intervención</th>
+                <th>Resultados/sugerencias y Proyección de la intervención</th>
                 <th>Acción</th>
             </tr>
         </thead>
@@ -150,7 +158,7 @@
                         <option value="Otra">Otra</option>
                     </select>
                 </td>
-                <td><input name="responsables" type="text"></td>
+                <td data-field="responsables"></td>
                 <td><input name="participantes" type="text"></td>
                 <td>
                     <select name="lugar_via">
@@ -164,7 +172,7 @@
                         <option value="Otro">Otro</option>
                     </select>
                 </td>
-                <td><input name="objetivos" type="text"></td>
+                <td data-field="objetivos"></td>
                 <td><input name="descripcion" type="text"></td>
                 <td><input name="resultados" type="text"></td>
                 <td>
@@ -175,155 +183,10 @@
     </table>
 </div>
 
+<!-- PASA LA URL Y EL TOKEN AL JS EXTERNO -->
 <script>
-function obtenerDatosDeFila(tr) {
-    let datos = {};
-    tr.querySelectorAll('input, select').forEach(el => {
-        datos[el.name] = el.value;
-    });
-    return datos;
-}
-
-function agregarIntervencion(event) {
-    event.preventDefault();
-    let fila = document.getElementById('nueva-intervencion');
-    let datos = obtenerDatosDeFila(fila);
-
-    // Validación simple (ejemplo: obligatorio fecha, etapa, tipo_intervencion)
-    if (!datos.fecha || !datos.etapa || !datos.tipo_intervencion) {
-        alert("Debe ingresar al menos Fecha, Etapa y Tipo de Atención");
-        return;
-    }
-
-    fetch("{% url 'fichas:api_intervencion_guardar' ficha.id %}", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            "X-CSRFToken": "{{ csrf_token }}",
-        },
-        body: JSON.stringify(datos)
-    }).then(resp => resp.json())
-    .then(data => {
-        if (data.success) {
-            let nueva = document.createElement('tr');
-            nueva.setAttribute('data-id', data.id);
-            nueva.innerHTML = `
-                <td>${data.fecha}</td>
-                <td>${data.etapa}</td>
-                <td>${data.tipo_intervencion}</td>
-                <td>${data.responsables || ""}</td>
-                <td>${data.participantes || ""}</td>
-                <td>${data.lugar_via || ""}</td>
-                <td>${data.objetivos || ""}</td>
-                <td>${data.descripcion || ""}</td>
-                <td>${data.resultados || ""}</td>
-                <td><button type="button" class="btn-edit" onclick="editarFila(this)">Editar</button></td>
-            `;
-            document.getElementById('body-intervenciones').insertBefore(nueva, fila);
-            fila.querySelectorAll('input, select').forEach(el => el.value = "");
-        } else {
-            alert("Error al guardar intervención: " + (data.error || ""));
-        }
-    });
-}
-
-function editarFila(btn) {
-    let tr = btn.closest('tr');
-    let valores = [];
-    tr.querySelectorAll('td').forEach((td, idx) => {
-        if (idx < 9) valores.push(td.textContent);
-    });
-
-    tr.innerHTML = `
-        <td><input name="fecha" type="date" value="${valores[0].trim()}"></td>
-        <td>
-            <select name="etapa">
-                <option value="Diagnóstico" ${valores[1].includes("Diagnóstico") ? "selected" : ""}>Diagnóstico</option>
-                <option value="Intervención" ${valores[1].includes("Intervención") ? "selected" : ""}>Intervención</option>
-                <option value="Preparación Egreso/Egreso" ${valores[1].includes("Egreso") ? "selected" : ""}>Preparación Egreso/Egreso</option>
-            </select>
-        </td>
-        <td>
-            <select name="tipo_intervencion">
-                <option value="Psicológica" ${valores[2].includes("Psicológica") ? "selected" : ""}>Psicológica</option>
-                <option value="Social" ${valores[2].includes("Social") ? "selected" : ""}>Social</option>
-                <option value="Psicosocial" ${valores[2].includes("Psicosocial") ? "selected" : ""}>Psicosocial</option>
-                <option value="Vinculación con red" ${valores[2].includes("Vinculación") ? "selected" : ""}>Vinculación con red</option>
-                <option value="Otra" ${valores[2].includes("Otra") ? "selected" : ""}>Otra</option>
-            </select>
-        </td>
-        <td><input name="responsables" type="text" value="${valores[3].trim()}"></td>
-        <td><input name="participantes" type="text" value="${valores[4].trim()}"></td>
-        <td>
-            <select name="lugar_via">
-                <option value="Domicilio" ${valores[5].includes("Domicilio") ? "selected" : ""}>Domicilio</option>
-                <option value="Otro sitio en terreno" ${valores[5].includes("terreno") ? "selected" : ""}>Otro sitio en terreno</option>
-                <option value="Contacto telefónico" ${valores[5].includes("teléfono") ? "selected" : ""}>Contacto telefónico</option>
-                <option value="Video llamada" ${valores[5].includes("Video") ? "selected" : ""}>Video llamada</option>
-                <option value="Dependencias UAV" ${valores[5].includes("Dependencias") ? "selected" : ""}>Dependencias UAV</option>
-                <option value="Correo, e-mail" ${valores[5].includes("Correo") ? "selected" : ""}>Correo, e-mail</option>
-                <option value="Otro" ${valores[5].includes("Otro") ? "selected" : ""}>Otro</option>
-            </select>
-        </td>
-        <td><input name="objetivos" type="text" value="${valores[6].trim()}"></td>
-        <td><input name="descripcion" type="text" value="${valores[7].trim()}"></td>
-        <td><input name="resultados" type="text" value="${valores[8].trim()}"></td>
-        <td>
-            <button class="btn-save" onclick="guardarEdicion(event, this)">Guardar</button>
-            <button class="btn-cancel" onclick="cancelarEdicion(event, this, valores)">Descartar</button>
-        </td>
-    `;
-}
-
-function guardarEdicion(event, btn) {
-    event.preventDefault();
-    let tr = btn.closest('tr');
-    let id = tr.getAttribute('data-id');
-    let datos = obtenerDatosDeFila(tr);
-
-    fetch(`/fichas/api/intervencion/editar/${id}/`, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            "X-CSRFToken": "{{ csrf_token }}",
-        },
-        body: JSON.stringify(datos)
-    }).then(resp => resp.json())
-    .then(data => {
-        if (data.success) {
-            tr.innerHTML = `
-                <td>${data.fecha}</td>
-                <td>${data.etapa}</td>
-                <td>${data.tipo_intervencion}</td>
-                <td>${data.responsables || ""}</td>
-                <td>${data.participantes || ""}</td>
-                <td>${data.lugar_via || ""}</td>
-                <td>${data.objetivos || ""}</td>
-                <td>${data.descripcion || ""}</td>
-                <td>${data.resultados || ""}</td>
-                <td><button type="button" class="btn-edit" onclick="editarFila(this)">Editar</button></td>
-            `;
-        } else {
-            alert("Error al actualizar intervención: " + (data.error || ""));
-        }
-    });
-}
-
-function cancelarEdicion(event, btn, valores) {
-    event.preventDefault();
-    let tr = btn.closest('tr');
-    tr.innerHTML = `
-        <td>${valores[0]}</td>
-        <td>${valores[1]}</td>
-        <td>${valores[2]}</td>
-        <td>${valores[3]}</td>
-        <td>${valores[4]}</td>
-        <td>${valores[5]}</td>
-        <td>${valores[6]}</td>
-        <td>${valores[7]}</td>
-        <td>${valores[8]}</td>
-        <td><button type="button" class="btn-edit" onclick="editarFila(this)">Editar</button></td>
-    `;
-}
+    const AGREGAR_INTERVENCION_URL = "{% url 'fichas:api_intervencion_guardar' ficha.id %}";
+    const CSRF_TOKEN = "{{ csrf_token }}";
 </script>
+<script src="{% static 'fichas/js/ingresar_intervencion.js' %}"></script>
 {% endblock %}

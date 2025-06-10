@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load widget_tweaks %}
 {% block content %}
 
 <style>
@@ -207,6 +208,31 @@ textarea {
 
 </style>
 
+{% comment %} ALERTA DE ERRORES GLOBAL {% endcomment %}
+{% if form_ficha.errors or form_persona.errors or form_denuncia.errors or form_motivo.errors or form_psicologico.errors or form_redes.errors or form_plan.errors %}
+  <div class="alert alert-danger" style="margin-bottom:20px;">
+    <ul style="margin-bottom:0;">
+      {# Errores por campo de todos los formularios #}
+      {% for form in forms_list %}
+
+        {% for field in form %}
+          {% for error in field.errors %}
+            <li>
+              <strong>{{ field.label }}:</strong> {{ error }}
+            </li>
+          {% endfor %}
+        {% endfor %}
+        {# Errores no asociados a campos (del método clean()) #}
+        {% for error in form.non_field_errors %}
+          <li>
+            {{ error }}
+          </li>
+        {% endfor %}
+      {% endfor %}
+    </ul>
+  </div>
+{% endif %}
+
 
  
 <div class="container mt-4">
@@ -274,13 +300,60 @@ textarea {
                             <tbody>
                                 <tr><td class="label-cell">Nombre</td><td class="input-cell">{{ form_persona.nombre }}</td></tr>
                                 <tr><td class="label-cell">RUT / Nº Pasaporte</td><td class="input-cell">{{ form_persona.rut_pasaporte }}</td></tr>
-                                <tr><td class="label-cell">Género</td><td class="input-cell">{{ form_persona.genero }}</td></tr>
+                                <tr>
+                                    <td class="label-cell">Género</td>
+                                    <td class="input-cell">
+                                        {{ form_persona.genero|add_class:"select-genero" }}
+                                        <div id="genero-otro-campo" style="display:none; margin-top:6px;">
+                                            {{ form_persona.genero_otro }}
+                                        </div>
+                                    </td>
+                                </tr>
+
                                 <tr><td class="label-cell">Teléfono</td><td class="input-cell">{{ form_persona.telefono }}</td></tr>
                                 <tr><td class="label-cell">Fecha de Nacimiento</td><td class="input-cell">{{ form_persona.fecha_nacimiento }}</td></tr>
-                                <tr><td class="label-cell">País de Nacionalidad</td><td class="input-cell">{{ form_persona.nacionalidad }}</td></tr>
+                                <tr id="fila-rango-etareo">
+                                    <td class="label-cell">Rango etáreo</td>
+                                    <td class="input-cell">
+                                        <div id="rango-etareo-select-wrapper">
+                                            {{ form_persona.rango_etareo|add_class:"select-rango-etareo" }}
+                                        </div>
+                                        <div id="rango-etareo-readonly-wrapper" style="display:none;">
+                                            <input type="text"
+                                                id="rango-etareo-readonly"
+                                                class="form-control"
+                                                value=""
+                                                readonly>
+                                        </div>
+                                    </td>
+                                </tr>
+
+
+                                
+
+                                <tr>
+                                    <td class="label-cell">País de Nacionalidad</td>
+                                    <td class="input-cell">
+                                        {{ form_persona.nacionalidad|add_class:"select2" }}
+                                        <div id="nacionalidad-otro-campo" style="display:none; margin-top:6px;">
+                                            {{ form_persona.nacionalidad_otro }}
+                                        </div>
+                                    </td>
+
+                                </tr>
+                                
+
                                 <tr><td class="label-cell">Estado Civil</td><td class="input-cell">{{ form_persona.estado_civil }}</td></tr>
                                 <tr><td class="label-cell">Previsión</td><td class="input-cell">{{ form_persona.prevision }}</td></tr>
-                                <tr><td class="label-cell">CESFAM Vinculante</td><td class="input-cell">{{ form_persona.cesfam }}</td></tr>
+                                <tr>
+                                    <td class="label-cell">CESFAM Vinculante</td>
+                                    <td class="input-cell">
+                                        {{ form_persona.cesfam }}
+                                        <div id="cesfam-otro-campo" style="display:none; margin-top:6px;">
+                                            {{ form_persona.cesfam_otro }}
+                                        </div>
+                                    </td>
+                                </tr>
                                 <tr><td class="label-cell">Ocupación</td><td class="input-cell">{{ form_persona.ocupacion }}</td></tr>
                                 <tr class="espacio-fila"><td colspan="2"></td></tr>
                                 <tr><td class="label-cell">Dirección</td><td class="input-cell">{{ form_persona.direccion }}</td></tr>
@@ -309,7 +382,7 @@ textarea {
                             <tbody>
                                 <!-- Siempre visibles -->
                                 <tr>
-                                    <td class="label-cell">¿Tiene denuncia?</td>
+                                    <td class="label-cell">¿Realizó denuncia?</td>
                                     <td class="input-cell">{{ form_denuncia.tiene_denuncia }}</td>
                                 </tr>
                                 <tr>

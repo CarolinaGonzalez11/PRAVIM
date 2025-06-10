@@ -189,3 +189,97 @@ document.addEventListener('DOMContentLoaded', function() {
         togglePatrullajeCampos();
     }
 });
+
+document.addEventListener('DOMContentLoaded', function () {
+    const fechaNacimiento = document.getElementById('id_fecha_nacimiento');
+    const rangoEtareoSelectWrapper = document.getElementById('rango-etareo-select-wrapper');
+    const rangoEtareoSelect = document.querySelector('.select-rango-etareo');
+    const rangoEtareoReadonlyWrapper = document.getElementById('rango-etareo-readonly-wrapper');
+    const rangoEtareoReadonly = document.getElementById('rango-etareo-readonly');
+
+    function obtenerTextoSeleccionado(selectElement) {
+        if (!selectElement) return '';
+        const selectedOption = selectElement.options[selectElement.selectedIndex];
+        return selectedOption ? selectedOption.text : '';
+    }
+
+    function toggleRangoEtareo() {
+        if (fechaNacimiento && fechaNacimiento.value) {
+            // Oculta el select y muestra el readonly
+            if (rangoEtareoSelectWrapper) rangoEtareoSelectWrapper.style.display = 'none';
+            if (rangoEtareoReadonlyWrapper) rangoEtareoReadonlyWrapper.style.display = '';
+            if (rangoEtareoSelect) rangoEtareoSelect.setAttribute('disabled', 'disabled');
+            if (rangoEtareoReadonly) {
+                // Mostrar el texto del rango etáreo actualmente seleccionado
+                rangoEtareoReadonly.value = obtenerTextoSeleccionado(rangoEtareoSelect);
+            }
+        } else {
+            // Muestra el select editable y oculta el campo readonly
+            if (rangoEtareoSelectWrapper) rangoEtareoSelectWrapper.style.display = '';
+            if (rangoEtareoReadonlyWrapper) rangoEtareoReadonlyWrapper.style.display = 'none';
+            if (rangoEtareoSelect) rangoEtareoSelect.removeAttribute('disabled');
+        }
+    }
+
+    if (fechaNacimiento) {
+        fechaNacimiento.addEventListener('change', toggleRangoEtareo);
+        // Ejecutar también al cargar
+        toggleRangoEtareo();
+    }
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+    const generoSelect = document.querySelector('.select-genero');
+    const generoOtroCampo = document.getElementById('genero-otro-campo');
+    if (generoSelect && generoOtroCampo) {
+        function toggleGeneroOtro() {
+            // Usa el valor "OTRO" porque así está en tu modelo
+            generoOtroCampo.style.display = (generoSelect.value === 'OTRO') ? 'block' : 'none';
+        }
+        generoSelect.addEventListener('change', toggleGeneroOtro);
+        toggleGeneroOtro();
+    }
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Inicializa select2 si no está inicializado
+    $('.select2').select2({
+        width: '100%',
+        placeholder: 'Seleccione o busque nacionalidad',
+        allowClear: true
+    });
+
+    function toggleNacionalidadOtro() {
+        // El valor puede ser null, "" o "Otro"
+        var val = $('#id_nacionalidad').val();
+        if (val && val.toLowerCase() === 'otro') {
+            $('#nacionalidad-otro-campo').show();
+        } else {
+            $('#nacionalidad-otro-campo').hide();
+            $('#id_nacionalidad_otro').val('');
+        }
+    }
+
+    // Usar ambos eventos para asegurar compatibilidad con select2 y selects normales
+    $('#id_nacionalidad').on('change.select2 change', toggleNacionalidadOtro);
+    toggleNacionalidadOtro(); // Ejecutar al cargar
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+    const cesfamSelect = document.getElementById('id_cesfam');
+    const cesfamOtroCampo = document.getElementById('cesfam-otro-campo');
+    function toggleCesfamOtro() {
+        if (cesfamSelect && cesfamOtroCampo) {
+            cesfamOtroCampo.style.display = (cesfamSelect.value === 'OTRO') ? 'block' : 'none';
+            // Limpia el campo si se cambia a otra opción
+            if (cesfamSelect.value !== 'OTRO') {
+                const input = cesfamOtroCampo.querySelector('input, textarea');
+                if (input) input.value = '';
+            }
+        }
+    }
+    if (cesfamSelect && cesfamOtroCampo) {
+        cesfamSelect.addEventListener('change', toggleCesfamOtro);
+        toggleCesfamOtro(); // Estado inicial
+    }
+});
