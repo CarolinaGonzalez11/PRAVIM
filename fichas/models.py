@@ -402,14 +402,6 @@ class Intervencion(models.Model):
 class PlanAccion(models.Model):
     ficha = models.OneToOneField(FichaAcogida, on_delete=models.CASCADE)
 
-    # Derivación CAVD
-    derivacion_cavd_psicologica = models.BooleanField(default=False)
-    derivacion_cavd_juridica = models.BooleanField(default=False)
-
-    # Derivación CESFAM
-    derivacion_cesfam_salud_general = models.BooleanField(default=False)
-    derivacion_cesfam_salud_mental = models.BooleanField(default=False)
-
     # UAV Atención Psicológica (checkbox + texto)
     uav_psicologica_1 = models.BooleanField(default=False)
     uav_psicologica_1_detalle = models.TextField(blank=True)
@@ -462,3 +454,152 @@ class PlanAccion(models.Model):
     
     def __str__(self):
         return f"Plan de Acción - Ficha {self.ficha.id}"
+
+
+
+# Opciones de CESFAM para derivaciones de salud (copiado de PersonaAtendida)
+CESFAM_CHOICES = [
+    ('', '---------'),
+    ('CESFAM Maipú (Pajaritos)', 'CESFAM Maipú (Pajaritos)'),
+    ('CESFAM Dra. Ana María Juricic', 'CESFAM Dra. Ana María Juricic'),
+    ('CESFAM Dr. Eduardo Ahués', 'CESFAM Dr. Eduardo Ahués'),
+    ('CESFAM Dr. Carlos Godoy', 'CESFAM Dr. Carlos Godoy'),
+    ('CESFAM Dr. Iván Insunza', 'CESFAM Dr. Iván Insunza'),
+    ('CESFAM Clotario Blest', 'CESFAM Clotario Blest'),
+    ('CESFAM Presidenta Michelle Bachelet', 'CESFAM Presidenta Michelle Bachelet'),
+    ('CESFAM Dr. Luis Ferrada', 'CESFAM Dr. Luis Ferrada'),
+    ('CESFAM Dr. Salvador Allende (El Abrazo)', 'CESFAM Dr. Salvador Allende (El Abrazo)'),
+    ('OTRO', 'Otro (especifique)'),
+]
+
+class DerivacionCavd(models.Model):
+    ficha = models.OneToOneField(FichaAcogida, on_delete=models.CASCADE, related_name='derivacion_cavd')
+    descripcion_cavd = models.TextField(blank=True)
+    fecha_derivacion_cavd = models.DateField(null=True, blank=True)
+    es_vinculacion_cavd = models.BooleanField(default=False)
+    fecha_respuesta_cavd = models.DateField(null=True, blank=True)
+    ingresa_cavd = models.BooleanField(default=False)
+    fecha_ingreso_cavd = models.DateField(null=True, blank=True)
+    es_conmocion_publica_cavd = models.BooleanField(default=False)
+    fecha_vinculacion_conmocion_cavd = models.DateField(null=True, blank=True)
+
+    def __str__(self):
+        return f"Derivación CAVD - Ficha {self.ficha.id}"
+
+class DerivacionUravit(models.Model):
+    ficha = models.OneToOneField(FichaAcogida, on_delete=models.CASCADE, related_name='derivacion_uravit')
+    descripcion_uravit = models.TextField(blank=True)
+    fecha_derivacion_uravit = models.DateField(null=True, blank=True)
+    es_vinculacion_uravit = models.BooleanField(default=False)
+    fecha_respuesta_uravit = models.DateField(null=True, blank=True)
+
+    def __str__(self):
+        return f"Derivación URAVIT - Ficha {self.ficha.id}"
+
+class DerivacionCdmCai(models.Model):
+    ficha = models.OneToOneField(FichaAcogida, on_delete=models.CASCADE, related_name='derivacion_cdm_cai')
+    descripcion_cdm_cai = models.TextField(blank=True)
+    fecha_derivacion_cdm_cai = models.DateField(null=True, blank=True)
+    es_vinculacion_cdm_cai = models.BooleanField(default=False)
+    fecha_respuesta_cdm_cai = models.DateField(null=True, blank=True)
+    ingresa_cdm_cai = models.BooleanField(default=False)
+    fecha_ingreso_cdm_cai = models.DateField(null=True, blank=True)
+
+    def __str__(self):
+        return f"Derivación CDM-CAI - Ficha {self.ficha.id}"
+
+class DerivacionSalud(models.Model):
+    ficha = models.OneToOneField(FichaAcogida, on_delete=models.CASCADE, related_name='derivacion_salud')
+    dispositivo_salud = models.CharField(max_length=100, choices=CESFAM_CHOICES, blank=True)
+    fecha_derivacion_salud = models.DateField(null=True, blank=True)
+    es_vinculacion_salud = models.BooleanField(default=False)
+    fecha_respuesta_salud = models.DateField(null=True, blank=True)
+    ingresa_salud = models.BooleanField(default=False)
+    fecha_ingreso_salud = models.DateField(null=True, blank=True)
+    dispositivo_salud_otro = models.CharField(max_length=100, blank=True)
+
+    def __str__(self):
+        return f"Derivación Salud - Ficha {self.ficha.id}"
+
+# Para los demás tipos con campos comunes:
+COMMON_FIELDS = {
+    'descripcion': (models.TextField, {}),
+    'fecha_derivacion': (models.DateField, {'null': True, 'blank': True}),
+    'es_vinculacion': (models.BooleanField, {'default': False}),
+    'fecha_respuesta': (models.DateField, {'null': True, 'blank': True}),
+    'ingresa': (models.BooleanField, {'default': False}),
+    'fecha_ingreso': (models.DateField, {'null': True, 'blank': True}),
+}
+
+class DerivacionOfam(models.Model):
+    ficha = models.OneToOneField(FichaAcogida, on_delete=models.CASCADE, related_name='derivacion_ofam')
+    descripcion_ofam = models.TextField(blank=True)
+    fecha_derivacion_ofam = models.DateField(null=True, blank=True)
+    es_vinculacion_ofam = models.BooleanField(default=False)
+    fecha_respuesta_ofam = models.DateField(null=True, blank=True)
+    ingresa_ofam = models.BooleanField(default=False)
+    fecha_ingreso_ofam = models.DateField(null=True, blank=True)
+
+    def __str__(self):
+        return f"Derivación OFAM - Ficha {self.ficha.id}"
+
+class DerivacionDideco(models.Model):
+    ficha = models.OneToOneField(FichaAcogida, on_delete=models.CASCADE, related_name='derivacion_dideco')
+    descripcion_dideco = models.TextField(blank=True)
+    fecha_derivacion_dideco = models.DateField(null=True, blank=True)
+    es_vinculacion_dideco = models.BooleanField(default=False)
+    fecha_respuesta_dideco = models.DateField(null=True, blank=True)
+    ingresa_dideco = models.BooleanField(default=False)
+    fecha_ingreso_dideco = models.DateField(null=True, blank=True)
+
+    def __str__(self):
+        return f"Derivación DIDECO - Ficha {self.ficha.id}"
+
+class DerivacionGestionTerritorial(models.Model):
+    ficha = models.OneToOneField(FichaAcogida, on_delete=models.CASCADE, related_name='derivacion_gestion_territorial')
+    descripcion_gestion_territorial = models.TextField(blank=True)
+    fecha_derivacion_gestion_territorial = models.DateField(null=True, blank=True)
+    es_vinculacion_gestion_territorial = models.BooleanField(default=False)
+    fecha_respuesta_gestion_territorial = models.DateField(null=True, blank=True)
+    ingresa_gestion_territorial = models.BooleanField(default=False)
+    fecha_ingreso_gestion_territorial = models.DateField(null=True, blank=True)
+
+    def __str__(self):
+        return f"Derivación Gestión Territorial - Ficha {self.ficha.id}"
+
+class DerivacionCapsUdla(models.Model):
+    ficha = models.OneToOneField(FichaAcogida, on_delete=models.CASCADE, related_name='derivacion_caps_udla')
+    descripcion_caps_udla = models.TextField(blank=True)
+    fecha_derivacion_caps_udla = models.DateField(null=True, blank=True)
+    es_vinculacion_caps_udla = models.BooleanField(default=False)
+    fecha_respuesta_caps_udla = models.DateField(null=True, blank=True)
+    ingresa_caps_udla = models.BooleanField(default=False)
+    fecha_ingreso_caps_udla = models.DateField(null=True, blank=True)
+
+    def __str__(self):
+        return f"Derivación CAPS UDLA - Ficha {self.ficha.id}"
+
+class DerivacionOln(models.Model):
+    ficha = models.OneToOneField(FichaAcogida, on_delete=models.CASCADE, related_name='derivacion_oln')
+    descripcion_oln = models.TextField(blank=True)
+    fecha_derivacion_oln = models.DateField(null=True, blank=True)
+    es_vinculacion_oln = models.BooleanField(default=False)
+    fecha_respuesta_oln = models.DateField(null=True, blank=True)
+    ingresa_oln = models.BooleanField(default=False)
+    fecha_ingreso_oln = models.DateField(null=True, blank=True)
+
+    def __str__(self):
+        return f"Derivación OLN - Ficha {self.ficha.id}"
+
+class DerivacionOtro(models.Model):
+    ficha = models.OneToOneField(FichaAcogida, on_delete=models.CASCADE, related_name='derivacion_otro')
+    institucion_otro = models.CharField(max_length=200, blank=True)
+    descripcion_otro = models.TextField(blank=True)
+    fecha_derivacion_otro = models.DateField(null=True, blank=True)
+    es_vinculacion_otro = models.BooleanField(default=False)
+    fecha_respuesta_otro = models.DateField(null=True, blank=True)
+    ingresa_otro = models.BooleanField(default=False)
+    fecha_ingreso_otro = models.DateField(null=True, blank=True)
+
+    def __str__(self):
+        return f"Derivación Otro - Ficha {self.ficha.id}"

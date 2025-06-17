@@ -447,17 +447,10 @@ class AspectosPsicologicosForm(forms.ModelForm):
 
     def clean(self):
         cleaned = super().clean()
-        # Validar diagnóstico
+        # Validar diagnóstico otro (esto sí tiene sentido mantener)
         if cleaned.get('diagnostico') == 'otro' and not cleaned.get('diagnostico_otro'):
             self.add_error('diagnostico_otro', "Debes especificar el diagnóstico si seleccionas 'Otro'.")
-        # Validar atención salud mental
-        if cleaned.get('atencion_salud_mental'):
-            if not cleaned.get('atencion_anio') or not cleaned.get('atencion_lugar'):
-                self.add_error('atencion_anio', "Debe indicar año y lugar de la atención.")
-        # Validar internación
-        if cleaned.get('internacion'):
-            if not cleaned.get('internacion_anio') or not cleaned.get('internacion_lugar'):
-                self.add_error('internacion_anio', "Debe indicar año y lugar de la internación.")
+        # NO más validaciones de año/lugar, todo opcional
         return cleaned
 
     def save(self, commit=True):
@@ -548,8 +541,250 @@ class PlanAccionForm(forms.ModelForm):
 
     def clean(self):
         cleaned_data = super().clean()
-        patrullaje_activo = cleaned_data.get('patrullaje_activo')
-        registro_patrullaje = cleaned_data.get('registro_patrullaje')
-        if patrullaje_activo and not registro_patrullaje:
-            self.add_error('registro_patrullaje', 'Debe ingresar el número de registro del patrullaje.')
         return cleaned_data
+    
+from django import forms
+from .models import (
+    DerivacionCavd,
+    DerivacionUravit,
+    DerivacionCdmCai,
+    DerivacionSalud,
+    DerivacionOfam,
+    DerivacionDideco,
+    DerivacionGestionTerritorial,
+    DerivacionCapsUdla,
+    DerivacionOln,
+    DerivacionOtro,
+)
+
+class DerivacionBaseForm(forms.ModelForm):
+    """
+    Formulario base para derivaciones: todos los campos opcionales,
+    y la relación con la ficha oculta en un HiddenInput.
+    """
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for fld in self.fields.values():
+            fld.required = False
+
+    class Meta:
+        fields = '__all__'
+        widgets = {
+            'ficha': forms.HiddenInput(),
+        }
+
+class DerivacionCavdForm(DerivacionBaseForm):
+    class Meta(DerivacionBaseForm.Meta):
+        model = DerivacionCavd
+        fields = [f.name for f in DerivacionCavd._meta.fields if f.name not in ('id','ficha')]
+        labels = {
+            'descripcion_cavd': 'Descripción (CAVD)',
+            'fecha_derivacion_cavd': 'Fecha de derivación',
+            'es_vinculacion_cavd': 'Es vinculación',
+            'fecha_respuesta_cavd': 'Fecha de respuesta',
+            'ingresa_cavd': 'Ingresa al programa',
+            'fecha_ingreso_cavd': 'Fecha de ingreso',
+            'es_conmocion_publica_cavd': 'Conmoción pública',
+            'fecha_vinculacion_conmocion_cavd': 'Fecha vinculación conmoción',
+        }
+        widgets = {
+            **DerivacionBaseForm.Meta.widgets,
+            'fecha_derivacion_cavd': forms.DateInput(attrs={'type':'date'}),
+            'fecha_respuesta_cavd': forms.DateInput(attrs={'type':'date'}),
+            'fecha_ingreso_cavd':   forms.DateInput(attrs={'type':'date'}),
+            'fecha_vinculacion_conmocion_cavd': forms.DateInput(attrs={'type':'date'}),
+        }
+
+class DerivacionUravitForm(DerivacionBaseForm):
+    class Meta(DerivacionBaseForm.Meta):
+        model = DerivacionUravit
+        fields = [f.name for f in DerivacionUravit._meta.fields if f.name not in ('id','ficha')]
+        labels = {
+            'descripcion_uravit': 'Descripción (URAVIT)',
+            'fecha_derivacion_uravit': 'Fecha de derivación',
+            'es_vinculacion_uravit': 'Es vinculación',
+            'fecha_respuesta_uravit': 'Fecha de respuesta',
+        }
+        widgets = {
+            **DerivacionBaseForm.Meta.widgets,
+            'fecha_derivacion_uravit': forms.DateInput(attrs={'type':'date'}),
+            'fecha_respuesta_uravit':  forms.DateInput(attrs={'type':'date'}),
+        }
+
+class DerivacionCdmCaiForm(DerivacionBaseForm):
+    class Meta(DerivacionBaseForm.Meta):
+        model = DerivacionCdmCai
+        fields = [f.name for f in DerivacionCdmCai._meta.fields if f.name not in ('id','ficha')]
+        labels = {
+            'descripcion_cdm_cai': 'Descripción (CDM-CAI)',
+            'fecha_derivacion_cdm_cai': 'Fecha de derivación',
+            'es_vinculacion_cdm_cai': 'Es vinculación',
+            'fecha_respuesta_cdm_cai': 'Fecha de respuesta',
+            'ingresa_cdm_cai': 'Ingresa al programa',
+            'fecha_ingreso_cdm_cai': 'Fecha de ingreso',
+        }
+        widgets = {
+            **DerivacionBaseForm.Meta.widgets,
+            'fecha_derivacion_cdm_cai': forms.DateInput(attrs={'type':'date'}),
+            'fecha_respuesta_cdm_cai':  forms.DateInput(attrs={'type':'date'}),
+            'fecha_ingreso_cdm_cai':    forms.DateInput(attrs={'type':'date'}),
+        }
+
+
+class DerivacionSaludForm(DerivacionBaseForm):
+    class Meta(DerivacionBaseForm.Meta):
+        model = DerivacionSalud
+        fields = [f.name for f in DerivacionSalud._meta.fields if f.name not in ('id','ficha')]
+        labels = {
+            'dispositivo_salud': 'Dispositivo de salud',
+            'fecha_derivacion_salud': 'Fecha de derivación',
+            'es_vinculacion_salud': 'Es vinculación',
+            'fecha_respuesta_salud': 'Fecha de respuesta',
+            'ingresa_salud': 'Ingresa al dispositivo',
+            'fecha_ingreso_salud': 'Fecha de ingreso',
+        }
+        widgets = {
+            **DerivacionBaseForm.Meta.widgets,
+            'fecha_derivacion_salud': forms.DateInput(attrs={'type':'date'}),
+            'fecha_respuesta_salud':  forms.DateInput(attrs={'type':'date'}),
+            'fecha_ingreso_salud':    forms.DateInput(attrs={'type':'date'}),
+        }
+        def clean(self):
+            cleaned_data = super().clean()
+            dispositivo = cleaned_data.get('dispositivo_salud')
+            otro = cleaned_data.get('dispositivo_salud_otro')
+            if dispositivo == 'OTRO' and not otro:
+                self.add_error('dispositivo_salud_otro', 'Debe especificar el dispositivo de salud.')
+            return cleaned_data
+
+
+class DerivacionOfamForm(DerivacionBaseForm):
+    class Meta(DerivacionBaseForm.Meta):
+        model = DerivacionOfam
+        fields = [f.name for f in DerivacionOfam._meta.fields if f.name not in ('id','ficha')]
+        labels = {
+            f.name: f.name.replace('_ofam','').replace('_',' ').capitalize()
+            for f in DerivacionOfam._meta.fields
+            if f.name not in ('id','ficha')
+        }
+        widgets = {
+            **DerivacionBaseForm.Meta.widgets,
+            'fecha_derivacion_ofam': forms.DateInput(attrs={'type':'date'}),
+            'fecha_respuesta_ofam':  forms.DateInput(attrs={'type':'date'}),
+            'fecha_ingreso_ofam':    forms.DateInput(attrs={'type':'date'}),
+        }
+
+class DerivacionDidecoForm(DerivacionBaseForm):
+    class Meta(DerivacionBaseForm.Meta):
+        model = DerivacionDideco
+        fields = [f.name for f in DerivacionDideco._meta.fields if f.name not in ('id','ficha')]
+        labels = {
+            f.name: f.name.replace('_dideco','').replace('_',' ').capitalize()
+            for f in DerivacionDideco._meta.fields
+            if f.name not in ('id','ficha')
+        }
+        widgets = {
+            **DerivacionBaseForm.Meta.widgets,
+            'fecha_derivacion_dideco': forms.DateInput(attrs={'type':'date'}),
+            'fecha_respuesta_dideco':  forms.DateInput(attrs={'type':'date'}),
+            'fecha_ingreso_dideco':    forms.DateInput(attrs={'type':'date'}),
+        }
+
+class DerivacionGestionTerritorialForm(DerivacionBaseForm):
+    class Meta(DerivacionBaseForm.Meta):
+        model = DerivacionGestionTerritorial
+        fields = [f.name for f in DerivacionGestionTerritorial._meta.fields if f.name not in ('id','ficha')]
+        labels = {
+            f.name: f.name.replace('_gestion_territorial','').replace('_',' ').capitalize()
+            for f in DerivacionGestionTerritorial._meta.fields
+            if f.name not in ('id','ficha')
+        }
+        widgets = {
+            **DerivacionBaseForm.Meta.widgets,
+            'fecha_derivacion_gestion_territorial': forms.DateInput(attrs={'type':'date'}),
+            'fecha_respuesta_gestion_territorial':  forms.DateInput(attrs={'type':'date'}),
+            'fecha_ingreso_gestion_territorial':    forms.DateInput(attrs={'type':'date'}),
+        }
+
+
+class DerivacionCapsUdlaForm(DerivacionBaseForm):
+    class Meta(DerivacionBaseForm.Meta):
+        model = DerivacionCapsUdla
+        fields = [f.name for f in DerivacionCapsUdla._meta.fields if f.name not in ('id','ficha')]
+        labels = {
+            f.name: f.name.replace('_caps_udla','').replace('_',' ').capitalize()
+            for f in DerivacionCapsUdla._meta.fields
+            if f.name not in ('id','ficha')
+        }
+        widgets = {
+            **DerivacionBaseForm.Meta.widgets,
+            'fecha_derivacion_caps_udla': forms.DateInput(attrs={'type':'date'}),
+            'fecha_respuesta_caps_udla':  forms.DateInput(attrs={'type':'date'}),
+            'fecha_ingreso_caps_udla':    forms.DateInput(attrs={'type':'date'}),
+        }
+
+
+class DerivacionOlnForm(DerivacionBaseForm):
+    class Meta(DerivacionBaseForm.Meta):
+        model = DerivacionOln
+        fields = [f.name for f in DerivacionOln._meta.fields if f.name not in ('id','ficha')]
+        labels = {
+            f.name: f.name.replace('_oln','').replace('_',' ').capitalize()
+            for f in DerivacionOln._meta.fields
+            if f.name not in ('id','ficha')
+        }
+        widgets = {
+            **DerivacionBaseForm.Meta.widgets,
+            'fecha_derivacion_oln': forms.DateInput(attrs={'type':'date'}),
+            'fecha_respuesta_oln':  forms.DateInput(attrs={'type':'date'}),
+            'fecha_ingreso_oln':    forms.DateInput(attrs={'type':'date'}),
+        }
+
+class DerivacionOtroForm(DerivacionBaseForm):
+    class Meta(DerivacionBaseForm.Meta):
+        model = DerivacionOtro
+        fields = [f.name for f in DerivacionOtro._meta.fields if f.name not in ('id','ficha')]
+        labels = {
+            'institucion_otro': 'Institución (Otro)',
+            'descripcion_otro': 'Descripción',
+            'fecha_derivacion_otro': 'Fecha de derivación',
+            'es_vinculacion_otro': 'Es vinculación',
+            'fecha_respuesta_otro': 'Fecha de respuesta',
+            'ingresa_otro': 'Ingresa al programa',
+            'fecha_ingreso_otro': 'Fecha de ingreso',
+        }
+        widgets = {
+            **DerivacionBaseForm.Meta.widgets,
+            'fecha_derivacion_otro': forms.DateInput(attrs={'type':'date'}),
+            'fecha_respuesta_otro':  forms.DateInput(attrs={'type':'date'}),
+            'fecha_ingreso_otro':    forms.DateInput(attrs={'type':'date'}),
+        }
+
+from django import forms
+
+TIPOS_DERIVACION = [
+    ('', '---------'),
+    ('CAVD', 'CAVD'),
+    ('URAVIT', 'URAVIT'),
+    ('CDM-CAI', 'CDM-CAI'),
+    ('SALUD', 'SALUD'),
+    ('OFAM', 'OFAM'),
+    ('DIDECO', 'DIDECO'),
+    ('GESTIÓN TERRITORIAL', 'GESTIÓN TERRITORIAL'),
+    ('CAPS UDLA', 'CAPS UDLA'),
+    ('OLN', 'OLN'),
+    ('OTRO', 'OTRO'),
+]
+
+
+class BuscarDerivacionForm(forms.Form):
+    rut = forms.CharField(label='RUT', required=False)
+    nombre = forms.CharField(label='Nombre', required=False)
+    tipo_derivacion = forms.ChoiceField(label="Tipo de Derivación", choices=TIPOS_DERIVACION, required=False)
+    fecha_inicio = forms.DateField(label='Desde', required=False, widget=forms.DateInput(attrs={'type': 'date'}))
+    fecha_fin = forms.DateField(label='Hasta', required=False, widget=forms.DateInput(attrs={'type': 'date'}))
+    solo_con_respuesta = forms.BooleanField(label='Sólo con respuesta', required=False)
+    solo_con_ingreso = forms.BooleanField(label='Sólo con ingreso', required=False)
+    solo_con_derivacion = forms.BooleanField(label="Solo con fecha de derivación", required=False)
+    solo_con_recepcion = forms.BooleanField(label="Solo con fecha de recepción", required=False)
+    solo_con_respuesta = forms.BooleanField(label="Solo con fecha de respuesta", required=False)

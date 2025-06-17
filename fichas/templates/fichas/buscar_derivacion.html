@@ -1,0 +1,162 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+<style>
+    h2 {
+        color: #252c54;
+        font-weight: 700;
+        margin-bottom: 24px;
+    }
+    .filtro-box {
+        background-color: #fff;
+        padding: 20px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        align-items: end;
+    }
+    .filtro-box label {
+        font-weight: 600;
+        margin-bottom: 4px;
+        color: #252c54;
+    }
+    .filtro-box input,
+    .filtro-box select {
+        padding: 6px 10px;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        font-size: 0.9rem;
+    }
+    .filtro-box button {
+        background-color: #252c54;
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 6px;
+        font-weight: 600;
+    }
+    .table-responsive {
+        overflow-x: auto;
+    }
+    table {
+        border-collapse: collapse;
+        width: 100%;
+        min-width: 1100px;
+        background: #fff;
+        font-size: 0.95rem;
+    }
+    th, td {
+        border: 1px solid #e5e8f4;
+        padding: 8px 12px;
+        text-align: left;
+    }
+    th {
+        background: #252c54;
+        color: white;
+    }
+    tr:nth-child(even) {
+        background: #f6f7fb;
+    }
+</style>
+
+<h2>Listado de Derivaciones</h2>
+
+<div class="card shadow-sm mb-4 p-3">
+    <form method="get">
+        <div class="row g-3 align-items-end">
+
+            <div class="col-md-3">
+                <label for="id_nombre" class="form-label fw-bold">Nombre</label>
+                <input type="text" name="nombre" class="form-control" id="id_nombre" value="{{ request.GET.nombre }}">
+            </div>
+
+            <div class="col-md-3">
+                <label for="id_rut" class="form-label fw-bold">RUT / Pasaporte</label>
+                <input type="text" name="rut" class="form-control" id="id_rut" value="{{ request.GET.rut }}">
+            </div>
+
+            <div class="col-md-3">
+                <label for="id_tipo_derivacion" class="form-label fw-bold">Tipo de Derivación</label>
+                <select name="tipo_derivacion" class="form-select" id="id_tipo_derivacion">
+                    {% for key, label in form.tipo_derivacion.field.choices %}
+                        <option value="{{ key }}" {% if request.GET.tipo_derivacion == key %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="col-md-3">
+                <label for="id_fecha_inicio" class="form-label fw-bold">Desde Derivación</label>
+                <input type="date" name="fecha_inicio" class="form-control" id="id_fecha_inicio" value="{{ request.GET.fecha_inicio }}">
+            </div>
+
+            <div class="col-md-3">
+                <label for="id_fecha_fin" class="form-label fw-bold">Hasta Derivación</label>
+                <input type="date" name="fecha_fin" class="form-control" id="id_fecha_fin" value="{{ request.GET.fecha_fin }}">
+            </div>
+
+            <div class="col-md-2 form-check mt-4 ps-4">
+                <input type="checkbox" name="sin_derivacion" class="form-check-input" id="id_sin_derivacion"
+                    {% if request.GET.sin_derivacion %}checked{% endif %}>
+                <label class="form-check-label" for="id_sin_derivacion">Sin fecha derivación</label>
+            </div>
+
+            <div class="col-md-2 form-check mt-4 ps-4">
+                <input type="checkbox" name="sin_respuesta" class="form-check-input" id="id_sin_respuesta"
+                    {% if request.GET.sin_respuesta %}checked{% endif %}>
+                <label class="form-check-label" for="id_sin_respuesta">Sin fecha respuesta</label>
+            </div>
+
+            <div class="col-md-2 form-check mt-4 ps-4">
+                <input type="checkbox" name="sin_ingreso" class="form-check-input" id="id_sin_ingreso"
+                    {% if request.GET.sin_ingreso %}checked{% endif %}>
+                <label class="form-check-label" for="id_sin_ingreso">Sin fecha ingreso</label>
+            </div>
+
+
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary w-100">Filtrar</button>
+            </div>
+
+        </div>
+    </form>
+</div>
+
+
+
+
+<div class="table-responsive">
+    <table>
+        <thead>
+            <tr>
+                <th>N° Ficha</th>
+                <th>Fecha Recepción</th>
+                <th>Nombre</th>
+                <th>Tipo de Derivación</th>
+                <th>Fecha Derivación</th>
+                <th>Fecha Respuesta</th>
+                <th>Fecha Ingreso</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for d in derivaciones %}
+            <tr>
+                <td>{{ d.ficha.id }}</td>
+                <td>{{ d.ficha.fecha_recepcion|date:"d/m/Y" }}</td>
+                <td>{{ d.ficha.personaatendida.nombre|default:"-" }}</td>
+                <td>{{ d.nombre }}</td>
+                <td>{% if d.fecha_derivacion %}{{ d.fecha_derivacion|date:"d/m/Y" }}{% else %}-{% endif %}</td>
+                <td>{% if d.fecha_respuesta %}{{ d.fecha_respuesta|date:"d/m/Y" }}{% else %}-{% endif %}</td>
+                <td>{% if d.fecha_ingreso %}{{ d.fecha_ingreso|date:"d/m/Y" }}{% else %}-{% endif %}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="7">No se encontraron derivaciones.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}

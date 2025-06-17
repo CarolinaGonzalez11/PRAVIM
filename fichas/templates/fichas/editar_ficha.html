@@ -107,11 +107,6 @@ textarea {
     align-items: center;
 }
 
-body {
-    font-family: Arial, sans-serif;
-    background-color: #f4f6f8;
-}
-.form-container { max-width: 100%; margin: 0 auto; background-color: white; padding: 30px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
 .accordion-button { background-color: #252c54 ; color: white; }
 .accordion-button:not(.collapsed) { background-color: #e60380 ; color: white; }
 .accordion-button:focus { box-shadow: none; outline: none; }
@@ -254,6 +249,7 @@ body {
                     </div>
                 </div>
             </div>
+
             <!-- Acordeón 2: Motivo -->
             <div class="accordion-item">
                 <h2 class="accordion-header" id="headingMotivo">
@@ -352,6 +348,7 @@ body {
                     </div>
                 </div>
             </div>
+
             <!-- Acordeón 4: Redes de Apoyo -->
             <div class="accordion-item">
                 <h2 class="accordion-header" id="headingRedes">
@@ -384,6 +381,7 @@ body {
                     </div>
                 </div>
             </div>
+
             <!-- Acordeón 5: Plan de Acción -->
             <div class="accordion-item">
                 <h2 class="accordion-header" id="headingPlan">
@@ -395,30 +393,6 @@ body {
                     <div class="accordion-body">
                         <table>
                             <tbody>
-                                <!-- Derivación CAVD -->
-                                <tr>
-                                    <td class="label-cell" rowspan="2"><strong>Derivación CAVD</strong></td>
-                                    <td class="input-cell">
-                                        {{ form_plan.derivacion_cavd_psicologica|add_class:"editable-field" }} Atención Psicológica
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="input-cell">
-                                        {{ form_plan.derivacion_cavd_juridica|add_class:"editable-field" }} Atención Jurídica
-                                    </td>
-                                </tr>
-                                <!-- Derivación CESFAM -->
-                                <tr>
-                                    <td class="label-cell" rowspan="2"><strong>DERIVACIÓN CESFAM</strong></td>
-                                    <td class="input-cell">
-                                        {{ form_plan.derivacion_cesfam_salud_general|add_class:"editable-field" }} Atención Salud General
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="input-cell">
-                                        {{ form_plan.derivacion_cesfam_salud_mental|add_class:"editable-field" }} Atención Salud Mental
-                                    </td>
-                                </tr>
                                 <!-- UAV Atención Psicológica -->
                                 <tr>
                                     <td class="label-cell" rowspan="3"><strong>UAV Atención Psicológica</strong></td>
@@ -536,9 +510,144 @@ body {
                             </tbody>
                         </table>
                     </div>
+         
+
+            <!-- Acordeón 6: Derivaciones -->
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="headingDerivaciones">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseDerivaciones">
+                        Derivaciones
+                    </button>
+                </h2>
+                <div id="collapseDerivaciones" class="accordion-collapse collapse" data-bs-parent="#formAccordion">
+                    <div class="accordion-body">
+
+                        <!-- CAVD -->
+                        <h5 class="mt-2 mb-2" style="color:#e60380;">Programa Atención a Víctimas (CAVD)</h5>
+                        <table>
+                            <tbody>
+                                <tr><td class="label-cell">Descripción</td><td class="input-cell">{{ form_deriv_cavd.descripcion_cavd|add_class:"editable-field" }}</td></tr>
+                                <tr><td class="label-cell">Fecha derivación</td><td class="input-cell">{{ form_deriv_cavd.fecha_derivacion_cavd|add_class:"editable-field" }}</td></tr>
+                                <tr><td class="label-cell">Es vinculación</td><td class="input-cell">{{ form_deriv_cavd.es_vinculacion_cavd|add_class:"editable-field" }}</td></tr>
+                                <tr><td class="label-cell">Fecha respuesta</td><td class="input-cell">{{ form_deriv_cavd.fecha_respuesta_cavd|add_class:"editable-field" }}</td></tr>
+                                <tr><td class="label-cell">Ingresa al programa</td><td class="input-cell">{{ form_deriv_cavd.ingresa_cavd|add_class:"editable-field" }}</td></tr>
+                                <tr><td class="label-cell">Fecha ingreso</td><td class="input-cell">{{ form_deriv_cavd.fecha_ingreso_cavd|add_class:"editable-field" }}</td></tr>
+                                <tr><td class="label-cell">Conmoción pública</td><td class="input-cell">{{ form_deriv_cavd.es_conmocion_publica_cavd|add_class:"editable-field" }}</td></tr>
+                                <tr><td class="label-cell">Fecha vinculación conmoción</td><td class="input-cell">{{ form_deriv_cavd.fecha_vinculacion_conmocion_cavd|add_class:"editable-field" }}</td></tr>
+                            </tbody>
+                        </table>
+                        <!-- URAVIT -->
+                        <h5 class="mt-4 mb-2" style="color:#e60380;">URAVIT Fiscalía</h5>
+                        <table>
+                            <tbody>
+                                <tr><td class="label-cell">Descripción</td><td class="input-cell">{{ form_deriv_uravit.descripcion_uravit|add_class:"editable-field" }}</td></tr>
+                                <tr><td class="label-cell">Fecha derivación</td><td class="input-cell">{{ form_deriv_uravit.fecha_derivacion_uravit|add_class:"editable-field" }}</td></tr>
+                                <tr><td class="label-cell">Es vinculación</td><td class="input-cell">{{ form_deriv_uravit.es_vinculacion_uravit|add_class:"editable-field" }}</td></tr>
+                                <tr><td class="label-cell">Fecha respuesta</td><td class="input-cell">{{ form_deriv_uravit.fecha_respuesta_uravit|add_class:"editable-field" }}</td></tr>
+                            </tbody>
+                        </table>
+                        <!-- CDM-CAI -->
+                        <h5 class="mt-4 mb-2" style="color:#e60380;">CDM-CAI</h5>
+                        <table>
+                            <tbody>
+                                <tr><td class="label-cell">Descripción</td><td class="input-cell">{{ form_deriv_cdm_cai.descripcion_cdm_cai|add_class:"editable-field" }}</td></tr>
+                                <tr><td class="label-cell">Fecha derivación</td><td class="input-cell">{{ form_deriv_cdm_cai.fecha_derivacion_cdm_cai|add_class:"editable-field" }}</td></tr>
+                                <tr><td class="label-cell">Es vinculación</td><td class="input-cell">{{ form_deriv_cdm_cai.es_vinculacion_cdm_cai|add_class:"editable-field" }}</td></tr>
+                                <tr><td class="label-cell">Fecha respuesta</td><td class="input-cell">{{ form_deriv_cdm_cai.fecha_respuesta_cdm_cai|add_class:"editable-field" }}</td></tr>
+                                <tr><td class="label-cell">Ingresa al programa</td><td class="input-cell">{{ form_deriv_cdm_cai.ingresa_cdm_cai|add_class:"editable-field" }}</td></tr>
+                                <tr><td class="label-cell">Fecha ingreso</td><td class="input-cell">{{ form_deriv_cdm_cai.fecha_ingreso_cdm_cai|add_class:"editable-field" }}</td></tr>
+                            </tbody>
+                        </table>
+                        <!-- SALUD -->
+                        <h5 class="mt-4 mb-2" style="color:#e60380;">Salud</h5>
+                        <table>
+                            <tbody>
+                                <tr><td class="label-cell">Dispositivo de salud</td><td class="input-cell">{{ form_deriv_salud.dispositivo_salud|add_class:"editable-field" }}</td></tr>
+                                <tr><td class="label-cell">Fecha derivación</td><td class="input-cell">{{ form_deriv_salud.fecha_derivacion_salud|add_class:"editable-field" }}</td></tr>
+                                <tr><td class="label-cell">Es vinculación</td><td class="input-cell">{{ form_deriv_salud.es_vinculacion_salud|add_class:"editable-field" }}</td></tr>
+                                <tr><td class="label-cell">Fecha respuesta</td><td class="input-cell">{{ form_deriv_salud.fecha_respuesta_salud|add_class:"editable-field" }}</td></tr>
+                                <tr><td class="label-cell">Ingresa al dispositivo</td><td class="input-cell">{{ form_deriv_salud.ingresa_salud|add_class:"editable-field" }}</td></tr>
+                                <tr><td class="label-cell">Fecha ingreso</td><td class="input-cell">{{ form_deriv_salud.fecha_ingreso_salud|add_class:"editable-field" }}</td></tr>
+                            </tbody>
+                        </table>
+                        <!-- OFAM -->
+                        <h5 class="mt-4 mb-2" style="color:#e60380;">OFAM</h5>
+                        <table>
+                            <tbody>
+                                <tr><td class="label-cell">Descripción</td><td class="input-cell">{{ form_deriv_ofam.descripcion_ofam|add_class:"editable-field" }}</td></tr>
+                                <tr><td class="label-cell">Fecha derivación</td><td class="input-cell">{{ form_deriv_ofam.fecha_derivacion_ofam|add_class:"editable-field" }}</td></tr>
+                                <tr><td class="label-cell">Es vinculación</td><td class="input-cell">{{ form_deriv_ofam.es_vinculacion_ofam|add_class:"editable-field" }}</td></tr>
+                                <tr><td class="label-cell">Fecha respuesta</td><td class="input-cell">{{ form_deriv_ofam.fecha_respuesta_ofam|add_class:"editable-field" }}</td></tr>
+                                <tr><td class="label-cell">Ingresa al programa</td><td class="input-cell">{{ form_deriv_ofam.ingresa_ofam|add_class:"editable-field" }}</td></tr>
+                                <tr><td class="label-cell">Fecha ingreso</td><td class="input-cell">{{ form_deriv_ofam.fecha_ingreso_ofam|add_class:"editable-field" }}</td></tr>
+                            </tbody>
+                        </table>
+                        <!-- DIDECO -->
+                        <h5 class="mt-4 mb-2" style="color:#e60380;">DIDECO</h5>
+                        <table>
+                            <tbody>
+                                <tr><td class="label-cell">Descripción</td><td class="input-cell">{{ form_deriv_dideco.descripcion_dideco|add_class:"editable-field" }}</td></tr>
+                                <tr><td class="label-cell">Fecha derivación</td><td class="input-cell">{{ form_deriv_dideco.fecha_derivacion_dideco|add_class:"editable-field" }}</td></tr>
+                                <tr><td class="label-cell">Es vinculación</td><td class="input-cell">{{ form_deriv_dideco.es_vinculacion_dideco|add_class:"editable-field" }}</td></tr>
+                                <tr><td class="label-cell">Fecha respuesta</td><td class="input-cell">{{ form_deriv_dideco.fecha_respuesta_dideco|add_class:"editable-field" }}</td></tr>
+                                <tr><td class="label-cell">Ingresa al programa</td><td class="input-cell">{{ form_deriv_dideco.ingresa_dideco|add_class:"editable-field" }}</td></tr>
+                                <tr><td class="label-cell">Fecha ingreso</td><td class="input-cell">{{ form_deriv_dideco.fecha_ingreso_dideco|add_class:"editable-field" }}</td></tr>
+                            </tbody>
+                        </table>
+                        <!-- Gestión Territorial -->
+                        <h5 class="mt-4 mb-2" style="color:#e60380;">Gestión Territorial</h5>
+                        <table>
+                            <tbody>
+                                <tr><td class="label-cell">Descripción</td><td class="input-cell">{{ form_deriv_gestion_territorial.descripcion_gestion_territorial|add_class:"editable-field" }}</td></tr>
+                                <tr><td class="label-cell">Fecha derivación</td><td class="input-cell">{{ form_deriv_gestion_territorial.fecha_derivacion_gestion_territorial|add_class:"editable-field" }}</td></tr>
+                                <tr><td class="label-cell">Es vinculación</td><td class="input-cell">{{ form_deriv_gestion_territorial.es_vinculacion_gestion_territorial|add_class:"editable-field" }}</td></tr>
+                                <tr><td class="label-cell">Fecha respuesta</td><td class="input-cell">{{ form_deriv_gestion_territorial.fecha_respuesta_gestion_territorial|add_class:"editable-field" }}</td></tr>
+                                <tr><td class="label-cell">Ingresa al programa</td><td class="input-cell">{{ form_deriv_gestion_territorial.ingresa_gestion_territorial|add_class:"editable-field" }}</td></tr>
+                                <tr><td class="label-cell">Fecha ingreso</td><td class="input-cell">{{ form_deriv_gestion_territorial.fecha_ingreso_gestion_territorial|add_class:"editable-field" }}</td></tr>
+                            </tbody>
+                        </table>
+                        <!-- CAPS UDLA -->
+                        <h5 class="mt-4 mb-2" style="color:#e60380;">CAPS UDLA</h5>
+                        <table>
+                            <tbody>
+                                <tr><td class="label-cell">Descripción</td><td class="input-cell">{{ form_deriv_caps_udla.descripcion_caps_udla|add_class:"editable-field" }}</td></tr>
+                                <tr><td class="label-cell">Fecha derivación</td><td class="input-cell">{{ form_deriv_caps_udla.fecha_derivacion_caps_udla|add_class:"editable-field" }}</td></tr>
+                                <tr><td class="label-cell">Es vinculación</td><td class="input-cell">{{ form_deriv_caps_udla.es_vinculacion_caps_udla|add_class:"editable-field" }}</td></tr>
+                                <tr><td class="label-cell">Fecha respuesta</td><td class="input-cell">{{ form_deriv_caps_udla.fecha_respuesta_caps_udla|add_class:"editable-field" }}</td></tr>
+                                <tr><td class="label-cell">Ingresa al programa</td><td class="input-cell">{{ form_deriv_caps_udla.ingresa_caps_udla|add_class:"editable-field" }}</td></tr>
+                                <tr><td class="label-cell">Fecha ingreso</td><td class="input-cell">{{ form_deriv_caps_udla.fecha_ingreso_caps_udla|add_class:"editable-field" }}</td></tr>
+                            </tbody>
+                        </table>
+                        <!-- OLN -->
+                        <h5 class="mt-4 mb-2" style="color:#e60380;">OLN</h5>
+                        <table>
+                            <tbody>
+                                <tr><td class="label-cell">Descripción</td><td class="input-cell">{{ form_deriv_oln.descripcion_oln|add_class:"editable-field" }}</td></tr>
+                                <tr><td class="label-cell">Fecha derivación</td><td class="input-cell">{{ form_deriv_oln.fecha_derivacion_oln|add_class:"editable-field" }}</td></tr>
+                                <tr><td class="label-cell">Es vinculación</td><td class="input-cell">{{ form_deriv_oln.es_vinculacion_oln|add_class:"editable-field" }}</td></tr>
+                                <tr><td class="label-cell">Fecha respuesta</td><td class="input-cell">{{ form_deriv_oln.fecha_respuesta_oln|add_class:"editable-field" }}</td></tr>
+                                <tr><td class="label-cell">Ingresa al programa</td><td class="input-cell">{{ form_deriv_oln.ingresa_oln|add_class:"editable-field" }}</td></tr>
+                                <tr><td class="label-cell">Fecha ingreso</td><td class="input-cell">{{ form_deriv_oln.fecha_ingreso_oln|add_class:"editable-field" }}</td></tr>
+                            </tbody>
+                        </table>
+                        <!-- Otro -->
+                        <h5 class="mt-4 mb-2" style="color:#e60380;">Otro</h5>
+                        <table>
+                            <tbody>
+                                <tr><td class="label-cell">Institución (otro)</td><td class="input-cell">{{ form_deriv_otro.institucion_otro|add_class:"editable-field" }}</td></tr>
+                                <tr><td class="label-cell">Descripción</td><td class="input-cell">{{ form_deriv_otro.descripcion_otro|add_class:"editable-field" }}</td></tr>
+                                <tr><td class="label-cell">Fecha derivación</td><td class="input-cell">{{ form_deriv_otro.fecha_derivacion_otro|add_class:"editable-field" }}</td></tr>
+                                <tr><td class="label-cell">Es vinculación</td><td class="input-cell">{{ form_deriv_otro.es_vinculacion_otro|add_class:"editable-field" }}</td></tr>
+                                <tr><td class="label-cell">Fecha respuesta</td><td class="input-cell">{{ form_deriv_otro.fecha_respuesta_otro|add_class:"editable-field" }}</td></tr>
+                                <tr><td class="label-cell">Ingresa al programa</td><td class="input-cell">{{ form_deriv_otro.ingresa_otro|add_class:"editable-field" }}</td></tr>
+                                <tr><td class="label-cell">Fecha ingreso</td><td class="input-cell">{{ form_deriv_otro.fecha_ingreso_otro|add_class:"editable-field" }}</td></tr>
+                            </tbody>
+                        </table>
+
+                    </div>
                 </div>
             </div>
-        </div>
+        </div> <!-- cierre accordion -->
 
         <div class="form-footer text-center mt-4">
             <a href="{% url 'fichas:ver_ficha_completa' ficha.id %}" class="btn btn-secondary btn-lg">Cancelar</a>

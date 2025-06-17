@@ -209,7 +209,7 @@ textarea {
 </style>
 
 {% comment %} ALERTA DE ERRORES GLOBAL {% endcomment %}
-{% if form_ficha.errors or form_persona.errors or form_denuncia.errors or form_motivo.errors or form_psicologico.errors or form_redes.errors or form_plan.errors %}
+{% if form_ficha.errors or form_persona.errors or form_denuncia.errors or form_motivo.errors or form_psico.errors or form_redes.errors or form_plan.errors %}
   <div class="alert alert-danger" style="margin-bottom:20px;">
     <ul style="margin-bottom:0;">
       {# Errores por campo de todos los formularios #}
@@ -234,7 +234,8 @@ textarea {
 {% endif %}
 
 
- 
+
+
 <div class="container mt-4">
     <h2 class="mb-4" style="color:#252c54;font-weight:700;">Nueva Ficha de Acogida</h2>
 
@@ -316,7 +317,7 @@ textarea {
                                     <td class="label-cell">Rango etáreo</td>
                                     <td class="input-cell">
                                         <div id="rango-etareo-select-wrapper">
-                                            {{ form_persona.rango_etareo|add_class:"select-rango-etareo" }}
+                                            {{ form_persona.rango_etareo|add_class:"select-rango-etareo"|attr:"id:id_rango_etareo" }}
                                         </div>
                                         <div id="rango-etareo-readonly-wrapper" style="display:none;">
                                             <input type="text"
@@ -326,7 +327,7 @@ textarea {
                                                 readonly>
                                         </div>
                                     </td>
-                                </tr>
+                                </tr>                                
 
 
                                 
@@ -368,9 +369,26 @@ textarea {
                                 <tr class="espacio-fila"><td colspan="2"></td></tr>
                                 <tr><td class="label-cell">Vínculo con persona significativa</td><td class="input-cell">{{ form_persona.vinculo }}</td></tr>
                                 <tr><td class="label-cell">Teléfono significativo</td><td class="input-cell">{{ form_persona.telefono_significativo }}</td></tr>
-                                <tr><td class="label-cell">N° adultos hogar</td><td class="input-cell">{{ form_persona.n_adultos }}</td></tr>
-                                <tr><td class="label-cell">N° NNA hogar</td><td class="input-cell">{{ form_persona.n_nna }}</td></tr>
-                                <tr><td class="label-cell"><strong>Total integrantes hogar</strong></td><td class="input-cell"><span id="total-integrantes" style="font-weight:bold;">0</span></td></tr>
+                                <tr>
+                                    <td class="label-cell">N° adultos hogar</td>
+                                    <td class="input-cell">
+                                        {{ form_persona.n_adultos|add_class:"input-integrantes" | attr:"id:id_n_adultos" }}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="label-cell">N° NNA hogar</td>
+                                    <td class="input-cell">
+                                        {{ form_persona.n_nna|add_class:"input-integrantes" | attr:"id:id_n_nna" }}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="label-cell"><strong>Total integrantes hogar</strong></td>
+                                    <td class="input-cell">
+                                        <span id="total-integrantes" style="font-weight:bold;">0</span>
+                                    </td>
+                                </tr>
+
+
                             </tbody>
                         </table>
 
@@ -446,26 +464,28 @@ textarea {
                         <table>
                             <tbody>
                                 <tr>
-        
                                     <td class="label-cell">Motivo principal</td>
-                                    <td class="input-cell">{{ form_motivo.motivo_ingreso }}</td>
+                                    <td class="input-cell">
+                                        {{ form_motivo.motivo_ingreso|add_class:"select-motivo-ingreso"|attr:"id:id_motivo_ingreso" }}
+                                    </td>
                                 </tr>
+                                <tr id="motivo-otro-row" style="display:none;">
+                                    <td class="label-cell">Si seleccionó Otro, especifique</td>
+                                    <td class="input-cell">
+                                        {{ form_motivo.motivo_otro }}
+                                        {% if form_motivo.motivo_otro.help_text %}
+                                        <small class="form-text text-muted">{{ form_motivo.motivo_otro.help_text }}</small>
+                                        {% endif %}
+                                        {% for error in form_motivo.motivo_otro.errors %}
+                                        <div class="text-danger" style="color:#e60380;">{{ error }}</div>
+                                        {% endfor %}
+                                    </td>
+                                </tr>                                
+                                              
                                 <tr>
                                     <td class="label-cell">Descripción del caso</td>
                                     <td class="input-cell">{{ form_motivo.descripcion_motivo }}</td> 
                                     <small class="form-text text-muted">Describe brevemente los hechos relatados por la persona atendida al momento del ingreso.</small>
-                                </tr>
-                                <tr id="motivo-otro-row" style="display:none;">
-                                <td class="label-cell">Si seleccionó Otro, especifique</td>
-                                <td class="input-cell">
-                                    {{ form_motivo.motivo_otro }}
-                                    {% if form_motivo.motivo_otro.help_text %}
-                                    <small class="form-text text-muted">{{ form_motivo.motivo_otro.help_text }}</small>
-                                    {% endif %}
-                                    {% for error in form_motivo.motivo_otro.errors %}
-                                    <div class="text-danger" style="color:#e60380;">{{ error }}</div>
-                                    {% endfor %}
-                                </td>
                                 </tr>
 
 
@@ -496,22 +516,22 @@ textarea {
                                 <tr>
                                     <td class="label-cell">Antecedentes</td>
                                     <td class="input-cell">
-                                        {{ form_psicologico.antecedentes }}
+                                        {{ form_psico.antecedentes }}
                                         <small class="form-text text-muted">Ingrese antecedentes relevantes en salud mental.</small>
                                     </td>
                                 </tr>
                                 <tr>
                                     <td class="label-cell">Diagnóstico</td>
                                     <td class="input-cell">
-                                        {{ form_psicologico.diagnostico }}
+                                        {{ form_psico.diagnostico }}
                                         <small class="form-text text-muted">Seleccione un diagnóstico. Si selecciona "Otro", especifique más abajo.</small>
                                     </td>
                                 </tr>
                                 <tr id="diagnostico-otro-row" style="display:none;">
                                     <td class="label-cell">Otro diagnóstico (especifique)</td>
                                     <td class="input-cell">
-                                        {{ form_psicologico.diagnostico_otro }}
-                                        {% for error in form_psicologico.diagnostico_otro.errors %}
+                                        {{ form_psico.diagnostico_otro }}
+                                        {% for error in form_psico.diagnostico_otro.errors %}
                                             <div class="text-danger" style="color:#e60380;">{{ error }}</div>
                                         {% endfor %}
                                     </td>
@@ -519,43 +539,43 @@ textarea {
                                 <tr>
                                     <td class="label-cell">¿Ha tenido atención en salud mental?</td>
                                     <td class="input-cell">
-                                        {{ form_psicologico.atencion_salud_mental }}
+                                        {{ form_psico.atencion_salud_mental }}
                                     </td>
                                 </tr>
                                 <tr id="atencion-anio-row" style="display:none;">
                                     <td class="label-cell">Año de atención</td>
                                     <td class="input-cell">
-                                        {{ form_psicologico.atencion_anio }}
+                                        {{ form_psico.atencion_anio }}
                                     </td>
                                 </tr>
                                 <tr id="atencion-lugar-row" style="display:none;">
                                     <td class="label-cell">Lugar de atención</td>
                                     <td class="input-cell">
-                                        {{ form_psicologico.atencion_lugar }}
+                                        {{ form_psico.atencion_lugar }}
                                     </td>
                                 </tr>
                                 <tr>
                                     <td class="label-cell">¿Ha tenido internaciones?</td>
                                     <td class="input-cell">
-                                        {{ form_psicologico.internacion }}
+                                        {{ form_psico.internacion }}
                                     </td>
                                 </tr>
                                 <tr id="internacion-anio-row" style="display:none;">
                                     <td class="label-cell">Año de internación</td>
                                     <td class="input-cell">
-                                        {{ form_psicologico.internacion_anio }}
+                                        {{ form_psico.internacion_anio }}
                                     </td>
                                 </tr>
                                 <tr id="internacion-lugar-row" style="display:none;">
                                     <td class="label-cell">Lugar de internación</td>
                                     <td class="input-cell">
-                                        {{ form_psicologico.internacion_lugar }}
+                                        {{ form_psico.internacion_lugar }}
                                     </td>
                                 </tr>
                                 <tr>
                                     <td class="label-cell">Ideación y/o intentos suicidas  ( año, motivo, otros, especifique)</td>
                                     <td class="input-cell">
-                                        {{ form_psicologico.afectacion_psicologica }}
+                                        {{ form_psico.afectacion_psicologica }}
                                     </td>
                                 </tr>
                             </tbody>
@@ -568,43 +588,43 @@ textarea {
                             <tbody>
                                 <tr>
                                     <td class="label-cell">Estado de conciencia</td>
-                                    <td class="input-cell">{{ form_psicologico.estado_conciencia }}</td>
+                                    <td class="input-cell">{{ form_psico.estado_conciencia }}</td>
                                 </tr>
                                 <tr>
                                     <td class="label-cell">Orientación</td>
-                                    <td class="input-cell">{{ form_psicologico.orientacion }}</td>
+                                    <td class="input-cell">{{ form_psico.orientacion }}</td>
                                 </tr>
                                 <tr>
                                     <td class="label-cell">Estado cognitivo</td>
-                                    <td class="input-cell">{{ form_psicologico.estado_cognitivo }}</td>
+                                    <td class="input-cell">{{ form_psico.estado_cognitivo }}</td>
                                 </tr>
                                 <tr>
                                     <td class="label-cell">Actitud</td>
-                                    <td class="input-cell">{{ form_psicologico.actitud }}</td>
+                                    <td class="input-cell">{{ form_psico.actitud }}</td>
                                 </tr>
                                 <tr>
                                     <td class="label-cell">Lenguaje</td>
-                                    <td class="input-cell">{{ form_psicologico.lenguaje }}</td>
+                                    <td class="input-cell">{{ form_psico.lenguaje }}</td>
                                 </tr>
                                 <tr>
                                     <td class="label-cell">Afectividad</td>
-                                    <td class="input-cell">{{ form_psicologico.afectividad }}</td>
+                                    <td class="input-cell">{{ form_psico.afectividad }}</td>
                                 </tr>
                                 <tr>
                                     <td class="label-cell">Sueño</td>
-                                    <td class="input-cell">{{ form_psicologico.sueno }}</td>
+                                    <td class="input-cell">{{ form_psico.sueno }}</td>
                                 </tr>
                                 <tr>
                                     <td class="label-cell">Alimentación</td>
-                                    <td class="input-cell">{{ form_psicologico.alimentacion }}</td>
+                                    <td class="input-cell">{{ form_psico.alimentacion }}</td>
                                 </tr>
                                 <tr>
                                     <td class="label-cell">Limitación vida cotidiana</td>
-                                    <td class="input-cell">{{ form_psicologico.limitacion_vida_cotidiana }}</td>
+                                    <td class="input-cell">{{ form_psico.limitacion_vida_cotidiana }}</td>
                                 </tr>
                                 <tr>
                                     <td class="label-cell">¿Quiebre en historia de vida?</td>
-                                    <td class="input-cell">{{ form_psicologico.quiebre_historia_vida }}</td>
+                                    <td class="input-cell">{{ form_psico.quiebre_historia_vida }}</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -667,7 +687,6 @@ textarea {
 
 
             <!-- Acordeón 5: Plan de Acción -->
-            <!-- Acordeón 5: Plan de Acción -->
             <div class="accordion-item">
                 <h2 class="accordion-header" id="headingPlan">
                     <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapsePlan">
@@ -678,30 +697,7 @@ textarea {
                     <div class="accordion-body">
                         <table>
                             <tbody>
-                                <!-- Derivación CAVD -->
-                                <tr>
-                                    <td class="label-cell" rowspan="2"><strong>Derivación CAVD</strong></td>
-                                    <td class="input-cell">
-                                        {{ form_plan.derivacion_cavd_psicologica }} Atención Psicológica
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="input-cell">
-                                        {{ form_plan.derivacion_cavd_juridica }} Atención Jurídica
-                                    </td>
-                                </tr>
-                                <!-- Derivación CESFAM -->
-                                <tr>
-                                    <td class="label-cell" rowspan="2"><strong>DERIVACIÓN CESFAM</strong></td>
-                                    <td class="input-cell">
-                                        {{ form_plan.derivacion_cesfam_salud_general }} Atención Salud General
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="input-cell">
-                                        {{ form_plan.derivacion_cesfam_salud_mental }} Atención Salud Mental
-                                    </td>
-                                </tr>
+                               
                                 <!-- UAV Atención Psicológica -->
                                 <tr>
                                     <td class="label-cell" rowspan="3"><strong>UAV Atención Psicológica</strong></td>
@@ -816,20 +812,447 @@ textarea {
                                         {{ form_plan.cordinadora_gloria }} Gloria Rivera<br>
                                     </td>
                                 </tr>
-                            </tbody>
-                        </table>
+                                       </tbody>
+                                    </table>        
                     </div>
                 </div>
             </div>
 
-        <div class="form-footer text-center mt-4">
-            <button type="submit" class="btn btn-institucional btn-lg">
-                Guardar Ficha
+        <!-- Acordeón 6: Derivaciones -->
+        <div class="accordion-item">
+        <h2 class="accordion-header" id="headingDerivaciones">
+            <button class="accordion-button collapsed" type="button"
+                    data-bs-toggle="collapse" data-bs-target="#collapseDerivaciones">
+            Derivaciones
             </button>
-        </div>
+        </h2>
+        <div id="collapseDerivaciones" class="accordion-collapse collapse"
+            data-bs-parent="#formAccordion">
+            <div class="accordion-body">
 
-    </form>
-</div>
+            <table>
+                <tbody>
+
+                <!-- CAVD -->
+                <tr>
+                    <td class="label-cell">
+                    <input type="checkbox"
+                            name="deriv_cavd-check"
+                            id="deriv_cavd_chk"
+                            onchange="document.getElementById('deriv_cavd_fields').style.display = this.checked ? '' : 'none';">
+                    Programa Atención a Víctimas (CAVD)
+                    </td>
+                    <td class="input-cell">
+                    <table id="deriv_cavd_fields" style="display:none; width:100%;">
+                        <tr>
+                        <td class="label-cell">Descripción</td>
+                        <td class="input-cell">{{ deriv_cavd.descripcion_cavd }}</td>
+                        </tr>
+                        <tr>
+                        <td class="label-cell">Fecha derivación</td>
+                        <td class="input-cell">{{ deriv_cavd.fecha_derivacion_cavd }}</td>
+                        </tr>
+                        <tr>
+                        <td class="label-cell">Es vinculación</td>
+                        <td class="input-cell">{{ deriv_cavd.es_vinculacion_cavd }}</td>
+                        </tr>
+                        <tr>
+                        <td class="label-cell">Fecha respuesta</td>
+                        <td class="input-cell">{{ deriv_cavd.fecha_respuesta_cavd }}</td>
+                        </tr>
+                        <tr>
+                        <td class="label-cell">Ingresa al programa</td>
+                        <td class="input-cell">{{ deriv_cavd.ingresa_cavd }}</td>
+                        </tr>
+                        <tr>
+                        <td class="label-cell">Fecha ingreso</td>
+                        <td class="input-cell">{{ deriv_cavd.fecha_ingreso_cavd }}</td>
+                        </tr>
+                        <tr>
+                        <td class="label-cell">Conmoción pública</td>
+                        <td class="input-cell">{{ deriv_cavd.es_conmocion_publica_cavd }}</td>
+                        </tr>
+                        <tr>
+                        <td class="label-cell">Fecha vinculación conmoción</td>
+                        <td class="input-cell">{{ deriv_cavd.fecha_vinculacion_conmocion_cavd }}</td>
+                        </tr>
+                    </table>
+                    </td>
+                </tr>
+
+                <!-- URAVIT -->
+                <tr>
+                    <td class="label-cell">
+                    <input type="checkbox"
+                            name="deriv_uravit-check"
+                            id="deriv_uravit_chk"
+                            onchange="document.getElementById('deriv_uravit_fields').style.display = this.checked ? '' : 'none';">
+                    URAVIT Fiscalía
+                    </td>
+                    <td class="input-cell">
+                    <table id="deriv_uravit_fields" style="display:none; width:100%;">
+                        <tr>
+                        <td class="label-cell">Descripción</td>
+                        <td class="input-cell">{{ deriv_uravit.descripcion_uravit }}</td>
+                        </tr>
+                        <tr>
+                        <td class="label-cell">Fecha derivación</td>
+                        <td class="input-cell">{{ deriv_uravit.fecha_derivacion_uravit }}</td>
+                        </tr>
+                        <tr>
+                        <td class="label-cell">Es vinculación</td>
+                        <td class="input-cell">{{ deriv_uravit.es_vinculacion_uravit }}</td>
+                        </tr>
+                        <tr>
+                        <td class="label-cell">Fecha respuesta</td>
+                        <td class="input-cell">{{ deriv_uravit.fecha_respuesta_uravit }}</td>
+                        </tr>
+                    </table>
+                    </td>
+                </tr>
+
+                <!-- CDM-CAI -->
+                <tr>
+                    <td class="label-cell">
+                    <input type="checkbox"
+                            name="deriv_cdm_cai-check"
+                            id="deriv_cdm_cai_chk"
+                            onchange="document.getElementById('deriv_cdm_cai_fields').style.display = this.checked ? '' : 'none';">
+                    CDM-CAI
+                    </td>
+                    <td class="input-cell">
+                    <table id="deriv_cdm_cai_fields" style="display:none; width:100%;">
+                        <tr>
+                        <td class="label-cell">Descripción</td>
+                        <td class="input-cell">{{ deriv_cdm_cai.descripcion_cdm_cai }}</td>
+                        </tr>
+                        <tr>
+                        <td class="label-cell">Fecha derivación</td>
+                        <td class="input-cell">{{ deriv_cdm_cai.fecha_derivacion_cdm_cai }}</td>
+                        </tr>
+                        <tr>
+                        <td class="label-cell">Es vinculación</td>
+                        <td class="input-cell">{{ deriv_cdm_cai.es_vinculacion_cdm_cai }}</td>
+                        </tr>
+                        <tr>
+                        <td class="label-cell">Fecha respuesta</td>
+                        <td class="input-cell">{{ deriv_cdm_cai.fecha_respuesta_cdm_cai }}</td>
+                        </tr>
+                        <tr>
+                        <td class="label-cell">Ingresa al programa</td>
+                        <td class="input-cell">{{ deriv_cdm_cai.ingresa_cdm_cai }}</td>
+                        </tr>
+                        <tr>
+                        <td class="label-cell">Fecha ingreso</td>
+                        <td class="input-cell">{{ deriv_cdm_cai.fecha_ingreso_cdm_cai }}</td>
+                        </tr>
+                    </table>
+                    </td>
+                </tr>
+
+                <!-- SALUD -->
+                <tr>
+                    <td class="label-cell">
+                    <input type="checkbox"
+                            name="deriv_salud-check"
+                            id="deriv_salud_chk"
+                            onchange="document.getElementById('deriv_salud_fields').style.display = this.checked ? '' : 'none';">
+                    Salud
+                    </td>
+                    <td class="input-cell">
+                    <table id="deriv_salud_fields" style="display:none; width:100%;">
+                        <tr>
+                        <td class="label-cell">Dispositivo de salud</td>
+                        <td class="input-cell">{{ deriv_salud.dispositivo_salud }}</td>
+                        </tr>
+                        <tr id="row_salud_otro" style="display:none;">
+                            <td class="label-cell">¿Cuál?</td>
+                            <td class="input-cell">
+                                <input type="text" name="deriv_salud-dispositivo_salud_otro" id="id_deriv_salud-dispositivo_salud_otro" maxlength="100">
+                            </td>
+                        </tr>
+                        <tr>
+                        <td class="label-cell">Fecha derivación</td>
+                        <td class="input-cell">{{ deriv_salud.fecha_derivacion_salud }}</td>
+                        </tr>
+                        <tr>
+                        <td class="label-cell">Es vinculación</td>
+                        <td class="input-cell">{{ deriv_salud.es_vinculacion_salud }}</td>
+                        </tr>
+                        <tr>
+                        <td class="label-cell">Fecha respuesta</td>
+                        <td class="input-cell">{{ deriv_salud.fecha_respuesta_salud }}</td>
+                        </tr>
+                        <tr>
+                        <td class="label-cell">Ingresa al dispositivo</td>
+                        <td class="input-cell">{{ deriv_salud.ingresa_salud }}</td>
+                        </tr>                       
+                        <tr>
+                        <td class="label-cell">Fecha ingreso</td>
+                        <td class="input-cell">{{ deriv_salud.fecha_ingreso_salud }}</td>
+                        </tr>
+                    </table>
+                    </td>
+                </tr>
+
+                <!-- OFAM -->
+                <tr>
+                    <td class="label-cell">
+                    <input type="checkbox"
+                            name="deriv_ofam-check"
+                            id="deriv_ofam_chk"
+                            onchange="document.getElementById('deriv_ofam_fields').style.display = this.checked ? '' : 'none';">
+                    OFAM
+                    </td>
+                    <td class="input-cell">
+                    <table id="deriv_ofam_fields" style="display:none; width:100%;">
+                        <tr>
+                        <td class="label-cell">Descripción</td>
+                        <td class="input-cell">{{ deriv_ofam.descripcion_ofam }}</td>
+                        </tr>
+                        <tr>
+                        <td class="label-cell">Fecha derivación</td>
+                        <td class="input-cell">{{ deriv_ofam.fecha_derivacion_ofam }}</td>
+                        </tr>
+                        <tr>
+                        <td class="label-cell">Es vinculación</td>
+                        <td class="input-cell">{{ deriv_ofam.es_vinculacion_ofam }}</td>
+                        </tr>
+                        <tr>
+                        <td class="label-cell">Fecha respuesta</td>
+                        <td class="input-cell">{{ deriv_ofam.fecha_respuesta_ofam }}</td>
+                        </tr>
+                        <tr>
+                        <td class="label-cell">Ingresa al programa</td>
+                        <td class="input-cell">{{ deriv_ofam.ingresa_ofam }}</td>
+                        </tr>
+                        <tr>
+                        <td class="label-cell">Fecha ingreso</td>
+                        <td class="input-cell">{{ deriv_ofam.fecha_ingreso_ofam }}</td>
+                        </tr>
+                    </table>
+                    </td>
+                </tr>
+
+                <!-- DIDECO -->
+                <tr>
+                    <td class="label-cell">
+                    <input type="checkbox"
+                            name="deriv_dideco-check"
+                            id="deriv_dideco_chk"
+                            onchange="document.getElementById('deriv_dideco_fields').style.display = this.checked ? '' : 'none';">
+                    DIDECO
+                    </td>
+                    <td class="input-cell">
+                    <table id="deriv_dideco_fields" style="display:none; width:100%;">
+                        <tr>
+                        <td class="label-cell">Descripción</td>
+                        <td class="input-cell">{{ deriv_dideco.descripcion_dideco }}</td>
+                        </tr>
+                        <tr>
+                        <td class="label-cell">Fecha derivación</td>
+                        <td class="input-cell">{{ deriv_dideco.fecha_derivacion_dideco }}</td>
+                        </tr>
+                        <tr>
+                        <td class="label-cell">Es vinculación</td>
+                        <td class="input-cell">{{ deriv_dideco.es_vinculacion_dideco }}</td>
+                        </tr>
+                        <tr>
+                        <td class="label-cell">Fecha respuesta</td>
+                        <td class="input-cell">{{ deriv_dideco.fecha_respuesta_dideco }}</td>
+                        </tr>
+                        <tr>
+                        <td class="label-cell">Ingresa al programa</td>
+                        <td class="input-cell">{{ deriv_dideco.ingresa_dideco }}</td>
+                        </tr>
+                        <tr>
+                        <td class="label-cell">Fecha ingreso</td>
+                        <td class="input-cell">{{ deriv_dideco.fecha_ingreso_dideco }}</td>
+                        </tr>
+                    </table>
+                    </td>
+                </tr>
+
+                <!-- Gestión Territorial -->
+                <tr>
+                    <td class="label-cell">
+                    <input type="checkbox"
+                            name="deriv_gestion_territorial-check"
+                            id="deriv_gestion_chk"
+                            onchange="document.getElementById('deriv_gestion_fields').style.display = this.checked ? '' : 'none';">
+                    Gestión Territorial
+                    </td>
+                    <td class="input-cell">
+                    <table id="deriv_gestion_fields" style="display:none; width:100%;">
+                        <tr>
+                        <td class="label-cell">Descripción</td>
+                        <td class="input-cell">{{ deriv_gestion_territorial.descripcion_gestion_territorial }}</td>
+                        </tr>
+                        <tr>
+                        <td class="label-cell">Fecha derivación</td>
+                        <td class="input-cell">{{ deriv_gestion_territorial.fecha_derivacion_gestion_territorial }}</td>
+                        </tr>
+                        <tr>
+                        <td class="label-cell">Es vinculación</td>
+                        <td class="input-cell">{{ deriv_gestion_territorial.es_vinculacion_gestion_territorial }}</td>
+                        </tr>
+                        <tr>
+                        <td class="label-cell">Fecha respuesta</td>
+                        <td class="input-cell">{{ deriv_gestion_territorial.fecha_respuesta_gestion_territorial }}</td>
+                        </tr>
+                        <tr>
+                        <td class="label-cell">Ingresa al programa</td>
+                        <td class="input-cell">{{ deriv_gestion_territorial.ingresa_gestion_territorial }}</td>
+                        </tr>
+                        <tr>
+                        <td class="label-cell">Fecha ingreso</td>
+                        <td class="input-cell">{{ deriv_gestion_territorial.fecha_ingreso_gestion_territorial }}</td>
+                        </tr>
+                    </table>
+                    </td>
+                </tr>
+
+                <!-- CAPS UDLA -->
+                <tr>
+                    <td class="label-cell">
+                    <input type="checkbox"
+                            name="deriv_caps_udla-check"
+                            id="deriv_caps_chk"
+                            onchange="document.getElementById('deriv_caps_fields').style.display = this.checked ? '' : 'none';">
+                    CAPS UDLA
+                    </td>
+                    <td class="input-cell">
+                    <table id="deriv_caps_fields" style="display:none; width:100%;">
+                        <tr>
+                        <td class="label-cell">Descripción</td>
+                        <td class="input-cell">{{ deriv_caps_udla.descripcion_caps_udla }}</td>
+                        </tr>
+                        <tr>
+                        <td class="label-cell">Fecha derivación</td>
+                        <td class="input-cell">{{ deriv_caps_udla.fecha_derivacion_caps_udla }}</td>
+                        </tr>
+                        <tr>
+                        <td class="label-cell">Es vinculación</td>
+                        <td class="input-cell">{{ deriv_caps_udla.es_vinculacion_caps_udla }}</td>
+                        </tr>
+                        <tr>
+                        <td class="label-cell">Fecha respuesta</td>
+                        <td class="input-cell">{{ deriv_caps_udla.fecha_respuesta_caps_udla }}</td>
+                        </tr>
+                        <tr>
+                        <td class="label-cell">Ingresa al programa</td>
+                        <td class="input-cell">{{ deriv_caps_udla.ingresa_caps_udla }}</td>
+                        </tr>
+                        <tr>
+                        <td class="label-cell">Fecha ingreso</td>
+                        <td class="input-cell">{{ deriv_caps_udla.fecha_ingreso_caps_udla }}</td>
+                        </tr>
+                    </table>
+                    </td>
+                </tr>
+
+                <!-- OLN -->
+                <tr>
+                    <td class="label-cell">
+                    <input type="checkbox"
+                            name="deriv_oln-check"
+                            id="deriv_oln_chk"
+                            onchange="document.getElementById('deriv_oln_fields').style.display = this.checked ? '' : 'none';">
+                    OLN
+                    </td>
+                    <td class="input-cell">
+                    <table id="deriv_oln_fields" style="display:none; width:100%;">
+                        <tr>
+                        <td class="label-cell">Descripción</td>
+                        <td class="input-cell">{{ deriv_oln.descripcion_oln }}</td>
+                        </tr>
+                        <tr>
+                        <td class="label-cell">Fecha derivación</td>
+                        <td class="input-cell">{{ deriv_oln.fecha_derivacion_oln }}</td>
+                        </tr>
+                        <tr>
+                        <td class="label-cell">Es vinculación</td>
+                        <td class="input-cell">{{ deriv_oln.es_vinculacion_oln }}</td>
+                        </tr>
+                        <tr>
+                        <td class="label-cell">Fecha respuesta</td>
+                        <td class="input-cell">{{ deriv_oln.fecha_respuesta_oln }}</td>
+                        </tr>
+                        <tr>
+                        <td class="label-cell">Ingresa al programa</td>
+                        <td class="input-cell">{{ deriv_oln.ingresa_oln }}</td>
+                        </tr>
+                        <tr>
+                        <td class="label-cell">Fecha ingreso</td>
+                        <td class="input-cell">{{ deriv_oln.fecha_ingreso_oln }}</td>
+                        </tr>
+                    </table>
+                    </td>
+                </tr>
+
+                <!-- OTRO -->
+                <tr>
+                    <td class="label-cell">
+                    <input type="checkbox"
+                            name="deriv_otro-check"
+                            id="deriv_otro_chk"
+                            onchange="document.getElementById('deriv_otro_fields').style.display = this.checked ? '' : 'none';">
+                    Otro
+                    </td>
+                    <td class="input-cell">
+                    <table id="deriv_otro_fields" style="display:none; width:100%;">
+                        <tr>
+                        <td class="label-cell">Institución (otro)</td>
+                        <td class="input-cell">{{ deriv_otro.institucion_otro }}</td>
+                        </tr>
+                        <tr>
+                        <td class="label-cell">Descripción</td>
+                        <td class="input-cell">{{ deriv_otro.descripcion_otro }}</td>
+                        </tr>
+                        <tr>
+                        <td class="label-cell">Fecha derivación</td>
+                        <td class="input-cell">{{ deriv_otro.fecha_derivacion_otro }}</td>
+                        </tr>
+                        <tr>
+                        <td class="label-cell">Es vinculación</td>
+                        <td class="input-cell">{{ deriv_otro.es_vinculacion_otro }}</td>
+                        </tr>
+                        <tr>
+                        <td class="label-cell">Fecha respuesta</td>
+                        <td class="input-cell">{{ deriv_otro.fecha_respuesta_otro }}</td>
+                        </tr>
+                        <tr>
+                        <td class="label-cell">Ingresa al programa</td>
+                        <td class="input-cell">{{ deriv_otro.ingresa_otro }}</td>
+                        </tr>
+                        <tr>
+                        <td class="label-cell">Fecha ingreso</td>
+                        <td class="input-cell">{{ deriv_otro.fecha_ingreso_otro }}</td>
+                        </tr>
+                    </table>
+                    </td>
+                </tr>
+
+                </tbody>
+            </table>
+
+            </div>
+        </div>
+        </div>
+        <!-- FIN Acordeón Derivaciones -->
+
+
+
+
+        </div><!-- /.accordion -->
+
+        <div class="form-footer text-center mt-4">
+        <button type="submit" class="btn btn-institucional btn-lg">
+            Guardar Ficha
+        </button>
+        </div>
+        </form>
+        </div>
 
 
 <script src="{% static 'fichas/js/ficha_completa.js' %}"></script>

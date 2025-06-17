@@ -30,10 +30,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Habilita/deshabilita fecha de ingreso según el radio de "ingreso efectivo"
 document.addEventListener('DOMContentLoaded', function () {
-    const radios = document.getElementsByName('ingreso_efectivo');
-    const fechaIngreso = document.getElementById('id_fecha_ingreso');
+    const radios = document.getElementsByName('ficha-ingreso_efectivo');
+    const fechaIngreso = document.getElementById('id_ficha-fecha_ingreso');
     function checkEstado() {
         let valor = null;
+        radios.forEach = Array.prototype.forEach; // Para forEach en NodeList en IE
         radios.forEach(radio => { if (radio.checked) valor = radio.value; });
         if (valor === "True") {
             fechaIngreso.removeAttribute('disabled');
@@ -61,14 +62,16 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // Mostrar/ocultar campos de denuncia según el boolean "¿Tiene denuncia?"
-document.addEventListener('DOMContentLoaded', () => {
-    const checkbox = document.getElementById('id_tiene_denuncia');
+document.addEventListener('DOMContentLoaded', function() {
+    const checkbox = document.getElementById('id_denuncia-tiene_denuncia');
     const detalleCampos = document.getElementById('denuncia-detalle-campos');
+
     function toggleDetalleCampos() {
         if (checkbox && detalleCampos) {
             detalleCampos.style.display = checkbox.checked ? 'table-row-group' : 'none';
         }
     }
+
     if (checkbox && detalleCampos) {
         checkbox.addEventListener('change', toggleDetalleCampos);
         toggleDetalleCampos(); // Estado inicial
@@ -77,9 +80,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
+
 document.addEventListener('DOMContentLoaded', function () {
     // Mostrar campo "otro" si corresponde
-    const lugarDenuncia = document.getElementById('id_lugar_denuncia');
+    const lugarDenuncia = document.querySelector('select[name$="lugar_denuncia"]');
     const otroLugarCampo = document.getElementById('otro-lugar-campo');
     if (lugarDenuncia && otroLugarCampo) {
         function toggleOtroLugar() {
@@ -90,12 +94,12 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // Mostrar "otra dificultad"
-    const dificultades = document.getElementsByName('dificultades');
+    const dificultades = document.querySelectorAll('input[name$="dificultades"]');
     const dificultadesOtraCampo = document.getElementById('dificultades-otra-campo');
-    if (dificultades && dificultadesOtraCampo) {
+
+    if (dificultades.length > 0 && dificultadesOtraCampo) {
         function toggleDificultadOtra() {
             let checked = false;
-            dificultades.forEach = Array.prototype.forEach;
             dificultades.forEach(input => {
                 if (input.value === 'otra' && input.checked) checked = true;
             });
@@ -105,8 +109,9 @@ document.addEventListener('DOMContentLoaded', function () {
         toggleDificultadOtra();
     }
 
+
     // Mostrar detalle de medida cautelar solo si es sí
-    const medidaCautelar = document.getElementById('id_medida_cautelar');
+    const medidaCautelar = document.getElementById('id_denuncia-medida_cautelar');
     const medidaCautelarDetalle = document.getElementById('medida-cautelar-detalle-campo');
     if (medidaCautelar && medidaCautelarDetalle) {
         function toggleMedidaDetalle() {
@@ -132,56 +137,59 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 
-document.addEventListener('DOMContentLoaded', function() {
-    // Diagnóstico: Mostrar campo "otro"
-    const diagSelect = document.getElementById('id_diagnostico');
-    const diagOtroRow = document.getElementById('diagnostico-otro-row');
-    function toggleDiagOtro() {
-        diagOtroRow.style.display = (diagSelect && diagSelect.value === 'otro') ? 'table-row' : 'none';
-    }
-    if (diagSelect && diagOtroRow) {
-        diagSelect.addEventListener('change', toggleDiagOtro);
-        toggleDiagOtro();
-    }
-
-    // Atención salud mental: año y lugar solo si SÍ
-    const atencionCheck = document.getElementById('id_atencion_salud_mental');
-    const atencionAnioRow = document.getElementById('atencion-anio-row');
-    const atencionLugarRow = document.getElementById('atencion-lugar-row');
-    function toggleAtencion() {
-        const checked = atencionCheck && (atencionCheck.checked || atencionCheck.value === "True" || atencionCheck.value === "true" || atencionCheck.value === "1");
-        atencionAnioRow.style.display = checked ? 'table-row' : 'none';
-        atencionLugarRow.style.display = checked ? 'table-row' : 'none';
-    }
-    if (atencionCheck && atencionAnioRow && atencionLugarRow) {
-        atencionCheck.addEventListener('change', toggleAtencion);
-        toggleAtencion();
+document.addEventListener('DOMContentLoaded', function () {
+    // Diagnóstico: mostrar "otro" si corresponde
+    const diagnostico = document.getElementById('id_psico-diagnostico');
+    const diagnosticoOtroRow = document.getElementById('diagnostico-otro-row');
+    if (diagnostico && diagnosticoOtroRow) {
+        function toggleDiagnosticoOtro() {
+            diagnosticoOtroRow.style.display = (diagnostico.value === 'otro') ? '' : 'none';
+        }
+        diagnostico.addEventListener('change', toggleDiagnosticoOtro);
+        toggleDiagnosticoOtro();
     }
 
-    // Internación: año y lugar solo si SÍ
-    const internacionCheck = document.getElementById('id_internacion');
-    const internacionAnioRow = document.getElementById('internacion-anio-row');
-    const internacionLugarRow = document.getElementById('internacion-lugar-row');
-    function toggleInternacion() {
-        const checked = internacionCheck && (internacionCheck.checked || internacionCheck.value === "True" || internacionCheck.value === "true" || internacionCheck.value === "1");
-        internacionAnioRow.style.display = checked ? 'table-row' : 'none';
-        internacionLugarRow.style.display = checked ? 'table-row' : 'none';
+    // Atención salud mental: mostrar año y lugar si check
+    const atencion = document.getElementById('id_psico-atencion_salud_mental');
+    const atencionAnio = document.getElementById('atencion-anio-row');
+    const atencionLugar = document.getElementById('atencion-lugar-row');
+    if (atencion && atencionAnio && atencionLugar) {
+        function toggleAtencionCampos() {
+            const checked = atencion.checked;
+            atencionAnio.style.display = checked ? '' : 'none';
+            atencionLugar.style.display = checked ? '' : 'none';
+        }
+        atencion.addEventListener('change', toggleAtencionCampos);
+        toggleAtencionCampos();
     }
-    if (internacionCheck && internacionAnioRow && internacionLugarRow) {
-        internacionCheck.addEventListener('change', toggleInternacion);
-        toggleInternacion();
+
+    // Internación: mostrar año y lugar si check
+    const internacion = document.getElementById('id_psico-internacion');
+    const internacionAnio = document.getElementById('internacion-anio-row');
+    const internacionLugar = document.getElementById('internacion-lugar-row');
+    if (internacion && internacionAnio && internacionLugar) {
+        function toggleInternacionCampos() {
+            const checked = internacion.checked;
+            internacionAnio.style.display = checked ? '' : 'none';
+            internacionLugar.style.display = checked ? '' : 'none';
+        }
+        internacion.addEventListener('change', toggleInternacionCampos);
+        toggleInternacionCampos();
     }
 });
 
 
 
 
+
+
+
 document.addEventListener('DOMContentLoaded', function() {
-    var patrullajeActivo = document.getElementById('id_patrullaje_activo');
+    var patrullajeActivo = document.getElementById('id_plan-patrullaje_activo');
     var patrullajeCampos = document.querySelectorAll('.patrullaje-campos');
     function togglePatrullajeCampos() {
         patrullajeCampos.forEach(function(row) {
-            row.style.display = patrullajeActivo && patrullajeActivo.checked ? '' : 'none';
+            row.style.display = (patrullajeActivo && patrullajeActivo.checked) ? '' : 'none';
         });
     }
     if (patrullajeActivo) {
@@ -190,8 +198,9 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
+
 document.addEventListener('DOMContentLoaded', function () {
-    const fechaNacimiento = document.getElementById('id_fecha_nacimiento');
+    const fechaNacimiento = document.getElementById('id_persona-fecha_nacimiento');
     const rangoEtareoSelectWrapper = document.getElementById('rango-etareo-select-wrapper');
     const rangoEtareoSelect = document.querySelector('.select-rango-etareo');
     const rangoEtareoReadonlyWrapper = document.getElementById('rango-etareo-readonly-wrapper');
@@ -281,5 +290,28 @@ document.addEventListener('DOMContentLoaded', function() {
     if (cesfamSelect && cesfamOtroCampo) {
         cesfamSelect.addEventListener('change', toggleCesfamOtro);
         toggleCesfamOtro(); // Estado inicial
+    }
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+    var selectSalud = document.getElementById('id_deriv_salud-dispositivo_salud');
+    var rowSaludOtro = document.getElementById('row_salud_otro');
+    var inputSaludOtro = document.getElementById('id_deriv_salud-dispositivo_salud_otro');
+
+    function mostrarCampoOtroSalud() {
+        if (selectSalud.value === 'OTRO') {
+            rowSaludOtro.style.display = '';
+            inputSaludOtro.required = true;
+        } else {
+            rowSaludOtro.style.display = 'none';
+            inputSaludOtro.value = '';
+            inputSaludOtro.required = false;
+        }
+    }
+
+    if (selectSalud && rowSaludOtro && inputSaludOtro) {
+        selectSalud.addEventListener('change', mostrarCampoOtroSalud);
+        // Llama al cargar por si viene con valor
+        mostrarCampoOtroSalud();
     }
 });
