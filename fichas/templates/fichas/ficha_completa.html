@@ -1,6 +1,8 @@
 {% extends 'base.html' %}
 {% load static %}
 {% load widget_tweaks %}
+
+
 {% block content %}
 
 <style>
@@ -204,6 +206,35 @@ textarea {
 .radio-inline input[type="radio"] {
     margin-right: 4px;
 }
+.autocomplete-suggestions {
+    background: #fff;
+    border: 1px solid #d2d2d2;
+    border-radius: 0 0 6px 6px;
+    max-height: 180px;
+    overflow-y: auto;
+    position: absolute;
+    z-index: 10;
+    width: 100%;
+    left: 0;
+    top: 100%;
+    box-shadow: 0 6px 18px #252c541a;
+}
+
+.autocomplete-suggestion {
+    padding: 8px 12px;
+    cursor: pointer;
+    border-bottom: 1px solid #eee;
+}
+
+.autocomplete-suggestion:last-child {
+    border-bottom: none;
+}
+
+.autocomplete-suggestion:hover, .autocomplete-suggestion.active {
+    background: #252c54;
+    color: #fff;
+}
+
 
 
 </style>
@@ -357,7 +388,19 @@ textarea {
                                 </tr>
                                 <tr><td class="label-cell">Ocupación</td><td class="input-cell">{{ form_persona.ocupacion }}</td></tr>
                                 <tr class="espacio-fila"><td colspan="2"></td></tr>
-                                <tr><td class="label-cell">Dirección</td><td class="input-cell">{{ form_persona.direccion }}</td></tr>
+                             <!-- EN caso de no poder integrar maps restaurar   <tr><td class="label-cell">Dirección</td><td class="input-cell">{{ form_persona.direccion }}</td></tr> -->
+                                <tr><td class="label-cell">Dirección</td>
+                                    <td class="input-cell" style="position:relative;">
+                                        {{ form_persona.direccion|attr:"id:direccion-autocompleta" }}
+                                        <input type="hidden" name="latitud" id="id_latitud">
+                                        <input type="hidden" name="longitud" id="id_longitud">
+                                        <div id="mapa-direccion" style="width: 100%; height: 280px; margin-top: 15px; border-radius: 8px; box-shadow: 0 1px 6px #252c5433;"></div>
+                                    </td>
+
+                                </tr>
+
+
+                             
                                 <tr><td class="label-cell">Villa</td><td class="input-cell">{{ form_persona.villa }}</td></tr>
                                 <tr><td class="label-cell">Barrio</td><td class="input-cell">{{ form_persona.barrio }}</td></tr>
                                 <tr><td class="label-cell">Cuadrante</td><td class="input-cell">{{ form_persona.cuadrante }}</td></tr>

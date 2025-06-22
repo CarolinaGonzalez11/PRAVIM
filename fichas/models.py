@@ -70,10 +70,10 @@ class FichaAcogida(models.Model):
     ]
 
     ESTADOS = [
-        ('EN_CURSO', 'En curso'),
+        ('ABIERTA', 'Abierta'),
         ('CERRADA', 'Cerrada'),
     ]
-    estado = models.CharField(max_length=20, choices=ESTADOS, default='EN_CURSO')
+    estado = models.CharField(max_length=20, choices=ESTADOS, default='ABIERTA')
     profesional = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT)
     fecha_recepcion = models.DateField(null=True, blank=True)
     via_ingreso = models.CharField(max_length=50, choices=VIA_INGRESO_CHOICES)

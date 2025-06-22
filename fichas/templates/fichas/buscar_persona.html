@@ -150,7 +150,7 @@
             <label for="estado">Estado ficha:</label>
             <select id="estado" name="estado" style="width:140px;">
                 <option value="">Todos</option>
-                <option value="EN_CURSO" {% if estado == 'EN_CURSO' %}selected{% endif %}>Abierta</option>
+                <option value="ABIERTA" {% if estado == 'ABIERTA' %}selected{% endif %}>Abierta</option>
                 <option value="CERRADA" {% if estado == 'CERRADA' %}selected{% endif %}>Cerrada</option>
             </select>
 
@@ -207,10 +207,10 @@
                 {% else %}-{% endif %}
             </td>
             <td>
-                {% if ficha.egreso %}
+                {% if ficha.egreso and ficha.egreso.fecha_egreso %}
                     Cerrada
                 {% else %}
-                    En curso
+                    Abierta
                 {% endif %}
             </td>
             <td>
@@ -243,9 +243,8 @@
     {% endif %}
     <span class="current">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
     {% if page_obj.has_next %}
-        <a href="?{% for key, value in request.GET.items %}
-            {% if key != 'page' %}{{ key }}={{ value|urlencode }}&{% endif %}
-        {% endfor %}page={{ page_obj.next_page_number }}">Siguiente</a>
+        <a href="?{% for key, value in request.GET.items %}{% if key != 'page' and value %}{{ key }}={{ value|urlencode }}&{% endif %}{% endfor %}page={{ page_obj.next_page_number }}">Siguiente</a>
+
     {% endif %}
 </div>
 {% endblock %}

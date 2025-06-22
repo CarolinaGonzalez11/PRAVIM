@@ -1,5 +1,7 @@
 {% extends 'base.html' %}
+{% load static %}
 {% block content %}
+
 <style>
     .modal-content {
         border-radius: 18px;
@@ -50,10 +52,198 @@
         background-color: #252c54 !important;
         color: white !important;
     }
+    .ficha-table th, .ficha-table td {
+        vertical-align: middle !important;
+        text-align: left !important;
+        padding: 10px 16px;
+        border-top: 1px solid #eee;
+        font-size: 1.07em;
+    }
+    .ficha-table th {
+        width: 45%;
+        background: #252c54;
+        color: #fff;
+        font-weight: bold;
+    }
+    .ficha-table td {
+        width: 55%;
+        background: #f8f9fa;
+        color: #222;
+    }
+    .ficha-table td, .ficha-table th {
+        word-break: break-word;
+        white-space: pre-line;
+    }
+
+    .table-pravim th, .table-pravim td {
+        vertical-align: middle !important;
+        text-align: left !important;
+        padding: 8px 16px !important;
+        font-size: 1em;
+        border-color: #dee2e6 !important;
+        /* Bordes sutiles y limpios */
+    }
+    .table-pravim th {
+        background: #252c54 !important;
+        color: #fff !important;
+        width: 35%;
+        min-width: 180px;
+        font-weight: bold;
+    }
+    .table-pravim td {
+        background: #f8f9fa !important;
+        color: #252c54 !important;
+        width: 65%;
+        word-break: break-word;
+    }
+    .table-pravim {
+        border-radius: 12px;
+        overflow: hidden;
+        margin-bottom: 0;
+    }
+    .table-pravim tr {
+        border-top: 1px solid #eee !important;
+    }
+
+    /* Responsive: hace que la tabla horizontal se vea bien en móvil */
+    @media (max-width: 600px) {
+        .table-pravim th, .table-pravim td {
+            font-size: 0.98em;
+            padding: 10px 6px !important;
+        }
+        .table-pravim th {
+            min-width: 120px;
+        }
+    }
+
+    .table-pravim {
+        min-width: 320px;
+        max-width: 100%;
+        table-layout: fixed;
+        word-break: break-word;
+    }
+
+    .table-pravim th,
+    .table-pravim td {
+        overflow-wrap: break-word;
+        word-break: break-word;
+        white-space: pre-line;
+    }
+
+    @media (max-width: 600px) {
+        .table-pravim th,
+        .table-pravim td {
+            font-size: 0.97em;
+            padding: 10px 6px !important;
+        }
+        .table-pravim th {
+            min-width: 90px;
+            width: 35%;
+        }
+        .table-pravim td {
+            width: 65%;
+        }
+    }
+    .table-responsive {
+        width: 100%;
+        overflow-x: auto;
+        /* border-radius solo visual, opcional */
+        border-radius: 12px;
+        /* Esconde scroll si no es necesario */
+        -webkit-overflow-scrolling: touch; /* Scroll suave en iOS */
+    }
+    .table-pravim {
+        min-width: 800px; /* Ajusta esto según tus columnas, puede ser 900-1000px si tienes más columnas */
+        width: 100%;
+        table-layout: fixed;
+    }
+
+    /* TH normales en tablas ficha-table (campo-valor) */
+    .ficha-table th {
+        background: #dfdfdf !important;
+        color: #232323 !important;
+        font-weight: bold;
+        text-align: left;
+    }
+
+    /* TH con colspan (cabecera de bloque en tablas) */
+    .ficha-table th[colspan] {
+        background: #252c54 !important;  /* negro institucional, puedes cambiar */
+        color: #fff !important;
+        text-align: center !important;
+        font-size: 1.05em;  /* opcional, para destacar más */
+        letter-spacing: 0.2px;  /* opcional */
+    }
+    .ficha-table th {
+        background: #dfdfdf !important;
+        color: #232323 !important;
+        font-weight: bold !important;   /* <--- lo importante */
+        text-align: left;
+    }
+
+    .ficha-table th[colspan] {
+        background: #252c54 !important;  /* tu color institucional */
+        color: #fff !important;
+        text-align: center !important;
+        font-size: 1.05em;
+        letter-spacing: 0.2px;
+        font-weight: normal !important;   /* <--- igual aquí */
+    }
+
+    .card-header.bg-pravim {
+        font-weight: bold !important;
+    }
+    .solo-pdf {
+        display: none;
+    }
+
+    @media print {
+        .card {
+            page-break-inside: avoid !important;
+            break-inside: avoid-page !important;
+        }
+    }
+
+    .card {
+        page-break-inside: avoid !important;
+        break-inside: avoid-page !important;
+    }
+    .card {
+        page-break-inside: avoid !important;
+        break-inside: avoid-page !important;
+    }
+    @media print {
+        .card {
+            page-break-inside: avoid !important;
+        }
+    }
+    @media print {
+        td, th {
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
+        }
+    }
+    td, th {
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+    }
+    
+    .table-pravim {
+        min-width: 600px;
+        width: 100%;
+        table-layout: fixed;
+    }
+
 </style>
 
 <div class="container">
-    <h2 class="mb-4">Ficha N° {{ ficha.id }}</h2>
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0">Ficha N° {{ ficha.id }}</h2>
+        <button id="btnDescargarPDF" class="btn btn-outline-pravim" type="button">
+            Descargar PDF
+        </button>
+    </div>
 
     {% if egreso and egreso.fecha_egreso %}
         <div class="alert alert-success">
@@ -68,12 +258,19 @@
     <a href="{% url 'fichas:editar_ficha_completa' ficha.id %}" class="btn btn-pravim mb-4">
         Editar ficha
     </a>
+<div id="fichaExport" style="padding-top:4px; padding-right:12px; padding-left:12px;">
+    <img id="img-encabezado" src="{% static 'fichas/encabezado.jpg' %}" style="display:none; margin-bottom: 1px;">
+    <div id="ficha-numero-pdf" class="solo-pdf" style="text-align:left; font-size:18px; font-weight:bold; margin-bottom:10px;">
+        Ficha N° {{ ficha.id }}
+    </div>
+
+
 
     {# --- PREINGRESO --- #}
     <div class="card mb-4">
         <div class="card-header bg-pravim">Preingreso</div>
         <div class="card-body">
-            <table class="table">
+            <table class="table ficha-table">
                 {% if ficha.fecha_recepcion %}
                 <tr><th>Fecha recepción</th>
                     <td>{{ ficha.fecha_recepcion|date:"d/m/Y" }}</td>
@@ -145,7 +342,7 @@
     <div class="card mb-4">
         <div class="card-header bg-pravim">Datos de la Persona Atendida</div>
         <div class="card-body">
-            <table class="table">
+            <table class="table ficha-table">
                 {% if persona.nombre %}
                 <tr><th>Nombre</th><td>{{ persona.nombre }}</td></tr>{% endif %}
                 {% if persona.rut_pasaporte %}
@@ -221,7 +418,7 @@
     <div class="card mb-4">
         <div class="card-header bg-pravim">Denuncia</div>
         <div class="card-body">
-            <table class="table">
+            <table class="table ficha-table">
                 <tr>
                     <th>¿Tiene denuncia?</th>
                     <td>{{ denuncia.tiene_denuncia|yesno:"Sí,No" }}</td>
@@ -276,7 +473,7 @@
     <div class="card mb-4">
         <div class="card-header bg-pravim">Motivo de Ingreso</div>
         <div class="card-body">
-            <table class="table">
+            <table class="table ficha-table">
                 {% if motivo.motivo_ingreso %}
                 <tr><th>Motivo principal</th>
                     <td>
@@ -300,7 +497,7 @@
     <div class="card mb-4">
         <div class="card-header bg-pravim">Aspectos Psicológicos</div>
         <div class="card-body">
-            <table class="table">
+            <table class="table ficha-table">
                 {% if psicologico.antecedentes %}
                 <tr><th>Antecedentes</th><td>{{ psicologico.antecedentes }}</td></tr>{% endif %}
                 {% if psicologico.diagnostico %}
@@ -385,7 +582,7 @@
     <div class="card mb-4">
         <div class="card-header bg-pravim">Redes de Apoyo</div>
         <div class="card-body">
-            <table class="table">
+            <table class="table ficha-table">
                 {% if redes.red_familiares %}
                 <tr><th>Familiares</th><td>{{ redes.red_familiares }}</td></tr>{% endif %}
                 {% if redes.red_amistades %}
@@ -444,7 +641,7 @@
     <div class="card mb-4">
         <div class="card-header bg-pravim">Plan de Acción</div>
         <div class="card-body">
-            <table class="table">
+            <table class="table ficha-table">
                 {% if plan.uav_psicologica_1 or plan.uav_psicologica_1_detalle %}
                 <tr><th>UAV Psicológica 1</th>
                     <td>{% if plan.uav_psicologica_1 %}✔{% endif %} {{ plan.uav_psicologica_1_detalle }}</td>
@@ -524,7 +721,7 @@
     <div class="card mb-4">
         <div class="card-header bg-pravim">Derivaciones</div>
         <div class="card-body">
-            <table class="table">
+            <table class="table ficha-table">
 
                 {% if deriv_cavd %}
                 <tr><th colspan="2">Programa Atención a Víctimas (CAVD)</th></tr>
@@ -881,7 +1078,8 @@
     <div class="card mb-4">
         <div class="card-header bg-pravim">Intervenciones</div>
         <div class="card-body">
-            <table class="table table-sm table-bordered">
+            <div class="table-responsive">
+            <table class="table table-sm table-bordered table-pravim">
                 <thead>
                     <tr>
                         <th>Fecha</th>
@@ -911,6 +1109,7 @@
                     {% endfor %}
                 </tbody>
             </table>
+            </div>
         </div>
     </div>
     {% endif %}
@@ -920,7 +1119,7 @@
     <div class="card mb-4">
         <div class="card-header bg-pravim">Egreso</div>
         <div class="card-body">
-            <table class="table">
+            <table class="table ficha-table">
                 {% if egreso.motivo_egreso %}
                 <tr><th>Motivo de egreso</th>
                     <td>{{ egreso.get_motivo_egreso_display }}</td>
@@ -945,12 +1144,17 @@
         </div>
     </div>
     {% endif %}
+    <img id="img-piepagina" src="{% static 'fichas/piepagina.jpg' %}" style="display:none; margin-top: 40px;">
+
+</div>
 
     <div class="text-center mb-4">
         <a href="{% url 'fichas:buscar_persona' %}" class="btn btn-outline-pravim">Volver</a>
     </div>
-</div>
 
+    
+
+</div>
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         if (window.location.search.indexOf('success=1') !== -1) {
@@ -958,4 +1162,65 @@
         }
     });
 </script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+
+<script>
+window.HEADER_IMG = "{% static 'fichas/encabezado.jpg' %}";
+window.FOOTER_IMG = "{% static 'fichas/piepagina.jpg' %}";
+
+document.addEventListener('DOMContentLoaded', function () {
+    const btn = document.getElementById('btnDescargarPDF');
+    btn.addEventListener('click', function() {
+        const fichaElem = document.getElementById('fichaExport');
+        const numFichaDiv = document.getElementById('ficha-numero-pdf');
+        const ahora = new Date();
+        const fechaHora = ahora.toLocaleDateString() + " " + ahora.toLocaleTimeString();
+
+        // Mostrar el número de ficha solo para exportar
+        const oldDisplay = numFichaDiv.style.display;
+        numFichaDiv.style.display = 'block';
+
+        const opt = {
+            margin: [36, 10, 28, 10],  // margen superior aumentado (de 26 a 36)
+            filename: 'Ficha_{{ ficha.id }}.pdf',
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2, useCORS: true },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
+
+
+        html2pdf().from(fichaElem).set(opt).toPdf().get('pdf').then(function(pdf) {
+            const pageCount = pdf.internal.getNumberOfPages();
+            for (let i = 1; i <= pageCount; i++) {
+                pdf.setPage(i);
+
+                // Encabezado (sin tamaño: se inserta con tamaño natural)
+                pdf.addImage(window.HEADER_IMG, 'JPEG', 0, 6);
+
+                // Pie de página (sin tamaño: se inserta con tamaño natural)
+                pdf.addImage(window.FOOTER_IMG, 'JPEG', 0, 277);
+
+                // Usuario y fecha/hora (abajo derecha)
+                pdf.setFontSize(8);
+                pdf.text(
+                  'Descargado por: {{ request.user.get_full_name|default:request.user.username }} | ' + fechaHora,
+                  207, 294, {align: 'right'}
+                );
+                // Número de página (abajo izquierda)
+                pdf.text('Página ' + i + ' de ' + pageCount, 16, 294, {align: 'left'});
+            }
+            // Volver a ocultar el número de ficha
+            numFichaDiv.style.display = oldDisplay || 'none';
+        }).save('Ficha_{{ ficha.id }}.pdf');
+    });
+});
+
+</script>
+
+
+
+
+
+
 {% endblock %}

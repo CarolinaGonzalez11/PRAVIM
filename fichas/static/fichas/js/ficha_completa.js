@@ -315,3 +315,209 @@ document.addEventListener('DOMContentLoaded', function() {
         mostrarCampoOtroSalud();
     }
 });
+
+
+//mapa
+
+let geoBarrios = null, geoCuadrantes = null, geoVillas = null;
+
+// Función para cargar todos los geojson y luego inicializar el mapa y lógica
+function cargarGeoJsonsYInit(callback) {
+    let cargados = 0;
+    fetch('/static/geo/barrios.geojson')
+        .then(r => r.json()).then(gj => {
+            geoBarrios = gj; cargados++; ready();
+        });
+    fetch('/static/geo/cuadrantes.geojson')
+        .then(r => r.json()).then(gj => {
+            geoCuadrantes = gj; cargados++; ready();
+        });
+    fetch('/static/geo/villas.geojson')
+        .then(r => r.json()).then(gj => {
+            geoVillas = gj; cargados++; ready();
+        });
+    function ready() {
+        if (cargados === 3 && typeof callback === 'function') callback();
+    }
+}
+
+// Y luego, en vez de ejecutar directamente la inicialización del mapa, pon:
+cargarGeoJsonsYInit(function(){
+    // Aquí va toda tu lógica de mapa, setMarkerAndSave, actualizarCamposTerritoriales, etc.
+    // Por ejemplo:
+    // initMapYFormulario(); // Si tienes una función que inicializa todo
+});
+
+
+const inputDireccion = document.getElementById("direccion-autocompleta");
+const inputLat = document.getElementById("id_latitud");
+const inputLon = document.getElementById("id_longitud");
+const mapaDiv = document.getElementById("mapa-direccion");
+
+const initialLat = -33.5167;  // Maipú
+const initialLon = -70.7617;
+const initialZoom = 13;
+
+const apiKey = "pk.6ab9d34608e281ef51b917bdf4e46a5f";
+
+// Inicializa mapa centrado en Maipú sin pin
+const map = L.map(mapaDiv).setView([initialLat, initialLon], initialZoom);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution: '© OpenStreetMap contributors'
+}).addTo(map);
+
+let marker = null;
+
+// Función para agregar/mover el pin y guardar lat/lon
+function setMarkerAndSave(lat, lon) {
+  if (marker) {
+    marker.setLatLng([lat, lon]);
+  } else {
+    marker = L.marker([lat, lon], { draggable: true }).addTo(map);
+    marker.on("dragend", function (e) {
+      const pos = marker.getLatLng();
+      setLatLonInputs(pos.lat, pos.lng);
+      // Reverse geocode y actualiza campo dirección
+      fetch(`https://us1.locationiq.com/v1/reverse?key=${apiKey}&lat=${pos.lat}&lon=${pos.lng}&format=json&addressdetails=1&normalizeaddress=1&accept-language=es`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.display_name) inputDireccion.value = data.display_name;
+        });
+    });
+  }
+  setLatLonInputs(lat, lon);
+  map.setView([lat, lon], 17);
+}
+
+// Guarda lat/lon en los inputs ocultos
+function setLatLonInputs(lat, lon) {
+  inputLat.value = lat;
+  inputLon.value = lon;
+}
+
+// Limpia el pin y los campos lat/lon
+function clearMarkerAndLatLon() {
+  if (marker) {
+    map.removeLayer(marker);
+    marker = null;
+  }
+  inputLat.value = "";
+  inputLon.value = "";
+}
+
+// AUTOCOMPLETADO: al tipear en dirección, muestra sugerencias y permite seleccionar
+let timeoutID;
+inputDireccion.addEventListener("input", function () {
+  const query = inputDireccion.value.trim();
+  // Si está vacío, limpiar pin y lat/lon
+  if (!query) {
+    clearMarkerAndLatLon();
+    return;
+  }
+  // Delay para no saturar la API
+  clearTimeout(timeoutID);
+  timeoutID = setTimeout(() => {
+    fetch(`https://us1.locationiq.com/v1/search?key=${apiKey}&q=${encodeURIComponent(query)}&format=json&addressdetails=1&limit=5&accept-language=es`)
+      .then(res => res.json())
+      .then(data => {
+        // Quitar sugerencias previas si existen
+        let suggestionBox = document.getElementById("autocomplete-suggestions");
+        if (suggestionBox) suggestionBox.remove();
+        // Si hay resultados, mostrar lista
+        if (Array.isArray(data) && data.length > 0) {
+          suggestionBox = document.createElement("div");
+          suggestionBox.id = "autocomplete-suggestions";
+          suggestionBox.style.position = "absolute";
+          suggestionBox.style.zIndex = 1000;
+          suggestionBox.style.background = "#fff";
+          suggestionBox.style.border = "1px solid #ccc";
+          suggestionBox.style.width = "100%";
+          suggestionBox.style.left = 0;
+          suggestionBox.style.top = (inputDireccion.offsetHeight + 2) + "px";
+          suggestionBox.style.maxHeight = "160px";
+          suggestionBox.style.overflowY = "auto";
+          data.forEach((item) => {
+            const option = document.createElement("div");
+            option.textContent = item.display_name;
+            option.style.padding = "6px";
+            option.style.cursor = "pointer";
+            option.addEventListener("mousedown", function () {
+              inputDireccion.value = item.display_name;
+              setMarkerAndSave(item.lat, item.lon);
+              suggestionBox.remove();
+            });
+            suggestionBox.appendChild(option);
+          });
+          inputDireccion.parentElement.appendChild(suggestionBox);
+        }
+      });
+  }, 400); // 400ms debounce
+});
+
+// Si pierde foco, borra sugerencias después de un pequeño delay
+inputDireccion.addEventListener("blur", function () {
+  setTimeout(() => {
+    let suggestionBox = document.getElementById("autocomplete-suggestions");
+    if (suggestionBox) suggestionBox.remove();
+  }, 150);
+});
+
+// Si el campo ya tiene coordenadas al editar, carga el pin
+if (inputLat.value && inputLon.value) {
+  setMarkerAndSave(inputLat.value, inputLon.value);
+}
+
+// Si quieres: al limpiar dirección, se borra el pin
+inputDireccion.addEventListener("input", function () {
+  if (!inputDireccion.value.trim()) clearMarkerAndLatLon();
+});
+
+function buscarNombrePoligono(geojson, lat, lon, nombreCampo) {
+    if (!geojson) return "";
+    const pt = turf.point([parseFloat(lon), parseFloat(lat)]);
+    for (let feature of geojson.features) {
+        if (turf.booleanPointInPolygon(pt, feature)) {
+            return feature.properties[nombreCampo];
+        }
+    }
+    return "";
+}
+
+function autoCompletarCamposGeo(lat, lon) {
+    // Espera si aún no han cargado
+    if (!geoBarrios || !geoCuadrantes || !geoVillas) {
+        setTimeout(() => autoCompletarCamposGeo(lat, lon), 350);
+        return;
+    }
+    const barrio = buscarNombrePoligono(geoBarrios, lat, lon, "BARRIO");
+    const cuadrante = buscarNombrePoligono(geoCuadrantes, lat, lon, "NUM_CUAD");
+    const villa = buscarNombrePoligono(geoVillas, lat, lon, "NOMBRE_LOT");
+
+    // ¡¡Corrige aquí los IDs!!
+    if (document.getElementById("id_persona-barrio")) document.getElementById("id_persona-barrio").value = barrio || "";
+    if (document.getElementById("id_persona-cuadrante")) document.getElementById("id_persona-cuadrante").value = cuadrante || "";
+    if (document.getElementById("id_persona-villa")) document.getElementById("id_persona-villa").value = villa || "";
+}
+
+function setMarkerAndSave(lat, lon) {
+  if (marker) {
+    marker.setLatLng([lat, lon]);
+  } else {
+    marker = L.marker([lat, lon], { draggable: true }).addTo(map);
+    marker.on("dragend", function (e) {
+      const pos = marker.getLatLng();
+      setLatLonInputs(pos.lat, pos.lng);
+      // Reverse geocode y actualiza campo dirección
+      fetch(`https://us1.locationiq.com/v1/reverse?key=${apiKey}&lat=${pos.lat}&lon=${pos.lng}&format=json&addressdetails=1&normalizeaddress=1&accept-language=es`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.display_name) inputDireccion.value = data.display_name;
+        });
+      autoCompletarCamposGeo(pos.lat, pos.lng);   // <--- AGREGA ESTA LÍNEA
+    });
+  }
+  setLatLonInputs(lat, lon);
+  map.setView([lat, lon], 17);
+  autoCompletarCamposGeo(lat, lon);   // <--- AGREGA ESTA LÍNEA
+}
+

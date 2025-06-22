@@ -208,128 +208,126 @@ from .forms import (
     DerivacionCapsUdlaForm, DerivacionOlnForm, DerivacionOtroForm,
 )
 
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from .models import (
+    FichaAcogida, PersonaAtendida, Denuncia, MotivoIngreso, AspectosPsicologicos,
+    RedesApoyo, PlanAccion,
+    DerivacionCavd, DerivacionUravit, DerivacionCdmCai, DerivacionSalud,
+    DerivacionOfam, DerivacionDideco, DerivacionGestionTerritorial,
+    DerivacionCapsUdla, DerivacionOln, DerivacionOtro,
+)
+from .forms import (
+    FichaAcogidaForm, PersonaAtendidaForm, DenunciaForm, MotivoIngresoForm,
+    AspectosPsicologicosForm, RedesApoyoForm, PlanAccionForm,
+    DerivacionCavdForm, DerivacionUravitForm, DerivacionCdmCaiForm,
+    DerivacionSaludForm, DerivacionOfamForm, DerivacionDidecoForm,
+    DerivacionGestionTerritorialForm, DerivacionCapsUdlaForm,
+    DerivacionOlnForm, DerivacionOtroForm,
+)
+
+# Listado DRY de tuplas (nombre_campo, modelo, form, prefix)
+DERIVS = [
+    ('deriv_cavd', DerivacionCavd, DerivacionCavdForm, 'deriv_cavd'),
+    ('deriv_uravit', DerivacionUravit, DerivacionUravitForm, 'deriv_uravit'),
+    ('deriv_cdm_cai', DerivacionCdmCai, DerivacionCdmCaiForm, 'deriv_cdm_cai'),
+    ('deriv_salud', DerivacionSalud, DerivacionSaludForm, 'deriv_salud'),
+    ('deriv_ofam', DerivacionOfam, DerivacionOfamForm, 'deriv_ofam'),
+    ('deriv_dideco', DerivacionDideco, DerivacionDidecoForm, 'deriv_dideco'),
+    ('deriv_gestion_territorial', DerivacionGestionTerritorial, DerivacionGestionTerritorialForm, 'deriv_gestion_territorial'),
+    ('deriv_caps_udla', DerivacionCapsUdla, DerivacionCapsUdlaForm, 'deriv_caps_udla'),
+    ('deriv_oln', DerivacionOln, DerivacionOlnForm, 'deriv_oln'),
+    ('deriv_otro', DerivacionOtro, DerivacionOtroForm, 'deriv_otro'),
+]
+
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+
+# ... tus imports de modelos y forms y DERIVS ...
+
 @login_required
 def editar_ficha(request, ficha_id):
     ficha = get_object_or_404(FichaAcogida, id=ficha_id)
-    persona = getattr(ficha, "persona_atendida", None)
+    persona = getattr(ficha, "personaatendida", None)
     denuncia = getattr(ficha, "denuncia", None)
     motivo = getattr(ficha, "motivoingreso", None)
     psicologico = getattr(ficha, "aspectospsicologicos", None)
     redes = getattr(ficha, "redesapoyo", None)
     plan = getattr(ficha, "planaccion", None)
 
-    # Derivaciones (asegúrate de que los nombres de related_name sean correctos)
-    deriv_cavd = getattr(ficha, "derivacioncavd", None)
-    deriv_uravit = getattr(ficha, "derivacionuravit", None)
-    deriv_cdm_cai = getattr(ficha, "derivacioncdmcai", None)
-    deriv_salud = getattr(ficha, "derivacionsalud", None)
-    deriv_ofam = getattr(ficha, "derivacionofam", None)
-    deriv_dideco = getattr(ficha, "derivaciondideco", None)
-    deriv_gestion_territorial = getattr(ficha, "derivaciongestionterritorial", None)
-    deriv_caps_udla = getattr(ficha, "derivacioncapsudla", None)
-    deriv_oln = getattr(ficha, "derivacionoln", None)
-    deriv_otro = getattr(ficha, "derivacionotro", None)
+    derivs_instances = {
+        campo: modelo.objects.filter(ficha=ficha).first()
+        for campo, modelo, _, _ in DERIVS
+    }
 
     if request.method == 'POST':
-        form_ficha = FichaAcogidaForm(request.POST, instance=ficha)
-        form_persona = PersonaAtendidaForm(request.POST, instance=persona)
-        form_denuncia = DenunciaForm(request.POST, instance=denuncia)
-        form_motivo = MotivoIngresoForm(request.POST, instance=motivo)
-        form_psicologico = AspectosPsicologicosForm(request.POST, instance=psicologico)
-        form_redes = RedesApoyoForm(request.POST, instance=redes)
-        form_plan = PlanAccionForm(request.POST, instance=plan)
-        # Derivaciones
-        form_deriv_cavd = DerivacionCavdForm(request.POST, instance=deriv_cavd)
-        form_deriv_uravit = DerivacionUravitForm(request.POST, instance=deriv_uravit)
-        form_deriv_cdm_cai = DerivacionCdmCaiForm(request.POST, instance=deriv_cdm_cai)
-        form_deriv_salud = DerivacionSaludForm(request.POST, instance=deriv_salud)
-        form_deriv_ofam = DerivacionOfamForm(request.POST, instance=deriv_ofam)
-        form_deriv_dideco = DerivacionDidecoForm(request.POST, instance=deriv_dideco)
-        form_deriv_gestion_territorial = DerivacionGestionTerritorialForm(request.POST, instance=deriv_gestion_territorial)
-        form_deriv_caps_udla = DerivacionCapsUdlaForm(request.POST, instance=deriv_caps_udla)
-        form_deriv_oln = DerivacionOlnForm(request.POST, instance=deriv_oln)
-        form_deriv_otro = DerivacionOtroForm(request.POST, instance=deriv_otro)
+        form_ficha = FichaAcogidaForm(request.POST, instance=ficha, prefix='ficha')
+        form_persona = PersonaAtendidaForm(request.POST, instance=persona, prefix='persona')
+        form_denuncia = DenunciaForm(request.POST, instance=denuncia, prefix='denuncia')
+        form_motivo = MotivoIngresoForm(request.POST, instance=motivo, prefix='motivo')
+        form_psicologico = AspectosPsicologicosForm(request.POST, instance=psicologico, prefix='psico')
+        form_redes = RedesApoyoForm(request.POST, instance=redes, prefix='redes')
+        form_plan = PlanAccionForm(request.POST, instance=plan, prefix='plan')
 
-        if (form_ficha.is_valid() and form_persona.is_valid() and form_denuncia.is_valid()
+        derivs_forms = {
+            f'form_{campo}': form_class(request.POST, instance=derivs_instances[campo], prefix=prefix)
+            for campo, _, form_class, prefix in DERIVS
+        }
+
+        all_valid = (
+            form_ficha.is_valid() and form_persona.is_valid() and form_denuncia.is_valid()
             and form_motivo.is_valid() and form_psicologico.is_valid() and form_redes.is_valid()
-            and form_plan.is_valid() and
-            form_deriv_cavd.is_valid() and form_deriv_uravit.is_valid() and form_deriv_cdm_cai.is_valid()
-            and form_deriv_salud.is_valid() and form_deriv_ofam.is_valid() and form_deriv_dideco.is_valid()
-            and form_deriv_gestion_territorial.is_valid() and form_deriv_caps_udla.is_valid()
-            and form_deriv_oln.is_valid() and form_deriv_otro.is_valid()):
+            and form_plan.is_valid()
+            and all(df.is_valid() for df in derivs_forms.values())
+        )
 
+        if all_valid:
             form_ficha.save()
-            persona_obj = form_persona.save(commit=False)
-            persona_obj.ficha = ficha
-            persona_obj.save()
-            denuncia_obj = form_denuncia.save(commit=False)
-            denuncia_obj.ficha = ficha
-            denuncia_obj.save()
-            motivo_obj = form_motivo.save(commit=False)
-            motivo_obj.ficha = ficha
-            motivo_obj.save()
-            psicologico_obj = form_psicologico.save(commit=False)
-            psicologico_obj.ficha = ficha
-            psicologico_obj.save()
-            redes_obj = form_redes.save(commit=False)
-            redes_obj.ficha = ficha
-            redes_obj.save()
-            plan_obj = form_plan.save(commit=False)
-            plan_obj.ficha = ficha
-            plan_obj.save()
-            # Derivaciones
-            deriv_cavd_obj = form_deriv_cavd.save(commit=False)
-            deriv_cavd_obj.ficha = ficha
-            deriv_cavd_obj.save()
-            deriv_uravit_obj = form_deriv_uravit.save(commit=False)
-            deriv_uravit_obj.ficha = ficha
-            deriv_uravit_obj.save()
-            deriv_cdm_cai_obj = form_deriv_cdm_cai.save(commit=False)
-            deriv_cdm_cai_obj.ficha = ficha
-            deriv_cdm_cai_obj.save()
-            deriv_salud_obj = form_deriv_salud.save(commit=False)
-            deriv_salud_obj.ficha = ficha
-            deriv_salud_obj.save()
-            deriv_ofam_obj = form_deriv_ofam.save(commit=False)
-            deriv_ofam_obj.ficha = ficha
-            deriv_ofam_obj.save()
-            deriv_dideco_obj = form_deriv_dideco.save(commit=False)
-            deriv_dideco_obj.ficha = ficha
-            deriv_dideco_obj.save()
-            deriv_gestion_territorial_obj = form_deriv_gestion_territorial.save(commit=False)
-            deriv_gestion_territorial_obj.ficha = ficha
-            deriv_gestion_territorial_obj.save()
-            deriv_caps_udla_obj = form_deriv_caps_udla.save(commit=False)
-            deriv_caps_udla_obj.ficha = ficha
-            deriv_caps_udla_obj.save()
-            deriv_oln_obj = form_deriv_oln.save(commit=False)
-            deriv_oln_obj.ficha = ficha
-            deriv_oln_obj.save()
-            deriv_otro_obj = form_deriv_otro.save(commit=False)
-            deriv_otro_obj.ficha = ficha
-            deriv_otro_obj.save()
+            for form, obj, rel in [
+                (form_persona, persona, 'personaatendida'),
+                (form_denuncia, denuncia, 'denuncia'),
+                (form_motivo, motivo, 'motivoingreso'),
+                (form_psicologico, psicologico, 'aspectospsicologicos'),
+                (form_redes, redes, 'redesapoyo'),
+                (form_plan, plan, 'planaccion'),
+            ]:
+                instance = form.save(commit=False)
+                instance.ficha = ficha
+                instance.save()
+
+            # Lógica de guardar/limpiar derivaciones según checkbox
+            for campo, modelo, _, prefix in DERIVS:
+                checkbox_name = f"{campo}-check"
+                dform = derivs_forms[f'form_{campo}']
+                deriv = derivs_instances[campo]
+                if request.POST.get(checkbox_name):
+                    # Guardar o actualizar si el checkbox está marcado
+                    instance = dform.save(commit=False)
+                    instance.ficha = ficha
+                    instance.save()
+                else:
+                    # Si el checkbox NO está marcado y existe la derivación, elimínala
+                    if deriv:
+                        deriv.delete()
 
             messages.success(request, "Ficha actualizada correctamente.")
             return redirect('fichas:ver_ficha_completa', ficha.id)
     else:
-        form_ficha = FichaAcogidaForm(instance=ficha)
-        form_persona = PersonaAtendidaForm(instance=persona)
-        form_denuncia = DenunciaForm(instance=denuncia)
-        form_motivo = MotivoIngresoForm(instance=motivo)
-        form_psicologico = AspectosPsicologicosForm(instance=psicologico)
-        form_redes = RedesApoyoForm(instance=redes)
-        form_plan = PlanAccionForm(instance=plan)
-        # Derivaciones
-        form_deriv_cavd = DerivacionCavdForm(instance=deriv_cavd)
-        form_deriv_uravit = DerivacionUravitForm(instance=deriv_uravit)
-        form_deriv_cdm_cai = DerivacionCdmCaiForm(instance=deriv_cdm_cai)
-        form_deriv_salud = DerivacionSaludForm(instance=deriv_salud)
-        form_deriv_ofam = DerivacionOfamForm(instance=deriv_ofam)
-        form_deriv_dideco = DerivacionDidecoForm(instance=deriv_dideco)
-        form_deriv_gestion_territorial = DerivacionGestionTerritorialForm(instance=deriv_gestion_territorial)
-        form_deriv_caps_udla = DerivacionCapsUdlaForm(instance=deriv_caps_udla)
-        form_deriv_oln = DerivacionOlnForm(instance=deriv_oln)
-        form_deriv_otro = DerivacionOtroForm(instance=deriv_otro)
+        form_ficha = FichaAcogidaForm(instance=ficha, prefix='ficha')
+        form_persona = PersonaAtendidaForm(instance=persona, prefix='persona')
+        form_denuncia = DenunciaForm(instance=denuncia, prefix='denuncia')
+        form_motivo = MotivoIngresoForm(instance=motivo, prefix='motivo')
+        form_psicologico = AspectosPsicologicosForm(instance=psicologico, prefix='psico')
+        form_redes = RedesApoyoForm(instance=redes, prefix='redes')
+        form_plan = PlanAccionForm(instance=plan, prefix='plan')
+
+        
+        derivs_forms = {
+            f'form_{campo}': form_class(instance=derivs_instances[campo], prefix=prefix)
+            for campo, _, form_class, prefix in DERIVS
+        }
 
     context = {
         'ficha': ficha,
@@ -340,19 +338,10 @@ def editar_ficha(request, ficha_id):
         'form_psicologico': form_psicologico,
         'form_redes': form_redes,
         'form_plan': form_plan,
-        # Derivaciones
-        'form_deriv_cavd': form_deriv_cavd,
-        'form_deriv_uravit': form_deriv_uravit,
-        'form_deriv_cdm_cai': form_deriv_cdm_cai,
-        'form_deriv_salud': form_deriv_salud,
-        'form_deriv_ofam': form_deriv_ofam,
-        'form_deriv_dideco': form_deriv_dideco,
-        'form_deriv_gestion_territorial': form_deriv_gestion_territorial,
-        'form_deriv_caps_udla': form_deriv_caps_udla,
-        'form_deriv_oln': form_deriv_oln,
-        'form_deriv_otro': form_deriv_otro,
+        **derivs_forms,
     }
     return render(request, 'fichas/editar_ficha.html', context)
+
 
 
 from .models import (
@@ -456,74 +445,6 @@ from .forms import (
     AspectosPsicologicosForm, RedesApoyoForm, PlanAccionForm
 )
 
-'''
-@login_required
-def editar_ficha_completa(request, ficha_id):
-    ficha = get_object_or_404(FichaAcogida, id=ficha_id)
-    persona = getattr(ficha, 'personaatendida', None)
-    denuncia = getattr(ficha, 'denuncia', None)
-    motivo = getattr(ficha, 'motivoingreso', None)
-    psicologico = getattr(ficha, 'aspectospsicologicos', None)
-    redes = getattr(ficha, 'redesapoyo', None)
-    plan = getattr(ficha, 'planaccion', None)
-
-    if request.method == 'POST':
-        form_ficha = FichaAcogidaForm(request.POST, instance=ficha)
-        form_persona = PersonaAtendidaForm(request.POST, instance=persona)
-        form_denuncia = DenunciaForm(request.POST, instance=denuncia)
-        form_motivo = MotivoIngresoForm(request.POST, instance=motivo)
-        form_psicologico = AspectosPsicologicosForm(request.POST, instance=psicologico)
-        form_redes = RedesApoyoForm(request.POST, instance=redes)
-        form_plan = PlanAccionForm(request.POST, instance=plan)
-
-        # Relacionar las instancias correctamente antes de guardar
-        if form_ficha.is_valid() and form_persona.is_valid() and form_denuncia.is_valid() \
-            and form_motivo.is_valid() and form_psicologico.is_valid() and form_redes.is_valid() and form_plan.is_valid():
-            
-            ficha = form_ficha.save()
-            persona = form_persona.save(commit=False)
-            denuncia = form_denuncia.save(commit=False)
-            motivo = form_motivo.save(commit=False)
-            psicologico = form_psicologico.save(commit=False)
-            redes = form_redes.save(commit=False)
-            plan = form_plan.save(commit=False)
-            
-            # Relacionar con ficha si corresponde
-            persona.ficha = ficha
-            denuncia.ficha = ficha
-            motivo.ficha = ficha
-            psicologico.ficha = ficha
-            redes.ficha = ficha
-            plan.ficha = ficha
-            
-            persona.save()
-            denuncia.save()
-            motivo.save()
-            psicologico.save()
-            redes.save()
-            plan.save()
-            return redirect('fichas:ver_ficha_completa', ficha.id)
-    else:
-        form_ficha = FichaAcogidaForm(instance=ficha)
-        form_persona = PersonaAtendidaForm(instance=persona)
-        form_denuncia = DenunciaForm(instance=denuncia)
-        form_motivo = MotivoIngresoForm(instance=motivo)
-        form_psicologico = AspectosPsicologicosForm(instance=psicologico)
-        form_redes = RedesApoyoForm(instance=redes)
-        form_plan = PlanAccionForm(instance=plan)
-
-    return render(request, 'fichas/editar_ficha.html', {
-        'form_ficha': form_ficha,
-        'form_persona': form_persona,
-        'form_denuncia': form_denuncia,
-        'form_motivo': form_motivo,
-        'form_psicologico': form_psicologico,
-        'form_redes': form_redes,
-        'form_plan': form_plan,
-        'ficha': ficha,
-    })
-
-    '''
 from django.shortcuts import render
 from django.db.models import Q
 from django.core.paginator import Paginator
@@ -535,7 +456,7 @@ from fichas.models import FichaAcogida
 
 @login_required
 def buscar_persona(request):
-    fichas = FichaAcogida.objects.all().select_related('personaatendida', 'motivoingreso')
+    fichas = FichaAcogida.objects.all().select_related('personaatendida', 'motivoingreso', 'egreso')
     fecha_inicio = request.GET.get('fecha_inicio')
     fecha_fin = request.GET.get('fecha_fin')
     numero_ficha = request.GET.get('numero_ficha')
@@ -561,8 +482,10 @@ def buscar_persona(request):
         fichas = fichas.filter(personaatendida__nombre__icontains=nombre)
     if delito:
         fichas = fichas.filter(motivoingreso__motivo_ingreso=delito)
-    if estado:
-        fichas = fichas.filter(estado=estado)
+    if estado == "ABIERTA":
+        fichas = fichas.filter(egreso__isnull=True)
+    elif estado == "CERRADA":
+        fichas = fichas.filter(egreso__isnull=False)
     if rut:
         fichas = fichas.filter(personaatendida__rut_pasaporte__icontains=rut)
     if domicilio:
@@ -1028,3 +951,5 @@ def buscar_derivacion(request):
         'form': form,
         'derivaciones': derivaciones,
     })
+
+
