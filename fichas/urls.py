@@ -15,6 +15,8 @@ urlpatterns = [
     path('dashboard/', views.dashboard, name='dashboard'),
     path('api/intervencion/eliminar/<int:intervencion_id>/', views.api_intervencion_eliminar, name='api_intervencion_eliminar'),
     path('buscar_derivacion/', views.buscar_derivacion, name='buscar_derivacion'),
+    path('ficha/<int:ficha_id>/pdf/', views.ficha_pdf, name='ficha_pdf'),
+    path('ficha/<int:ficha_id>/preview/', views.ficha_pdf_preview, name='ficha_pdf_preview'),
 
 
 ]

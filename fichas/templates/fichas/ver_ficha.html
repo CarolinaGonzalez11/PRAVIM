@@ -57,7 +57,7 @@
         text-align: left !important;
         padding: 10px 16px;
         border-top: 1px solid #eee;
-        font-size: 1.07em;
+        font-size: 1em;
     }
     .ficha-table th {
         width: 45%;
@@ -72,7 +72,7 @@
     }
     .ficha-table td, .ficha-table th {
         word-break: break-word;
-        white-space: pre-line;
+        /* white-space: pre-line;
     }
 
     .table-pravim th, .table-pravim td {
@@ -171,7 +171,7 @@
         background: #252c54 !important;  /* negro institucional, puedes cambiar */
         color: #fff !important;
         text-align: center !important;
-        font-size: 1.05em;  /* opcional, para destacar más */
+        font-size: 1em;  /* opcional, para destacar más */
         letter-spacing: 0.2px;  /* opcional */
     }
     .ficha-table th {
@@ -240,9 +240,8 @@
 
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="mb-0">Ficha N° {{ ficha.id }}</h2>
-        <button id="btnDescargarPDF" class="btn btn-outline-pravim" type="button">
-            Descargar PDF
-        </button>
+        <a href="{% url 'fichas:ficha_pdf' ficha.id %}" class="btn btn-pravim" target="_blank">Descargar PDF</a>
+
     </div>
 
     {% if egreso and egreso.fecha_egreso %}
@@ -258,8 +257,6 @@
     <a href="{% url 'fichas:editar_ficha_completa' ficha.id %}" class="btn btn-pravim mb-4">
         Editar ficha
     </a>
-<div id="fichaExport" style="padding-top:4px; padding-right:12px; padding-left:12px;">
-    <img id="img-encabezado" src="{% static 'fichas/encabezado.jpg' %}" style="display:none; margin-bottom: 1px;">
     <div id="ficha-numero-pdf" class="solo-pdf" style="text-align:left; font-size:18px; font-weight:bold; margin-bottom:10px;">
         Ficha N° {{ ficha.id }}
     </div>
@@ -565,7 +562,13 @@
                 </tr>{% endif %}
                 {% if psicologico.limitacion_vida_cotidiana %}
                 <tr><th>Limitación vida cotidiana</th>
-                    <td>{{ psicologico.limitacion_vida_cotidiana|join:", " }}</td>
+                    <td>
+                    {% with lista=mi_lista|join:", " %}
+                        {% if lista != ", " and lista %}
+                        {{ lista }}
+                        {% endif %}
+                    {% endwith %}
+                    </td>
                 </tr>{% endif %}
 
                 <tr>
@@ -1078,41 +1081,37 @@
     <div class="card mb-4">
         <div class="card-header bg-pravim">Intervenciones</div>
         <div class="card-body">
-            <div class="table-responsive">
-            <table class="table table-sm table-bordered table-pravim">
-                <thead>
-                    <tr>
-                        <th>Fecha</th>
-                        <th>Etapa</th>
-                        <th>Tipo de Atención</th>
-                        <th>Responsables</th>
-                        <th>Participantes</th>
-                        <th>Lugar/Vía</th>
-                        <th>Objetivos</th>
-                        <th>Descripción</th>
-                        <th>Resultados</th>
+            {% for interv in intervenciones %}
+                <table class="table ficha-table" style="margin-bottom: 14px;">
+                    <tr><th>Fecha</th><td>{{ interv.fecha|date:"d/m/Y" }}</td></tr>
+                    <tr><th>Etapa</th><td>{{ interv.get_etapa_display }}</td></tr>
+                    <tr><th>Tipo de Atención</th><td>{{ interv.get_tipo_atencion_display }}</td></tr>
+                    <tr><th>Responsables</th>
+                        <td>
+                            {% if interv.responsables %}
+                                {{ interv.responsables|join:", " }}
+                            {% endif %}
+                        </td>
                     </tr>
-                </thead>
-                <tbody>
-                    {% for interv in intervenciones %}
-                    <tr>
-                        <td>{{ interv.fecha|date:"d/m/Y" }}</td>
-                        <td>{{ interv.get_etapa_display }}</td>
-                        <td>{{ interv.get_tipo_atencion_display }}</td>
-                        <td>{{ interv.responsables }}</td>
-                        <td>{{ interv.participantes }}</td>
-                        <td>{{ interv.get_lugar_display }}</td>
-                        <td>{{ interv.objetivos }}</td>
-                        <td>{{ interv.descripcion }}</td>
-                        <td>{{ interv.resultados }}</td>
+                    <tr><th>Participantes</th><td>{{ interv.participantes }}</td></tr>
+                    <tr><th>Lugar/Vía</th><td>{{ interv.get_lugar_display }}</td></tr>
+                    <tr><th>Objetivos</th>
+                        <td>
+                            {% if interv.objetivos %}
+                                {{ interv.objetivos|join:", " }}
+                            {% endif %}
+                        </td>
                     </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-            </div>
+                    <tr><th>Descripción</th><td>{{ interv.descripcion }}</td></tr>
+                    <tr><th>Resultados</th><td>{{ interv.resultados }}</td></tr>
+                </table>
+            {% empty %}
+                <p>No hay intervenciones registradas.</p>
+            {% endfor %}
         </div>
     </div>
     {% endif %}
+
 
     {# --- EGRESO --- #}
     {% if egreso %}
@@ -1144,9 +1143,7 @@
         </div>
     </div>
     {% endif %}
-    <img id="img-piepagina" src="{% static 'fichas/piepagina.jpg' %}" style="display:none; margin-top: 40px;">
 
-</div>
 
     <div class="text-center mb-4">
         <a href="{% url 'fichas:buscar_persona' %}" class="btn btn-outline-pravim">Volver</a>
@@ -1163,61 +1160,6 @@
     });
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-
-
-<script>
-window.HEADER_IMG = "{% static 'fichas/encabezado.jpg' %}";
-window.FOOTER_IMG = "{% static 'fichas/piepagina.jpg' %}";
-
-document.addEventListener('DOMContentLoaded', function () {
-    const btn = document.getElementById('btnDescargarPDF');
-    btn.addEventListener('click', function() {
-        const fichaElem = document.getElementById('fichaExport');
-        const numFichaDiv = document.getElementById('ficha-numero-pdf');
-        const ahora = new Date();
-        const fechaHora = ahora.toLocaleDateString() + " " + ahora.toLocaleTimeString();
-
-        // Mostrar el número de ficha solo para exportar
-        const oldDisplay = numFichaDiv.style.display;
-        numFichaDiv.style.display = 'block';
-
-        const opt = {
-            margin: [36, 10, 28, 10],  // margen superior aumentado (de 26 a 36)
-            filename: 'Ficha_{{ ficha.id }}.pdf',
-            image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: { scale: 2, useCORS: true },
-            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-        };
-
-
-        html2pdf().from(fichaElem).set(opt).toPdf().get('pdf').then(function(pdf) {
-            const pageCount = pdf.internal.getNumberOfPages();
-            for (let i = 1; i <= pageCount; i++) {
-                pdf.setPage(i);
-
-                // Encabezado (sin tamaño: se inserta con tamaño natural)
-                pdf.addImage(window.HEADER_IMG, 'JPEG', 0, 6);
-
-                // Pie de página (sin tamaño: se inserta con tamaño natural)
-                pdf.addImage(window.FOOTER_IMG, 'JPEG', 0, 277);
-
-                // Usuario y fecha/hora (abajo derecha)
-                pdf.setFontSize(8);
-                pdf.text(
-                  'Descargado por: {{ request.user.get_full_name|default:request.user.username }} | ' + fechaHora,
-                  207, 294, {align: 'right'}
-                );
-                // Número de página (abajo izquierda)
-                pdf.text('Página ' + i + ' de ' + pageCount, 16, 294, {align: 'left'});
-            }
-            // Volver a ocultar el número de ficha
-            numFichaDiv.style.display = oldDisplay || 'none';
-        }).save('Ficha_{{ ficha.id }}.pdf');
-    });
-});
-
-</script>
-
 
 
 

@@ -953,3 +953,171 @@ def buscar_derivacion(request):
     })
 
 
+from django.shortcuts import get_object_or_404
+from django.template.loader import get_template
+from django.http import HttpResponse
+from weasyprint import HTML, CSS
+from datetime import datetime
+from .models import (
+    FichaAcogida, PersonaAtendida, Denuncia, MotivoIngreso,
+    AspectosPsicologicos, RedesApoyo, PlanAccion, Egreso, Intervencion,
+    DerivacionCavd, DerivacionUravit, DerivacionCdmCai, DerivacionSalud,
+    DerivacionOfam, DerivacionDideco, DerivacionGestionTerritorial,
+    DerivacionCapsUdla, DerivacionOln, DerivacionOtro
+)
+from django.contrib.auth.decorators import login_required
+from django.utils import timezone
+from weasyprint import CSS
+
+custom_css = CSS(string="""
+    @page {
+        size: A4;
+        margin: 80pt 28pt 95pt 28pt; /* Arriba, derecha, abajo, izquierda (en puntos, no px) */
+        @top-center { content: element(header); }
+        @bottom-center { content: element(footer); }
+        @bottom-right { content: "Página " counter(page) " de " counter(pages); }
+    }
+    .header { position: running(header); }
+    .footer { position: running(footer); }
+    tr, td, th, .card { page-break-inside: avoid; break-inside: avoid; }
+    body { font-family: Arial, sans-serif; }
+""")
+
+
+@login_required
+def ficha_pdf(request, ficha_id):
+    ficha = get_object_or_404(FichaAcogida, id=ficha_id)
+    persona = getattr(ficha, "personaatendida", None)
+    denuncia = getattr(ficha, "denuncia", None)
+    motivo = getattr(ficha, "motivoingreso", None)
+    psicologico = getattr(ficha, "aspectospsicologicos", None)
+    redes = getattr(ficha, "redesapoyo", None)
+    plan = getattr(ficha, "planaccion", None)
+    egreso = getattr(ficha, "egreso", None)
+    intervenciones = Intervencion.objects.filter(ficha=ficha).order_by('fecha')
+
+    # Derivaciones usando nombres de modelos correctos
+    deriv_cavd = DerivacionCavd.objects.filter(ficha=ficha).first()
+    deriv_uravit = DerivacionUravit.objects.filter(ficha=ficha).first()
+    deriv_cdm_cai = DerivacionCdmCai.objects.filter(ficha=ficha).first()
+    deriv_salud = DerivacionSalud.objects.filter(ficha=ficha).first()
+    deriv_ofam = DerivacionOfam.objects.filter(ficha=ficha).first()
+    deriv_dideco = DerivacionDideco.objects.filter(ficha=ficha).first()
+    deriv_gestion_territorial = DerivacionGestionTerritorial.objects.filter(ficha=ficha).first()
+    deriv_caps_udla = DerivacionCapsUdla.objects.filter(ficha=ficha).first()
+    deriv_oln = DerivacionOln.objects.filter(ficha=ficha).first()
+    deriv_otro = DerivacionOtro.objects.filter(ficha=ficha).first()
+
+    context = {
+        'ficha': ficha,
+        'persona': persona,
+        'denuncia': denuncia,
+        'motivo': motivo,
+        'psicologico': psicologico,
+        'redes': redes,
+        'plan': plan,
+        'egreso': egreso,
+        'intervenciones': intervenciones,
+        # Derivaciones:
+        'deriv_cavd': deriv_cavd,
+        'deriv_uravit': deriv_uravit,
+        'deriv_cdm_cai': deriv_cdm_cai,
+        'deriv_salud': deriv_salud,
+        'deriv_ofam': deriv_ofam,
+        'deriv_dideco': deriv_dideco,
+        'deriv_gestion_territorial': deriv_gestion_territorial,
+        'deriv_caps_udla': deriv_caps_udla,
+        'deriv_oln': deriv_oln,
+        'deriv_otro': deriv_otro,
+        # Extras para PDF:
+        'now': datetime.now(),
+        'user': request.user,
+    }
+
+    template = get_template('fichas/ficha_pdf.html')
+    html_string = template.render(context, request=request)
+    base_url = request.build_absolute_uri('/')
+
+    # CSS especial para WeasyPrint (puedes personalizar si quieres encabezados/pies por página)
+    custom_css = CSS(string="""
+        @page {
+            size: A4;
+            margin: 42pt 24pt 66pt 24pt;
+            @top-center {
+                content: element(header)
+            }
+            @bottom-center {
+                content: element(footer)
+            }
+        }
+        .header { position: running(header); }
+        .footer { position: running(footer); }
+        tr, td, th, .card { page-break-inside: avoid; break-inside: avoid; }
+        body { font-family: Arial, sans-serif; }
+    """)
+
+    pdf_file = HTML(string=html_string, base_url=base_url).write_pdf(stylesheets=[custom_css])
+
+    response = HttpResponse(pdf_file, content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="Ficha_{ficha.id}.pdf"'
+    return response
+
+
+from django.shortcuts import render, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from datetime import datetime
+from .models import (
+    FichaAcogida, PersonaAtendida, Denuncia, MotivoIngreso,
+    AspectosPsicologicos, RedesApoyo, PlanAccion, Egreso, Intervencion,
+    DerivacionCavd, DerivacionUravit, DerivacionCdmCai, DerivacionSalud,
+    DerivacionOfam, DerivacionDideco, DerivacionGestionTerritorial,
+    DerivacionCapsUdla, DerivacionOln, DerivacionOtro
+)
+
+@login_required
+def ficha_pdf_preview(request, ficha_id):
+    ficha = get_object_or_404(FichaAcogida, id=ficha_id)
+    persona = getattr(ficha, "personaatendida", None)
+    denuncia = getattr(ficha, "denuncia", None)
+    motivo = getattr(ficha, "motivoingreso", None)
+    psicologico = getattr(ficha, "aspectospsicologicos", None)
+    redes = getattr(ficha, "redesapoyo", None)
+    plan = getattr(ficha, "planaccion", None)
+    egreso = getattr(ficha, "egreso", None)
+    intervenciones = Intervencion.objects.filter(ficha=ficha).order_by('fecha')
+
+    deriv_cavd = DerivacionCavd.objects.filter(ficha=ficha).first()
+    deriv_uravit = DerivacionUravit.objects.filter(ficha=ficha).first()
+    deriv_cdm_cai = DerivacionCdmCai.objects.filter(ficha=ficha).first()
+    deriv_salud = DerivacionSalud.objects.filter(ficha=ficha).first()
+    deriv_ofam = DerivacionOfam.objects.filter(ficha=ficha).first()
+    deriv_dideco = DerivacionDideco.objects.filter(ficha=ficha).first()
+    deriv_gestion_territorial = DerivacionGestionTerritorial.objects.filter(ficha=ficha).first()
+    deriv_caps_udla = DerivacionCapsUdla.objects.filter(ficha=ficha).first()
+    deriv_oln = DerivacionOln.objects.filter(ficha=ficha).first()
+    deriv_otro = DerivacionOtro.objects.filter(ficha=ficha).first()
+
+    context = {
+        'ficha': ficha,
+        'persona': persona,
+        'denuncia': denuncia,
+        'motivo': motivo,
+        'psicologico': psicologico,
+        'redes': redes,
+        'plan': plan,
+        'egreso': egreso,
+        'intervenciones': intervenciones,
+        'deriv_cavd': deriv_cavd,
+        'deriv_uravit': deriv_uravit,
+        'deriv_cdm_cai': deriv_cdm_cai,
+        'deriv_salud': deriv_salud,
+        'deriv_ofam': deriv_ofam,
+        'deriv_dideco': deriv_dideco,
+        'deriv_gestion_territorial': deriv_gestion_territorial,
+        'deriv_caps_udla': deriv_caps_udla,
+        'deriv_oln': deriv_oln,
+        'deriv_otro': deriv_otro,
+        'now': timezone.now(),
+        'user': request.user,
+    }
+    return render(request, 'fichas/ficha_pdf.html', context)
