@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+<div class="container my-4">
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-pravim text-white">
+            <h4 class="mb-0" style="color: #252c54;">Historial de Cambios — Ficha N° {{ ficha.id }}</h4>        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-sm mb-0 table-hover align-middle">
+                    <thead class="bg-light">
+                        <tr>
+                            <th class="text-center">Fecha</th>
+                            <th class="text-center">Usuario</th>
+                            <th class="text-center">Acción</th>
+                            <th class="text-center">Campo</th>
+                            <th class="text-center">Valor anterior</th>
+                            <th class="text-center">Valor nuevo</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for c in cambios %}
+                        <tr>
+                            <td class="text-center">{{ c.fecha|date:"d-m-Y H:i:s" }}</td>
+                            <td class="text-center">{{ c.usuario.get_full_name|default:c.usuario.username }}</td>
+                            <td class="text-center">{{ c.get_accion_display|default:"Edición" }}</td>
+                            <td class="text-center">{{ c.campo|title }}</td>
+                            <td>{{ c.valor_anterior|default:"—" }}</td>
+                            <td>{{ c.valor_nuevo|default:"—" }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center text-muted py-4">No hay cambios registrados para esta ficha.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="card-footer bg-white border-0 text-end">
+            <a href="{% url 'fichas:ver_ficha_completa' ficha.id %}" class="btn btn-secondary">Volver a la Ficha</a>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

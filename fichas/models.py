@@ -259,17 +259,17 @@ class MotivoIngreso(models.Model):
 
 
 DIAGNOSTICO_CHOICES = [
-    ('estado_animo', 'Trastornos del estado de ánimo (depresión, bipolaridad, distimia)'),
-    ('ansiedad', 'Trastornos de ansiedad (ansiedad generalizada, crisis de pánico, fobias)'),
-    ('psicoticos', 'Trastornos psicóticos (esquizofrenia, delirante, psicosis no especificada)'),
-    ('personalidad', 'Trastornos de la personalidad (límite, antisocial, evitativa)'),
-    ('consumo', 'Trastornos por consumo de sustancias (alcohol, drogas, psicotrópicos)'),
-    ('neurodesarrollo', 'Trastornos del neurodesarrollo (autismo, TDAH, discapacidad intelectual leve)'),
-    ('conducta_alimentaria', 'Trastornos de la conducta alimentaria (anorexia, bulimia, atracón)'),
-    ('adaptativos', 'Trastornos adaptativos y reacción al estrés (estrés agudo, adaptativo, TEPT)'),
-    ('somatomorfos', 'Trastornos somatomorfos y psicosomáticos (somatización, dolor crónico sin causa médica)'),
-    ('disociativos', 'Trastornos disociativos (amnesia disociativa, despersonalización)'),
-    ('no_especificado', 'Problemas de salud mental no especificados (malestar emocional, síntomas inespecíficos)'),
+    ('estado_animo', 'Trastornos del estado de ánimo'),
+    ('ansiedad', 'Trastornos de ansiedad'),
+    ('psicoticos', 'Trastornos psicóticos'),
+    ('personalidad', 'Trastornos de la personalidad'),
+    ('consumo', 'Trastornos por consumo de sustancias'),
+    ('neurodesarrollo', 'Trastornos del neurodesarrollo'),
+    ('conducta_alimentaria', 'Trastornos de la conducta alimentaria'),
+    ('adaptativos', 'Trastornos adaptativos y reacción al estrés'),
+    ('somatomorfos', 'Trastornos somatomorfos y psicosomáticos'),
+    ('disociativos', 'Trastornos disociativos'),
+    ('no_especificado', 'Problemas de salud mental no especificados'),
     ('otro', 'Otro (especifique)')
 ]
 
@@ -302,7 +302,7 @@ class AspectosPsicologicos(models.Model):
     sueno = models.JSONField(blank=True, null=True)
     alimentacion = models.JSONField(blank=True, null=True)
 
-    limitacion_vida_cotidiana = models.CharField(max_length=100, blank=True)
+    limitacion_vida_cotidiana = models.JSONField(blank=True, null=True)
     quiebre_historia_vida = models.BooleanField(default=False)
 
 
@@ -603,3 +603,20 @@ class DerivacionOtro(models.Model):
 
     def __str__(self):
         return f"Derivación Otro - Ficha {self.ficha.id}"
+    
+from django.db import models
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
+
+class FichaChangeLog(models.Model):
+    ficha = models.ForeignKey('FichaAcogida', on_delete=models.CASCADE, related_name='changelog')
+    usuario = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    fecha = models.DateTimeField(auto_now_add=True)
+    campo = models.CharField(max_length=100)
+    valor_anterior = models.TextField(null=True, blank=True)
+    valor_nuevo = models.TextField(null=True, blank=True)
+    accion = models.CharField(max_length=16, choices=[('CREADO', 'Creado'), ('EDITADO', 'Editado'), ('ELIMINADO', 'Eliminado')], default='EDITADO')
+
+    class Meta:
+        ordering = ['-fecha']

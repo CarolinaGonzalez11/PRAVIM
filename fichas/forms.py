@@ -320,17 +320,17 @@ ESTADO_COGNITIVO_CHOICES = [
 ]
 
 DIAGNOSTICO_CHOICES = [
-    ('estado_animo', 'Trastornos del estado de ánimo (depresión, bipolaridad, distimia)'),
-    ('ansiedad', 'Trastornos de ansiedad (ansiedad generalizada, crisis de pánico, fobias)'),
-    ('psicoticos', 'Trastornos psicóticos (esquizofrenia, delirante, psicosis no especificada)'),
-    ('personalidad', 'Trastornos de la personalidad (límite, antisocial, evitativa)'),
-    ('consumo', 'Trastornos por consumo de sustancias (alcohol, drogas, psicotrópicos)'),
-    ('neurodesarrollo', 'Trastornos del neurodesarrollo (autismo, TDAH, discapacidad intelectual leve)'),
-    ('conducta_alimentaria', 'Trastornos de la conducta alimentaria (anorexia, bulimia, atracón)'),
-    ('adaptativos', 'Trastornos adaptativos y reacción al estrés (estrés agudo, adaptativo, TEPT)'),
-    ('somatomorfos', 'Trastornos somatomorfos y psicosomáticos (somatización, dolor crónico sin causa médica)'),
-    ('disociativos', 'Trastornos disociativos (amnesia disociativa, despersonalización)'),
-    ('no_especificado', 'Problemas de salud mental no especificados (malestar emocional, síntomas inespecíficos)'),
+    ('estado_animo', 'Trastornos del estado de ánimo'),
+    ('ansiedad', 'Trastornos de ansiedad'),
+    ('psicoticos', 'Trastornos psicóticos'),
+    ('personalidad', 'Trastornos de la personalidad'),
+    ('consumo', 'Trastornos por consumo de sustancias'),
+    ('neurodesarrollo', 'Trastornos del neurodesarrollo'),
+    ('conducta_alimentaria', 'Trastornos de la conducta alimentaria'),
+    ('adaptativos', 'Trastornos adaptativos y reacción al estrés'),
+    ('somatomorfos', 'Trastornos somatomorfos y psicosomáticos'),
+    ('disociativos', 'Trastornos disociativos'),
+    ('no_especificado', 'Problemas de salud mental no especificados'),
     ('otro', 'Otro (especifique)')
 ]
 
@@ -464,7 +464,7 @@ class AspectosPsicologicosForm(forms.ModelForm):
         instance.afectividad = self.cleaned_data.get('afectividad', [])
         instance.sueno = self.cleaned_data.get('sueno', [])
         instance.alimentacion = self.cleaned_data.get('alimentacion', [])
-        instance.limitacion_vida_cotidiana = self.cleaned_data.get('limitacion_vida_cotidiana', [])
+        instance.limitacion_vida_cotidiana = ', '.join(self.cleaned_data.get('limitacion_vida_cotidiana', [])) if self.cleaned_data.get('limitacion_vida_cotidiana') else ''
         if commit:
             instance.save()
         return instance

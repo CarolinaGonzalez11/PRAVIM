@@ -1,5 +1,7 @@
 from django.urls import path
 from . import views
+from .views import descargar_derivacion_excel , buscar_persona_excel
+
 
 app_name = 'fichas'
 
@@ -17,6 +19,11 @@ urlpatterns = [
     path('buscar_derivacion/', views.buscar_derivacion, name='buscar_derivacion'),
     path('ficha/<int:ficha_id>/pdf/', views.ficha_pdf, name='ficha_pdf'),
     path('ficha/<int:ficha_id>/preview/', views.ficha_pdf_preview, name='ficha_pdf_preview'),
-
+    path('dashboard/export-excel/', views.dashboard_export_excel, name='dashboard_export_excel'),
+    path('historial/', views.historial_cambios, name='historial_cambios'),
+    path('ficha/<int:ficha_id>/historial/', views.historial_ficha, name='historial_ficha'),
+    path('historial/descargar_excel/', views.descargar_historial_excel, name='descargar_historial_excel'),
+    path('derivaciones/descargar_excel/', descargar_derivacion_excel, name='descargar_derivacion_excel'),
+    path('buscar-persona/excel/', buscar_persona_excel, name='buscar_persona_excel'),
 
 ]
